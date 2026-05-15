@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import RejectReasonModal from '../../components/feedback/RejectReasonModal.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
@@ -12,10 +14,83 @@ import { webAdminMenus } from '../../data/navigation.js';
 
 export default function SignupApprovalDetail() {
   const { id } = useParams();
-  const { findSignupRequestById, approveSignupRequest, rejectSignupRequest } = useWebAdmin();
+  const navigate = useNavigate();
+  const {
+    findSignupRequestById,
+    isSignupRequestsLoading,
+    signupRequestsError,
+    approveSignupRequest,
+    rejectSignupRequest,
+  } = useWebAdmin();
   const request = findSignupRequestById(id);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleApprove = async () => {
+    try {
+      setIsSubmitting(true);
+      await approveSignupRequest(request.id);
+      navigate('/web-admin/signup-approvals');
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('가입 신청 승인에 실패했습니다. 서버 상태를 확인하세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReject = async (reason) => {
+    try {
+      setIsSubmitting(true);
+      await rejectSignupRequest(request.id, reason);
+      setIsRejectModalOpen(false);
+      navigate('/web-admin/signup-approvals');
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('가입 신청 반려에 실패했습니다. 서버 상태를 확인하세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isSignupRequestsLoading) {
+    return (
+      <AdminLayout
+        roleLabel="웹 관리자"
+        consoleTitle="웹 관리자 콘솔"
+        userName="최고관리자"
+        menus={webAdminMenus}
+      >
+        <PageTitle title="가입 신청 상세" description="가입 신청 정보를 불러오고 있습니다." />
+        <SectionCard title="신청 정보">
+          <LoadingState message="가입 신청 상세 불러오는 중" />
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
+
+  if (signupRequestsError) {
+    return (
+      <AdminLayout
+        roleLabel="웹 관리자"
+        consoleTitle="웹 관리자 콘솔"
+        userName="최고관리자"
+        menus={webAdminMenus}
+      >
+        <PageTitle title="가입 신청 상세" description="가입 신청 정보를 불러오지 못했습니다." />
+        <SectionCard title="조회 실패">
+          <EmptyState title="상세 조회 실패" description={signupRequestsError} />
+          <div className="detail-actions">
+            <Link to="/web-admin/signup-approvals">
+              <Button variant="secondary">목록으로</Button>
+            </Link>
+          </div>
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
 
   if (!request) {
     return (
@@ -95,16 +170,11 @@ export default function SignupApprovalDetail() {
           <Link to="/web-admin/signup-approvals">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button variant="danger" onClick={() => setIsRejectModalOpen(true)}>
+          <Button variant="danger" disabled={isSubmitting} onClick={() => setIsRejectModalOpen(true)}>
             거절
           </Button>
-          <Button
-            onClick={() => {
-              approveSignupRequest(request.id);
-              setToastMessage('가입 신청이 승인되었습니다.');
-            }}
-          >
-            승인
+          <Button disabled={isSubmitting} onClick={handleApprove}>
+            {isSubmitting ? '처리 중...' : '승인'}
           </Button>
         </div>
       </SectionCard>
@@ -112,13 +182,9 @@ export default function SignupApprovalDetail() {
       <RejectReasonModal
         open={isRejectModalOpen}
         onClose={() => setIsRejectModalOpen(false)}
-        onConfirm={(reason) => {
-          rejectSignupRequest(request.id, reason);
-          setIsRejectModalOpen(false);
-          setToastMessage('가입 신청이 반려되었습니다.');
-        }}
+        onConfirm={handleReject}
       />
-      <Toast message={toastMessage} onClose={() => setToastMessage('')} />
+      <Toast message={toastMessage} type={toastType} onClose={() => setToastMessage('')} />
     </AdminLayout>
   );
 }

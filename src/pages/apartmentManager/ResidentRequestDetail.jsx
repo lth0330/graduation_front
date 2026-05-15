@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import RejectReasonModal from '../../components/feedback/RejectReasonModal.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
@@ -12,14 +14,83 @@ import { apartmentManagerMenus } from '../../data/navigation.js';
 
 export default function ResidentRequestDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const {
     findResidentSignupRequestById,
+    isResidentRequestsLoading,
+    residentRequestsError,
     approveResidentSignupRequest,
     rejectResidentSignupRequest,
   } = useApartmentManager();
   const request = findResidentSignupRequestById(id);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleApprove = async () => {
+    try {
+      setIsSubmitting(true);
+      await approveResidentSignupRequest(request.id);
+      navigate('/apartment-manager/resident-requests');
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('주민 가입 신청 승인에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReject = async (reason) => {
+    try {
+      setIsSubmitting(true);
+      await rejectResidentSignupRequest(request.id, reason);
+      setIsRejectModalOpen(false);
+      navigate('/apartment-manager/resident-requests');
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('주민 가입 신청 반려에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (isResidentRequestsLoading) {
+    return (
+      <AdminLayout
+        roleLabel="아파트 관리자"
+        consoleTitle="아파트 관리자 콘솔"
+        userName="한빛아파트 관리자"
+        menus={apartmentManagerMenus}
+      >
+        <PageTitle title="주민 신청 상세" description="주민 신청 정보를 불러오고 있습니다." />
+        <SectionCard title="신청 정보">
+          <LoadingState message="주민 신청 상세 불러오는 중" />
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
+
+  if (residentRequestsError) {
+    return (
+      <AdminLayout
+        roleLabel="아파트 관리자"
+        consoleTitle="아파트 관리자 콘솔"
+        userName="한빛아파트 관리자"
+        menus={apartmentManagerMenus}
+      >
+        <PageTitle title="주민 신청 상세" description="주민 신청 정보를 불러오지 못했습니다." />
+        <SectionCard title="조회 실패">
+          <EmptyState title="상세 조회 실패" description={residentRequestsError} />
+          <div className="detail-actions">
+            <Link to="/apartment-manager/resident-requests">
+              <Button variant="secondary">목록으로</Button>
+            </Link>
+          </div>
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
 
   if (!request) {
     return (
@@ -105,16 +176,11 @@ export default function ResidentRequestDetail() {
           <Link to="/apartment-manager/resident-requests">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button variant="danger" onClick={() => setIsRejectModalOpen(true)}>
+          <Button variant="danger" disabled={isSubmitting} onClick={() => setIsRejectModalOpen(true)}>
             거절
           </Button>
-          <Button
-            onClick={() => {
-              approveResidentSignupRequest(request.id);
-              setToastMessage('주민 가입 신청이 승인되었습니다.');
-            }}
-          >
-            승인
+          <Button disabled={isSubmitting} onClick={handleApprove}>
+            {isSubmitting ? '처리 중...' : '승인'}
           </Button>
         </div>
       </SectionCard>
@@ -122,13 +188,9 @@ export default function ResidentRequestDetail() {
       <RejectReasonModal
         open={isRejectModalOpen}
         onClose={() => setIsRejectModalOpen(false)}
-        onConfirm={(reason) => {
-          rejectResidentSignupRequest(request.id, reason);
-          setIsRejectModalOpen(false);
-          setToastMessage('주민 가입 신청이 반려되었습니다.');
-        }}
+        onConfirm={handleReject}
       />
-      <Toast message={toastMessage} onClose={() => setToastMessage('')} />
+      <Toast message={toastMessage} type={toastType} onClose={() => setToastMessage('')} />
     </AdminLayout>
   );
 }

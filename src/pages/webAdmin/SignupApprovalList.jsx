@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
@@ -31,9 +34,14 @@ const columns = [
 ];
 
 export default function SignupApprovalList() {
-  const { signupRequests } = useWebAdmin();
+  const { signupRequests, isSignupRequestsLoading, signupRequestsError, refreshSignupRequests } = useWebAdmin();
   const [keyword, setKeyword] = useState('');
-  const filteredRequests = filterByKeyword(signupRequests, keyword, ['id', 'loginId', 'email', 'apartmentName']);
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const searchedRequests = filterByKeyword(signupRequests, keyword, ['id', 'loginId', 'email', 'apartmentName']);
+  const filteredRequests =
+    selectedStatus === 'all'
+      ? searchedRequests
+      : searchedRequests.filter((request) => request.status === selectedStatus);
 
   return (
     <AdminLayout
@@ -48,9 +56,38 @@ export default function SignupApprovalList() {
       />
 
       <SectionCard title="신청 목록 테이블" description="상세/승인/거절 기능은 다음 단계에서 연결합니다.">
-        <SearchBar placeholder="아이디, 이메일, 아파트 이름 검색" value={keyword} onChange={setKeyword} />
-        <DataTable columns={columns} rows={filteredRequests} emptyMessage="조건에 맞는 가입 신청이 없습니다." />
-        <Pagination currentPage={1} totalPages={3} />
+        <div className="section-toolbar">
+          <SearchBar placeholder="아이디, 이메일, 아파트 이름 검색" value={keyword} onChange={setKeyword} />
+          <div className="status-filter">
+            <SelectBox
+              aria-label="가입 신청 상태 분류"
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="pending">승인 대기</option>
+              <option value="approved">승인 완료</option>
+              <option value="rejected">거절</option>
+            </SelectBox>
+          </div>
+        </div>
+        {isSignupRequestsLoading ? (
+          <LoadingState message="가입 신청 목록 불러오는 중" />
+        ) : signupRequestsError ? (
+          <EmptyState title="목록 조회 실패" description={signupRequestsError} />
+        ) : (
+          <>
+            <DataTable columns={columns} rows={filteredRequests} emptyMessage="조건에 맞는 가입 신청이 없습니다." />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
+        {signupRequestsError && (
+          <div className="detail-actions">
+            <Button variant="secondary" onClick={refreshSignupRequests}>
+              다시 불러오기
+            </Button>
+          </div>
+        )}
       </SectionCard>
     </AdminLayout>
   );

@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import Badge from '../../components/common/Badge.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
@@ -14,14 +17,28 @@ const columns = [
   { key: 'id', header: '문의 ID' },
   { key: 'title', header: '제목' },
   { key: 'category', header: '카테고리' },
-  { key: 'status', header: '답변 상태', render: (row) => <Badge status={row.status} /> },
+  {
+    key: 'status',
+    header: '답변 상태',
+    render: (row) => <Badge status={row.status}>{row.status === 'answered' ? '답변 완료' : '답변 대기'}</Badge>,
+  },
   { key: 'createdAt', header: '작성일' },
 ];
 
 export default function InquiryHistory() {
-  const { managerInquiries } = useApartmentManager();
+  const {
+    managerInquiries,
+    isManagerInquiriesLoading,
+    managerInquiriesError,
+    refreshManagerInquiries,
+  } = useApartmentManager();
   const [keyword, setKeyword] = useState('');
-  const filteredInquiries = filterByKeyword(managerInquiries, keyword, ['id', 'title', 'category']);
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const searchedInquiries = filterByKeyword(managerInquiries, keyword, ['id', 'title', 'category']);
+  const filteredInquiries =
+    selectedStatus === 'all'
+      ? searchedInquiries
+      : searchedInquiries.filter((inquiry) => inquiry.status === selectedStatus);
 
   return (
     <AdminLayout
@@ -33,9 +50,37 @@ export default function InquiryHistory() {
       <PageTitle title="문의 내역 확인" description="웹 관리자에게 등록한 문의와 답변 상태를 확인합니다." />
 
       <SectionCard title="문의 목록">
-        <SearchBar placeholder="문의 제목, 카테고리 검색" value={keyword} onChange={setKeyword} />
-        <DataTable columns={columns} rows={filteredInquiries} emptyMessage="조건에 맞는 문의 내역이 없습니다." />
-        <Pagination currentPage={1} totalPages={2} />
+        <div className="section-toolbar">
+          <SearchBar placeholder="문의 제목, 카테고리 검색" value={keyword} onChange={setKeyword} />
+          <div className="status-filter">
+            <SelectBox
+              aria-label="문의 답변 상태 분류"
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="pending">답변 대기</option>
+              <option value="answered">답변 완료</option>
+            </SelectBox>
+          </div>
+        </div>
+        {isManagerInquiriesLoading ? (
+          <LoadingState message="문의 내역 불러오는 중" />
+        ) : managerInquiriesError ? (
+          <>
+            <EmptyState title="문의 내역 조회 실패" description={managerInquiriesError} />
+            <div className="detail-actions">
+              <button className="secondary-button" type="button" onClick={refreshManagerInquiries}>
+                다시 불러오기
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DataTable columns={columns} rows={filteredInquiries} emptyMessage="조건에 맞는 문의 내역이 없습니다." />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
       </SectionCard>
     </AdminLayout>
   );

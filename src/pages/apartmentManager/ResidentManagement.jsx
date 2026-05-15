@@ -2,9 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
@@ -32,9 +35,11 @@ const columns = [
 ];
 
 export default function ResidentManagement() {
-  const { residents } = useApartmentManager();
+  const { residents, isResidentsLoading, residentsError, refreshResidents } = useApartmentManager();
   const [keyword, setKeyword] = useState('');
-  const filteredResidents = filterByKeyword(residents, keyword, ['id', 'name', 'loginId', 'email', 'building', 'unit']);
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const searchedResidents = filterByKeyword(residents, keyword, ['id', 'name', 'loginId', 'email', 'building', 'unit']);
+  const filteredResidents = selectedStatus === 'all' || selectedStatus === 'approved' ? searchedResidents : [];
 
   return (
     <AdminLayout
@@ -51,10 +56,35 @@ export default function ResidentManagement() {
       <SectionCard title="승인된 주민 목록" description="수정 화면에서 주민 정보를 변경하거나 삭제할 수 있습니다.">
         <div className="section-toolbar">
           <SearchBar placeholder="이름, 아이디, 이메일, 동/호수 검색" value={keyword} onChange={setKeyword} />
+          <div className="status-filter">
+            <SelectBox
+              aria-label="주민 상태 분류"
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="approved">승인 완료</option>
+            </SelectBox>
+          </div>
           <Button>주민 등록</Button>
         </div>
-        <DataTable columns={columns} rows={filteredResidents} emptyMessage="조건에 맞는 주민이 없습니다." />
-        <Pagination currentPage={1} totalPages={3} />
+        {isResidentsLoading ? (
+          <LoadingState message="주민 목록 불러오는 중" />
+        ) : residentsError ? (
+          <>
+            <EmptyState title="주민 목록 조회 실패" description={residentsError} />
+            <div className="detail-actions">
+              <Button variant="secondary" onClick={refreshResidents}>
+                다시 불러오기
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DataTable columns={columns} rows={filteredResidents} emptyMessage="조건에 맞는 주민이 없습니다." />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
       </SectionCard>
     </AdminLayout>
   );

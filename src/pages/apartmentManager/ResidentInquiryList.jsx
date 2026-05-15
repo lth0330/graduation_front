@@ -5,6 +5,7 @@ import Button from '../../components/common/Button.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
@@ -17,7 +18,11 @@ const columns = [
   { key: 'title', header: '제목' },
   { key: 'writer', header: '작성자' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
-  { key: 'status', header: '답변 상태', render: (row) => <Badge status={row.status} /> },
+  {
+    key: 'status',
+    header: '답변 상태',
+    render: (row) => <Badge status={row.status}>{row.status === 'answered' ? '답변 완료' : '답변 대기'}</Badge>,
+  },
   { key: 'createdAt', header: '작성일' },
   {
     key: 'action',
@@ -33,13 +38,18 @@ const columns = [
 export default function ResidentInquiryList() {
   const { residentParkingInquiries } = useApartmentManager();
   const [keyword, setKeyword] = useState('');
-  const filteredInquiries = filterByKeyword(residentParkingInquiries, keyword, [
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const searchedInquiries = filterByKeyword(residentParkingInquiries, keyword, [
     'id',
     'title',
     'writer',
     'building',
     'unit',
   ]);
+  const filteredInquiries =
+    selectedStatus === 'all'
+      ? searchedInquiries
+      : searchedInquiries.filter((inquiry) => inquiry.status === selectedStatus);
 
   return (
     <AdminLayout
@@ -54,7 +64,20 @@ export default function ResidentInquiryList() {
       />
 
       <SectionCard title="주민 문의 목록 테이블">
-        <SearchBar placeholder="제목, 작성자, 동/호수 검색" value={keyword} onChange={setKeyword} />
+        <div className="section-toolbar">
+          <SearchBar placeholder="제목, 작성자, 동/호수 검색" value={keyword} onChange={setKeyword} />
+          <div className="status-filter">
+            <SelectBox
+              aria-label="주민 문의 답변 상태 분류"
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="pending">답변 대기</option>
+              <option value="answered">답변 완료</option>
+            </SelectBox>
+          </div>
+        </div>
         <DataTable columns={columns} rows={filteredInquiries} emptyMessage="조건에 맞는 주민 문의가 없습니다." />
         <Pagination currentPage={1} totalPages={2} />
       </SectionCard>

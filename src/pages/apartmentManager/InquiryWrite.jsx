@@ -15,6 +15,7 @@ export default function InquiryWrite() {
   const { createManagerInquiry } = useApartmentManager();
   const [form, setForm] = useState({ title: '', category: '서비스 신청', content: '' });
   const [toastMessage, setToastMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (field, value) => {
     setForm((currentForm) => ({
@@ -23,19 +24,26 @@ export default function InquiryWrite() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.title.trim() || !form.content.trim()) {
       setToastMessage('문의 제목과 내용을 입력하세요.');
       return;
     }
 
-    createManagerInquiry({
-      title: form.title.trim(),
-      category: form.category,
-      content: form.content.trim(),
-    });
-    setForm({ title: '', category: '서비스 신청', content: '' });
-    setToastMessage('문의가 등록되었습니다.');
+    try {
+      setIsSubmitting(true);
+      await createManagerInquiry({
+        title: form.title.trim(),
+        category: form.category,
+        content: form.content.trim(),
+      });
+      setForm({ title: '', category: '서비스 신청', content: '' });
+      setToastMessage('문의가 등록되었습니다.');
+    } catch (error) {
+      setToastMessage('문의 등록에 실패했습니다. 잠시 후 다시 시도하세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -73,7 +81,9 @@ export default function InquiryWrite() {
           <Button variant="secondary" onClick={() => setForm({ title: '', category: '서비스 신청', content: '' })}>
             취소
           </Button>
-          <Button onClick={handleSubmit}>문의 등록</Button>
+          <Button disabled={isSubmitting} onClick={handleSubmit}>
+            {isSubmitting ? '등록 중...' : '문의 등록'}
+          </Button>
         </div>
       </SectionCard>
 

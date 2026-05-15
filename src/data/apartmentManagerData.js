@@ -195,7 +195,7 @@ export const parkingAreas = [
     id: 'AREA-1001',
     parkingLotId: 'PL-1001',
     areaNumber: 'A-B1-001',
-    location: 'A동 지하주차장 B1 입구 앞',
+    location: 'A동 지하주차장 B1 입구 옆',
     status: 'empty',
   },
   {
@@ -223,7 +223,7 @@ export const parkingAreas = [
     id: 'AREA-2001',
     parkingLotId: 'PL-1002',
     areaNumber: 'A-B2-001',
-    location: 'A동 지하주차장 B2 입구 앞',
+    location: 'A동 지하주차장 B2 입구 옆',
     status: 'occupied',
   },
 ];
@@ -267,7 +267,7 @@ export const residentParkingInquiries = [
     status: 'pending',
     createdAt: '2026-04-30',
     content:
-      '이번 주말 방문 차량이 있어 방문 주차 가능 여부와 등록 방법을 문의드립니다. 방문 주차 시간이 제한되는지도 확인 부탁드립니다.',
+      '이번 주말 방문 차량이 있어 방문 주차 가능 여부와 등록 방법을 문의드립니다. 방문 주차 시간 제한이 있는지도 확인 부탁드립니다.',
   },
   {
     id: 'RINQ-2107',
@@ -279,7 +279,7 @@ export const residentParkingInquiries = [
     status: 'answered',
     createdAt: '2026-04-29',
     content: '현재 배정된 주차면 위치를 변경할 수 있는지 문의드립니다.',
-    answer: '관리사무소 방문 후 주차 구역 변경 신청서를 작성해주세요.',
+    answer: '관리사무소 방문 후 주차 구역 변경 신청서를 작성해 주세요.',
   },
   {
     id: 'RINQ-2106',

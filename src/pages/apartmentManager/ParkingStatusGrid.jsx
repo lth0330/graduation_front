@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
@@ -16,8 +16,21 @@ const statusClassMap = {
 export default function ParkingStatusGrid() {
   const { parkingLots, parkingAreas } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
+
+  useEffect(() => {
+    if (parkingLots.length > 0 && !parkingLots.some((parkingLot) => parkingLot.id === selectedParkingLotId)) {
+      setSelectedParkingLotId(parkingLots[0].id);
+    }
+  }, [parkingLots, selectedParkingLotId]);
+
   const selectedParkingLot = parkingLots.find((parkingLot) => parkingLot.id === selectedParkingLotId);
-  const visibleAreas = parkingAreas.filter((parkingArea) => parkingArea.parkingLotId === selectedParkingLotId);
+  const visibleAreas = parkingAreas
+    .filter((parkingArea) => parkingArea.parkingLotId === selectedParkingLotId)
+    .map((parkingArea, index) => ({
+      ...parkingArea,
+      layoutRow: parkingArea.layoutRow || Math.floor(index / 8) + 1,
+      layoutColumn: parkingArea.layoutColumn || (index % 8) + 1,
+    }));
   const occupiedCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'occupied').length;
   const emptyCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'empty').length;
   const disabledCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'disabled').length;
@@ -55,7 +68,15 @@ export default function ParkingStatusGrid() {
         </div>
         <div className="parking-grid">
           {visibleAreas.map((area) => (
-            <div key={area.id} className={`parking-spot ${statusClassMap[area.status]}`}>
+            <div
+              key={area.id}
+              className={`parking-spot ${statusClassMap[area.status]}`}
+              style={{
+                gridColumn: area.layoutColumn,
+                gridRow: area.layoutRow,
+              }}
+              title={`${area.areaNumber}: ${area.layoutRow}행 ${area.layoutColumn}열`}
+            >
               {area.areaNumber}
             </div>
           ))}

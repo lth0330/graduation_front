@@ -22,7 +22,9 @@ export default function DataTable({
         <thead>
           <tr>
             {columns.map((column) => (
-              <th key={column.key}>{column.header}</th>
+              <th className={column.key === 'id' ? 'table-index-column' : undefined} key={column.key}>
+                {column.header}
+              </th>
             ))}
           </tr>
         </thead>
@@ -30,7 +32,9 @@ export default function DataTable({
           {rows.map((row, rowIndex) => (
             <tr key={row[rowKey] || rowIndex}>
               {columns.map((column) => (
-                <td key={column.key}>{column.render ? column.render(row) : row[column.key]}</td>
+                <td className={column.key === 'id' ? 'table-index-column' : undefined} key={column.key}>
+                  {column.render ? column.render(row) : column.key === 'id' ? rowIndex + 1 : row[column.key]}
+                </td>
               ))}
             </tr>
           ))}

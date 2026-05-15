@@ -4,8 +4,17 @@ import { NavLink, useLocation } from 'react-router-dom';
 export default function Sidebar({ roleLabel, consoleTitle, menus }) {
   const location = useLocation();
 
-  // 상세/수정 페이지에서도 상위 메뉴가 열린 상태로 보이도록 경로 앞부분을 비교합니다.
-  const isSameMenuPath = (path) => location.pathname === path || location.pathname.startsWith(`${path}/`);
+  // 대시보드는 정확히 해당 경로일 때만 활성화하고,
+  // 목록 메뉴는 상세 페이지에서도 활성화되도록 경로 앞부분을 비교합니다.
+  const isSameMenuPath = (path) => {
+    const dashboardPaths = ['/web-admin', '/apartment-admin'];
+
+    if (dashboardPaths.includes(path)) {
+      return location.pathname === path;
+    }
+
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   const isGroupActive = (menu) => menu.children?.some((childMenu) => isSameMenuPath(childMenu.path));
 
@@ -65,7 +74,7 @@ export default function Sidebar({ roleLabel, consoleTitle, menus }) {
                       <NavLink
                         key={childMenu.path}
                         to={childMenu.path}
-                        className={({ isActive }) => `nav-subitem ${isActive ? 'active' : ''}`}
+                        className={() => `nav-subitem ${isSameMenuPath(childMenu.path) ? 'active' : ''}`}
                       >
                         {childMenu.label}
                       </NavLink>
@@ -80,7 +89,7 @@ export default function Sidebar({ roleLabel, consoleTitle, menus }) {
             <NavLink
               key={menu.path}
               to={menu.path}
-              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              className={() => `nav-item ${isSameMenuPath(menu.path) ? 'active' : ''}`}
             >
               {menu.label}
             </NavLink>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
@@ -30,7 +32,7 @@ const columns = [
 ];
 
 export default function VehicleManagement() {
-  const { vehicles } = useApartmentManager();
+  const { vehicles, isVehiclesLoading, vehiclesError, refreshVehicles } = useApartmentManager();
   const [keyword, setKeyword] = useState('');
   const filteredVehicles = filterByKeyword(vehicles, keyword, [
     'id',
@@ -60,8 +62,23 @@ export default function VehicleManagement() {
             <Button>차량 등록</Button>
           </Link>
         </div>
-        <DataTable columns={columns} rows={filteredVehicles} emptyMessage="조건에 맞는 차량이 없습니다." />
-        <Pagination currentPage={1} totalPages={4} />
+        {isVehiclesLoading ? (
+          <LoadingState message="차량 목록 불러오는 중" />
+        ) : vehiclesError ? (
+          <>
+            <EmptyState title="차량 목록 조회 실패" description={vehiclesError} />
+            <div className="detail-actions">
+              <Button variant="secondary" onClick={refreshVehicles}>
+                다시 불러오기
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DataTable columns={columns} rows={filteredVehicles} emptyMessage="조건에 맞는 차량이 없습니다." />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
       </SectionCard>
     </AdminLayout>
   );

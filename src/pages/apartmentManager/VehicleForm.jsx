@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/common/Button.jsx';
 import ConfirmModal from '../../components/feedback/ConfirmModal.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import FormField from '../../components/forms/FormField.jsx';
 import SelectBox from '../../components/forms/SelectBox.jsx';
@@ -20,6 +22,9 @@ export default function VehicleForm() {
   const {
     findVehicleById,
     residents,
+    isVehiclesLoading,
+    vehiclesError,
+    isResidentsLoading,
     createVehicle,
     updateVehicle,
     deleteVehicle,
@@ -39,7 +44,50 @@ export default function VehicleForm() {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  useEffect(() => {
+    setForm(initialForm);
+  }, [initialForm]);
+
+  if (isVehiclesLoading || isResidentsLoading) {
+    return (
+      <AdminLayout
+        roleLabel="아파트 관리자"
+        consoleTitle="아파트 관리자 콘솔"
+        userName="한빛아파트 관리자"
+        menus={apartmentManagerMenus}
+      >
+        <PageTitle title={isEditMode ? '차량 정보 수정' : '차량 등록'} description="차량 정보를 불러오고 있습니다." />
+        <SectionCard title="차량 정보">
+          <LoadingState message="차량 정보 불러오는 중" />
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
+
+  if (vehiclesError) {
+    return (
+      <AdminLayout
+        roleLabel="아파트 관리자"
+        consoleTitle="아파트 관리자 콘솔"
+        userName="한빛아파트 관리자"
+        menus={apartmentManagerMenus}
+      >
+        <PageTitle title="차량 등록 및 수정" description="차량 정보를 불러오지 못했습니다." />
+        <SectionCard title="조회 실패">
+          <EmptyState title="차량 정보 조회 실패" description={vehiclesError} />
+          <div className="detail-actions">
+            <Link to="/apartment-manager/vehicles">
+              <Button variant="secondary">목록으로</Button>
+            </Link>
+          </div>
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
 
   if (isEditMode && !vehicle) {
     return (
@@ -106,28 +154,47 @@ export default function VehicleForm() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       return;
     }
 
     const payload = buildVehiclePayload();
 
-    if (isEditMode) {
-      updateVehicle(vehicle.id, payload);
-      setToastMessage('차량 정보가 저장되었습니다.');
-      return;
-    }
+    try {
+      setIsSubmitting(true);
 
-    const createdVehicle = createVehicle(payload);
-    setToastMessage('차량이 등록되었습니다.');
-    navigate(`/apartment-manager/vehicles/${createdVehicle.id}/edit`);
+      if (isEditMode) {
+        await updateVehicle(vehicle.id, payload);
+        setToastType('success');
+        setToastMessage('차량 정보가 저장되었습니다.');
+        return;
+      }
+
+      const createdVehicle = await createVehicle(payload);
+      setToastType('success');
+      setToastMessage('차량이 등록되었습니다.');
+      navigate(`/apartment-manager/vehicles/${createdVehicle.id}/edit`);
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('차량 정보 저장에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = () => {
-    deleteVehicle(vehicle.id);
-    setIsDeleteModalOpen(false);
-    navigate('/apartment-manager/vehicles');
+  const handleDelete = async () => {
+    try {
+      setIsSubmitting(true);
+      await deleteVehicle(vehicle.id);
+      setIsDeleteModalOpen(false);
+      navigate('/apartment-manager/vehicles');
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('차량 정보 삭제에 실패했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -200,11 +267,13 @@ export default function VehicleForm() {
             <Button variant="secondary">취소</Button>
           </Link>
           {isEditMode && (
-            <Button variant="danger" onClick={() => setIsDeleteModalOpen(true)}>
+            <Button variant="danger" disabled={isSubmitting} onClick={() => setIsDeleteModalOpen(true)}>
               삭제
             </Button>
           )}
-          <Button onClick={handleSave}>저장</Button>
+          <Button disabled={isSubmitting} onClick={handleSave}>
+            {isSubmitting ? '저장 중...' : '저장'}
+          </Button>
         </div>
       </SectionCard>
 
@@ -217,7 +286,7 @@ export default function VehicleForm() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDelete}
       />
-      <Toast message={toastMessage} onClose={() => setToastMessage('')} />
+      <Toast message={toastMessage} type={toastType} onClose={() => setToastMessage('')} />
     </AdminLayout>
   );
 }

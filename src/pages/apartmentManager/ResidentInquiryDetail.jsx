@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
@@ -13,6 +13,7 @@ import { apartmentManagerMenus } from '../../data/navigation.js';
 
 export default function ResidentInquiryDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { findResidentParkingInquiryById, answerResidentParkingInquiry } = useApartmentManager();
   const inquiry = findResidentParkingInquiryById(id);
   const [answer, setAnswer] = useState(inquiry?.answer || '');
@@ -45,6 +46,7 @@ export default function ResidentInquiryDetail() {
 
     answerResidentParkingInquiry(inquiry.id, answer.trim());
     setToastMessage('주민 문의 답변이 등록되었습니다.');
+    navigate('/apartment-manager/resident-inquiries');
   };
 
   return (
@@ -65,7 +67,7 @@ export default function ResidentInquiryDetail() {
           <div>
             <dt>답변 상태</dt>
             <dd>
-              <Badge status={inquiry.status} />
+              <Badge status={inquiry.status}>{inquiry.status === 'answered' ? '답변 완료' : '답변 대기'}</Badge>
             </dd>
           </div>
           <div>

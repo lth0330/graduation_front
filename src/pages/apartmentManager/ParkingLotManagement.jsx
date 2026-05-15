@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import Button from '../../components/common/Button.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
 import ConfirmModal from '../../components/feedback/ConfirmModal.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import FormField from '../../components/forms/FormField.jsx';
 import TextInput from '../../components/forms/TextInput.jsx';
@@ -27,7 +29,8 @@ const columns = [
 ];
 
 export default function ParkingLotManagement() {
-  const { parkingLots, createParkingLot, deleteParkingLot } = useApartmentManager();
+  const { parkingLots, isParkingLoading, parkingError, refreshParkingData, createParkingLot, deleteParkingLot } =
+    useApartmentManager();
   const [form, setForm] = useState({ name: '', floor: '', totalSpaces: '', usedSpaces: '' });
   const [deleteTargetId, setDeleteTargetId] = useState('');
   const [toastMessage, setToastMessage] = useState('');
@@ -53,7 +56,7 @@ export default function ParkingLotManagement() {
     }));
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!form.name.trim() || !form.floor.trim() || !form.totalSpaces || !form.usedSpaces) {
       setToastMessage('주차장 정보를 모두 입력하세요.');
       return;
@@ -69,15 +72,23 @@ export default function ParkingLotManagement() {
       return;
     }
 
-    createParkingLot(form);
-    setForm({ name: '', floor: '', totalSpaces: '', usedSpaces: '' });
-    setToastMessage('주차장이 등록되었습니다.');
+    try {
+      await createParkingLot(form);
+      setForm({ name: '', floor: '', totalSpaces: '', usedSpaces: '' });
+      setToastMessage('주차장이 등록되었습니다.');
+    } catch (error) {
+      setToastMessage('주차장 등록에 실패했습니다.');
+    }
   };
 
-  const handleDelete = () => {
-    deleteParkingLot(deleteTargetId);
-    setDeleteTargetId('');
-    setToastMessage('주차장이 삭제되었습니다.');
+  const handleDelete = async () => {
+    try {
+      await deleteParkingLot(deleteTargetId);
+      setDeleteTargetId('');
+      setToastMessage('주차장이 삭제되었습니다.');
+    } catch (error) {
+      setToastMessage('주차장 삭제에 실패했습니다.');
+    }
   };
 
   return (
@@ -115,8 +126,23 @@ export default function ParkingLotManagement() {
           <Button onClick={handleCreate}>주차장 등록</Button>
         </div>
         <p className="section-help">주차장을 삭제하면 연결된 주차 구역도 함께 삭제됩니다.</p>
-        <DataTable columns={tableColumns} rows={parkingLots} />
-        <Pagination currentPage={1} totalPages={2} />
+        {isParkingLoading ? (
+          <LoadingState message="주차장 목록 불러오는 중" />
+        ) : parkingError ? (
+          <>
+            <EmptyState title="주차장 조회 실패" description={parkingError} />
+            <div className="detail-actions">
+              <Button variant="secondary" onClick={refreshParkingData}>
+                다시 불러오기
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DataTable columns={tableColumns} rows={parkingLots} />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
       </SectionCard>
 
       <ConfirmModal

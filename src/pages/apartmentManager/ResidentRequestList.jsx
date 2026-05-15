@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
@@ -32,9 +35,15 @@ const columns = [
 ];
 
 export default function ResidentRequestList() {
-  const { residentSignupRequests } = useApartmentManager();
+  const {
+    residentSignupRequests,
+    isResidentRequestsLoading,
+    residentRequestsError,
+    refreshResidentSignupRequests,
+  } = useApartmentManager();
   const [keyword, setKeyword] = useState('');
-  const filteredRequests = filterByKeyword(residentSignupRequests, keyword, [
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const searchedRequests = filterByKeyword(residentSignupRequests, keyword, [
     'id',
     'name',
     'loginId',
@@ -42,6 +51,10 @@ export default function ResidentRequestList() {
     'unit',
     'carNumber',
   ]);
+  const filteredRequests =
+    selectedStatus === 'all'
+      ? searchedRequests
+      : searchedRequests.filter((request) => request.status === selectedStatus);
 
   return (
     <AdminLayout
@@ -56,9 +69,38 @@ export default function ResidentRequestList() {
       />
 
       <SectionCard title="주민 가입 신청 목록" description="상세 승인 처리는 다음 단계에서 추가합니다.">
-        <SearchBar placeholder="이름, 아이디, 동/호수, 차량번호 검색" value={keyword} onChange={setKeyword} />
-        <DataTable columns={columns} rows={filteredRequests} emptyMessage="조건에 맞는 주민 신청이 없습니다." />
-        <Pagination currentPage={1} totalPages={3} />
+        <div className="section-toolbar">
+          <SearchBar placeholder="이름, 아이디, 동/호수, 차량번호 검색" value={keyword} onChange={setKeyword} />
+          <div className="status-filter">
+            <SelectBox
+              aria-label="주민 가입 신청 상태 분류"
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="pending">승인 대기</option>
+              <option value="approved">승인 완료</option>
+              <option value="rejected">거절</option>
+            </SelectBox>
+          </div>
+        </div>
+        {isResidentRequestsLoading ? (
+          <LoadingState message="주민 가입 신청 목록 불러오는 중" />
+        ) : residentRequestsError ? (
+          <>
+            <EmptyState title="주민 신청 조회 실패" description={residentRequestsError} />
+            <div className="detail-actions">
+              <Button variant="secondary" onClick={refreshResidentSignupRequests}>
+                다시 불러오기
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DataTable columns={columns} rows={filteredRequests} emptyMessage="조건에 맞는 주민 신청이 없습니다." />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
       </SectionCard>
     </AdminLayout>
   );

@@ -102,7 +102,7 @@ export const webAdminInquiries = [
     status: 'answered',
     createdAt: '2026-04-29',
     content: '관리자 정보에 등록된 아파트 주소가 실제 주소와 달라 수정 방법을 문의드립니다.',
-    answer: '웹 관리자 확인 후 주소 정보를 수정했습니다. 마이페이지에서 변경된 주소를 확인해주세요.',
+    answer: '웹 관리자 확인 후 주소 정보를 수정했습니다. 마이페이지에서 변경된 주소를 확인해 주세요.',
   },
   {
     id: 'INQ-3049',
@@ -123,7 +123,7 @@ export const webAdminInquiries = [
     status: 'answered',
     createdAt: '2026-04-27',
     content: '주민 회원가입에 사용하는 아파트 비밀번호를 재발급받고 싶습니다.',
-    answer: '관리자 본인 확인 후 새 아파트 비밀번호를 발급했습니다.',
+    answer: '관리자 본인 확인 후 아파트 비밀번호를 발급했습니다.',
   },
 ];
 

@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
 import ConfirmModal from '../../components/feedback/ConfirmModal.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SelectBox from '../../components/forms/SelectBox.jsx';
 import FormField from '../../components/forms/FormField.jsx';
+import TextArea from '../../components/forms/TextArea.jsx';
 import TextInput from '../../components/forms/TextInput.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
@@ -26,6 +29,11 @@ const areaStatusBadge = {
   disabled: 'rejected',
 };
 
+const getAreaPlacement = (area, index) => ({
+  row: area.layoutRow || Math.floor(index / 8) + 1,
+  column: area.layoutColumn || (index % 8) + 1,
+});
+
 const columns = [
   { key: 'id', header: '구역 ID' },
   { key: 'areaNumber', header: '구역 번호' },
@@ -35,18 +43,76 @@ const columns = [
     header: '상태',
     render: (row) => <Badge status={areaStatusBadge[row.status]}>{areaStatusLabel[row.status]}</Badge>,
   },
+  { key: 'placement', header: '배치 위치', render: (row) => `${row.layoutRow || '-'}행 ${row.layoutColumn || '-'}열` },
+  { key: 'statusChangeReason', header: '변경 사유', render: (row) => row.statusChangeReason || '-' },
 ];
 
 export default function ParkingAreaManagement() {
-  const { parkingLots, parkingAreas, createParkingArea, deleteParkingArea } = useApartmentManager();
+  const {
+    parkingLots,
+    parkingAreas,
+    isParkingLoading,
+    parkingError,
+    refreshParkingData,
+    createParkingArea,
+    updateParkingAreaStatus,
+    updateParkingAreaLayout,
+    deleteParkingArea,
+  } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
-  const [form, setForm] = useState({ areaNumber: '', location: '', status: 'empty' });
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [form, setForm] = useState({ areaNumber: '', location: '', status: 'empty', layoutRow: '1', layoutColumn: '1' });
+  const [statusTarget, setStatusTarget] = useState(null);
+  const [statusForm, setStatusForm] = useState({ status: 'empty', reason: '' });
+  const [statusError, setStatusError] = useState('');
+  const [layoutTarget, setLayoutTarget] = useState(null);
+  const [layoutForm, setLayoutForm] = useState({ layoutRow: '1', layoutColumn: '1' });
+  const [layoutError, setLayoutError] = useState('');
   const [deleteTargetId, setDeleteTargetId] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+
+  useEffect(() => {
+    if (parkingLots.length > 0 && !parkingLots.some((parkingLot) => parkingLot.id === selectedParkingLotId)) {
+      setSelectedParkingLotId(parkingLots[0].id);
+    }
+  }, [parkingLots, selectedParkingLotId]);
+
   const selectedParkingLot = parkingLots.find((parkingLot) => parkingLot.id === selectedParkingLotId);
-  const visibleAreas = parkingAreas.filter((parkingArea) => parkingArea.parkingLotId === selectedParkingLot?.id);
+  const visibleAreas = parkingAreas
+    .filter((parkingArea) => parkingArea.parkingLotId === selectedParkingLot?.id)
+    .map((parkingArea, index) => {
+      const placement = getAreaPlacement(parkingArea, index);
+
+      return {
+        ...parkingArea,
+        layoutRow: placement.row,
+        layoutColumn: placement.column,
+      };
+    });
+  const filteredAreas =
+    selectedStatus === 'all'
+      ? visibleAreas
+      : visibleAreas.filter((parkingArea) => parkingArea.status === selectedStatus);
   const tableColumns = [
     ...columns,
+    {
+      key: 'changeLayout',
+      header: '배치 수정',
+      render: (row) => (
+        <Button variant="secondary" size="small" onClick={() => openLayoutModal(row)}>
+          수정
+        </Button>
+      ),
+    },
+    {
+      key: 'changeStatus',
+      header: '상태 변경',
+      render: (row) => (
+        <Button variant="secondary" size="small" onClick={() => openStatusModal(row)}>
+          변경
+        </Button>
+      ),
+    },
     {
       key: 'delete',
       header: '삭제',
@@ -65,26 +131,143 @@ export default function ParkingAreaManagement() {
     }));
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!selectedParkingLotId || !form.areaNumber.trim() || !form.location.trim()) {
       setToastMessage('주차 구역 정보를 모두 입력하세요.');
       return;
     }
 
-    createParkingArea({
-      ...form,
-      areaNumber: form.areaNumber.trim(),
-      location: form.location.trim(),
-      parkingLotId: selectedParkingLotId,
-    });
-    setForm({ areaNumber: '', location: '', status: 'empty' });
-    setToastMessage('주차 구역이 등록되었습니다.');
+    if (!isValidPlacement(form.layoutRow, form.layoutColumn)) {
+      setToastMessage('배치 행과 열은 1 이상의 숫자로 입력하세요.');
+      return;
+    }
+
+    if (isDuplicatePlacement(form.layoutRow, form.layoutColumn)) {
+      setToastMessage('이미 사용 중인 배치 위치입니다.');
+      return;
+    }
+
+    try {
+      await createParkingArea({
+        ...form,
+        areaNumber: form.areaNumber.trim(),
+        location: form.location.trim(),
+        parkingLotId: selectedParkingLotId,
+        statusChangeReason: '신규 등록',
+      });
+      setForm({ areaNumber: '', location: '', status: 'empty', layoutRow: '1', layoutColumn: '1' });
+      setToastMessage('주차 구역이 등록되었습니다.');
+    } catch (error) {
+      setToastMessage('주차 구역 등록에 실패했습니다.');
+    }
   };
 
-  const handleDelete = () => {
-    deleteParkingArea(deleteTargetId);
-    setDeleteTargetId('');
-    setToastMessage('주차 구역이 삭제되었습니다.');
+  const isValidPlacement = (layoutRow, layoutColumn) =>
+    Number(layoutRow) >= 1 && Number(layoutColumn) >= 1;
+
+  const isDuplicatePlacement = (layoutRow, layoutColumn, currentAreaId) =>
+    visibleAreas.some(
+      (area) =>
+        area.id !== currentAreaId &&
+        Number(area.layoutRow) === Number(layoutRow) &&
+        Number(area.layoutColumn) === Number(layoutColumn),
+    );
+
+  const openStatusModal = (parkingArea) => {
+    setStatusTarget(parkingArea);
+    setStatusForm({
+      status: parkingArea.status,
+      reason: parkingArea.statusChangeReason || '',
+    });
+    setStatusError('');
+  };
+
+  const closeStatusModal = () => {
+    setStatusTarget(null);
+    setStatusForm({ status: 'empty', reason: '' });
+    setStatusError('');
+  };
+
+  const handleStatusFormChange = (field, value) => {
+    setStatusForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+
+    if (statusError) {
+      setStatusError('');
+    }
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!statusForm.reason.trim()) {
+      setStatusError('상태 변경 사유를 입력하세요.');
+      return;
+    }
+
+    try {
+      await updateParkingAreaStatus(statusTarget.id, statusForm.status, statusForm.reason.trim());
+      closeStatusModal();
+      setToastMessage('주차 구역 상태가 변경되었습니다.');
+    } catch (error) {
+      setToastMessage('주차 구역 상태 변경에 실패했습니다.');
+    }
+  };
+
+  const openLayoutModal = (parkingArea) => {
+    setLayoutTarget(parkingArea);
+    setLayoutForm({
+      layoutRow: String(parkingArea.layoutRow),
+      layoutColumn: String(parkingArea.layoutColumn),
+    });
+    setLayoutError('');
+  };
+
+  const closeLayoutModal = () => {
+    setLayoutTarget(null);
+    setLayoutForm({ layoutRow: '1', layoutColumn: '1' });
+    setLayoutError('');
+  };
+
+  const handleLayoutFormChange = (field, value) => {
+    setLayoutForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+
+    if (layoutError) {
+      setLayoutError('');
+    }
+  };
+
+  const handleUpdateLayout = async () => {
+    if (!isValidPlacement(layoutForm.layoutRow, layoutForm.layoutColumn)) {
+      setLayoutError('배치 행과 열은 1 이상의 숫자로 입력하세요.');
+      return;
+    }
+
+    if (isDuplicatePlacement(layoutForm.layoutRow, layoutForm.layoutColumn, layoutTarget.id)) {
+      setLayoutError('이미 사용 중인 배치 위치입니다.');
+      return;
+    }
+
+    try {
+      await updateParkingAreaLayout(layoutTarget.id, layoutForm.layoutRow, layoutForm.layoutColumn);
+      closeLayoutModal();
+      setToastMessage('주차 구역 배치가 수정되었습니다.');
+    } catch (error) {
+      setToastMessage('주차 구역 배치 수정에 실패했습니다.');
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteParkingArea(deleteTargetId);
+      setDeleteTargetId('');
+      setToastMessage('주차 구역이 삭제되었습니다.');
+    } catch (error) {
+      setToastMessage('주차 구역 삭제에 실패했습니다.');
+    }
   };
 
   return (
@@ -111,9 +294,18 @@ export default function ParkingAreaManagement() {
               ))}
             </SelectBox>
           </label>
+          <label>
+            상태 분류
+            <SelectBox value={selectedStatus} onChange={(event) => setSelectedStatus(event.target.value)}>
+              <option value="all">전체</option>
+              <option value="empty">빈자리</option>
+              <option value="occupied">주차됨</option>
+              <option value="disabled">사용 불가</option>
+            </SelectBox>
+          </label>
         </div>
 
-        <div className="inline-form-grid">
+        <div className="inline-form-grid parking-area-form-grid">
           <FormField label="구역 번호">
             <TextInput value={form.areaNumber} onChange={(event) => handleChange('areaNumber', event.target.value)} />
           </FormField>
@@ -127,11 +319,42 @@ export default function ParkingAreaManagement() {
               <option value="disabled">사용 불가</option>
             </SelectBox>
           </FormField>
+          <FormField label="배치 행">
+            <TextInput
+              min="1"
+              type="number"
+              value={form.layoutRow}
+              onChange={(event) => handleChange('layoutRow', event.target.value)}
+            />
+          </FormField>
+          <FormField label="배치 열">
+            <TextInput
+              min="1"
+              type="number"
+              value={form.layoutColumn}
+              onChange={(event) => handleChange('layoutColumn', event.target.value)}
+            />
+          </FormField>
           <Button onClick={handleCreate}>구역 등록</Button>
         </div>
 
-        <DataTable columns={tableColumns} rows={visibleAreas} emptyMessage="등록된 주차 구역이 없습니다." />
-        <Pagination currentPage={1} totalPages={2} />
+        {isParkingLoading ? (
+          <LoadingState message="주차 구역 목록 불러오는 중" />
+        ) : parkingError ? (
+          <>
+            <EmptyState title="주차 구역 조회 실패" description={parkingError} />
+            <div className="detail-actions">
+              <Button variant="secondary" onClick={refreshParkingData}>
+                다시 불러오기
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DataTable columns={tableColumns} rows={filteredAreas} emptyMessage="등록된 주차 구역이 없습니다." />
+            <Pagination currentPage={1} totalPages={1} />
+          </>
+        )}
       </SectionCard>
 
       <ConfirmModal
@@ -143,6 +366,83 @@ export default function ParkingAreaManagement() {
         onClose={() => setDeleteTargetId('')}
         onConfirm={handleDelete}
       />
+      {layoutTarget && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="parking-area-layout-title">
+            <h2 id="parking-area-layout-title">주차 구역 배치 수정</h2>
+            <p>{layoutTarget.areaNumber} 구역이 실제 주차장 어느 위치에 보일지 설정합니다.</p>
+
+            <div className="form-grid">
+              <FormField label="배치 행" error={layoutError}>
+                <TextInput
+                  error={Boolean(layoutError)}
+                  min="1"
+                  type="number"
+                  value={layoutForm.layoutRow}
+                  onChange={(event) => handleLayoutFormChange('layoutRow', event.target.value)}
+                />
+              </FormField>
+              <FormField label="배치 열" error={layoutError}>
+                <TextInput
+                  error={Boolean(layoutError)}
+                  min="1"
+                  type="number"
+                  value={layoutForm.layoutColumn}
+                  onChange={(event) => handleLayoutFormChange('layoutColumn', event.target.value)}
+                />
+              </FormField>
+            </div>
+
+            {layoutError && <p className="form-error">{layoutError}</p>}
+
+            <div className="modal-actions">
+              <Button variant="secondary" onClick={closeLayoutModal}>
+                취소
+              </Button>
+              <Button onClick={handleUpdateLayout}>저장</Button>
+            </div>
+          </section>
+        </div>
+      )}
+      {statusTarget && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="parking-area-status-title">
+            <h2 id="parking-area-status-title">주차 구역 상태 변경</h2>
+            <p>
+              {statusTarget.areaNumber} 구역의 상태를 변경하고 사유를 저장합니다.
+            </p>
+
+            <div className="form-grid">
+              <FormField label="변경 상태">
+                <SelectBox
+                  value={statusForm.status}
+                  onChange={(event) => handleStatusFormChange('status', event.target.value)}
+                >
+                  <option value="empty">빈자리</option>
+                  <option value="occupied">주차됨</option>
+                  <option value="disabled">사용 불가</option>
+                </SelectBox>
+              </FormField>
+            </div>
+
+            <FormField label="변경 사유" error={statusError}>
+              <TextArea
+                error={Boolean(statusError)}
+                placeholder="예: 시설 점검으로 사용 불가 처리"
+                value={statusForm.reason}
+                onChange={(event) => handleStatusFormChange('reason', event.target.value)}
+              />
+            </FormField>
+
+            <div className="modal-actions">
+              <Button variant="secondary" onClick={closeStatusModal}>
+                취소
+              </Button>
+              <Button onClick={handleUpdateStatus}>저장</Button>
+            </div>
+          </section>
+        </div>
+      )}
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
     </AdminLayout>
   );

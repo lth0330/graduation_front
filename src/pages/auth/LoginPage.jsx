@@ -1,5 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { loginApartmentManager } from '../../api/apartmentManagerApi.js';
+import { loginWebAdmin } from '../../api/webAdminApi.js';
+import {
+  authRoles,
+  consumeAuthMessage,
+  getCurrentAuthRole,
+  saveAuthSession,
+} from '../../utils/auth.js';
 import Button from '../../components/common/Button.jsx';
 import FormField from '../../components/forms/FormField.jsx';
 import TextInput from '../../components/forms/TextInput.jsx';
@@ -9,6 +17,27 @@ export default function LoginPage() {
   const [form, setForm] = useState({ loginId: '', password: '' });
   const [errors, setErrors] = useState({});
   const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  useEffect(() => {
+    const currentRole = getCurrentAuthRole();
+
+    if (currentRole === authRoles.WEB_ADMIN) {
+      navigate('/web-admin', { replace: true });
+      return;
+    }
+
+    if (currentRole === authRoles.APARTMENT_MANAGER) {
+      navigate('/apartment-admin', { replace: true });
+      return;
+    }
+
+    const authMessage = consumeAuthMessage();
+
+    if (authMessage) {
+      setLoginError(authMessage);
+    }
+  }, [navigate]);
 
   const handleChange = (field, value) => {
     setForm((currentForm) => ({
@@ -22,7 +51,7 @@ export default function LoginPage() {
     setLoginError('');
   };
 
-  const handleLogin = (role) => {
+  const handleLogin = async (role) => {
     const nextErrors = {};
 
     if (!form.loginId.trim()) {
@@ -39,16 +68,52 @@ export default function LoginPage() {
       return;
     }
 
-    const isWebAdmin = role === 'webAdmin' && form.loginId === 'webadmin' && form.password === '1234';
-    const isApartmentAdmin = role === 'apartmentAdmin' && form.loginId === 'aptadmin' && form.password === '1234';
+    if (role === 'webAdmin') {
+      try {
+        setIsLoggingIn(true);
+        const webAdmin = await loginWebAdmin({
+          wId: form.loginId,
+          wPwd: form.password,
+        });
 
-    if (isWebAdmin) {
-      navigate('/web-admin');
+        saveAuthSession(authRoles.WEB_ADMIN, webAdmin);
+        navigate('/web-admin');
+      } catch (error) {
+        if (error.response?.status === 401 || error.response?.status === 400) {
+          setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
+        } else {
+          setLoginError('서버와 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인하세요.');
+        }
+      } finally {
+        setIsLoggingIn(false);
+      }
       return;
     }
 
-    if (isApartmentAdmin) {
-      navigate('/apartment-admin');
+    if (role === 'apartmentAdmin') {
+      try {
+        setIsLoggingIn(true);
+        const apartmentManager = await loginApartmentManager({
+          loginId: form.loginId,
+          password: form.password,
+        });
+
+        if (apartmentManager.approvalStatus !== 'APPROVED') {
+          setLoginError('승인 완료된 아파트 관리자만 로그인할 수 있습니다.');
+          return;
+        }
+
+        saveAuthSession(authRoles.APARTMENT_MANAGER, apartmentManager);
+        navigate('/apartment-admin');
+      } catch (error) {
+        if (error.response?.status === 401 || error.response?.status === 400) {
+          setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
+        } else {
+          setLoginError('서버와 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인하세요.');
+        }
+      } finally {
+        setIsLoggingIn(false);
+      }
       return;
     }
 
@@ -96,10 +161,10 @@ export default function LoginPage() {
           />
         </FormField>
 
-        <Button fullWidth onClick={() => handleLogin('webAdmin')}>
-          웹 관리자로 로그인
+        <Button fullWidth disabled={isLoggingIn} onClick={() => handleLogin('webAdmin')}>
+          {isLoggingIn ? '로그인 중...' : '웹 관리자로 로그인'}
         </Button>
-        <Button fullWidth variant="secondary" onClick={() => handleLogin('apartmentAdmin')}>
+        <Button fullWidth variant="secondary" disabled={isLoggingIn} onClick={() => handleLogin('apartmentAdmin')}>
           아파트 관리자로 로그인
         </Button>
 
@@ -107,7 +172,7 @@ export default function LoginPage() {
           아파트 관리자 계정이 없나요?{' '}
           <Link to="/signup-request">회원가입 신청</Link>
         </p>
-        <div className="auth-notice">테스트 계정: webadmin / 1234, aptadmin / 1234</div>
+        <div className="auth-notice">테스트 계정: admin / 1234, qwe123 / qwer1234</div>
       </section>
     </main>
   );

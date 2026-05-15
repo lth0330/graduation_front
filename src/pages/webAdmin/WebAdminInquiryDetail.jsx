@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
@@ -8,11 +8,13 @@ import TextArea from '../../components/forms/TextArea.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
+import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
-import { findWebAdminInquiryById } from '../../data/webAdminData.js';
 
 export default function WebAdminInquiryDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { findWebAdminInquiryById, answerWebAdminInquiry } = useWebAdmin();
   const inquiry = findWebAdminInquiryById(id);
   const [answer, setAnswer] = useState(inquiry?.answer || '');
   const [status, setStatus] = useState(inquiry?.status);
@@ -37,14 +39,20 @@ export default function WebAdminInquiryDetail() {
     );
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!answer.trim()) {
       setError('답변 내용을 입력하세요.');
       return;
     }
 
-    setStatus('answered');
-    setToastMessage('답변이 등록되었습니다.');
+    try {
+      await answerWebAdminInquiry(inquiry.id, answer.trim());
+      setStatus('answered');
+      setToastMessage('답변이 등록되었습니다.');
+      navigate('/web-admin/inquiries');
+    } catch (error) {
+      setToastMessage('답변 등록에 실패했습니다. 잠시 후 다시 시도하세요.');
+    }
   };
 
   return (
@@ -68,7 +76,7 @@ export default function WebAdminInquiryDetail() {
           <div>
             <dt>답변 상태</dt>
             <dd>
-              <Badge status={status} />
+              <Badge status={status}>{status === 'answered' ? '답변 완료' : '답변 대기'}</Badge>
             </dd>
           </div>
           <div>

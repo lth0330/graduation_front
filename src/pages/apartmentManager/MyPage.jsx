@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
+import LoadingState from '../../components/feedback/LoadingState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
@@ -8,7 +10,12 @@ import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx'
 import { apartmentManagerMenus } from '../../data/navigation.js';
 
 export default function MyPage() {
-  const { apartmentManagerProfile } = useApartmentManager();
+  const {
+    apartmentManagerProfile,
+    isManagerProfileLoading,
+    managerProfileError,
+    refreshManagerProfile,
+  } = useApartmentManager();
   const [toastMessage, setToastMessage] = useState('');
 
   const handleCopyPassword = async () => {
@@ -30,33 +37,54 @@ export default function MyPage() {
       <PageTitle title="아파트 관리자 정보" description="아파트 관리자 계정과 아파트 인증 정보를 확인합니다." />
 
       <SectionCard title="기본 정보">
-        <dl className="detail-list">
-          <div>
-            <dt>관리자 아이디</dt>
-            <dd>{apartmentManagerProfile.loginId}</dd>
-          </div>
-          <div>
-            <dt>이메일</dt>
-            <dd>{apartmentManagerProfile.email}</dd>
-          </div>
-          <div>
-            <dt>아파트 이름</dt>
-            <dd>{apartmentManagerProfile.apartmentName}</dd>
-          </div>
-          <div className="detail-wide">
-            <dt>아파트 주소</dt>
-            <dd>{apartmentManagerProfile.address}</dd>
-          </div>
-          <div>
-            <dt>아파트 비밀번호</dt>
-            <dd className="password-row">
-              <strong>{apartmentManagerProfile.apartmentPassword}</strong>
-              <Button variant="secondary" size="small" onClick={handleCopyPassword}>
-                복사
+        {isManagerProfileLoading ? (
+          <LoadingState message="아파트 관리자 정보 불러오는 중" />
+        ) : managerProfileError ? (
+          <>
+            <EmptyState title="관리자 정보 조회 실패" description={managerProfileError} />
+            <div className="detail-actions">
+              <Button variant="secondary" onClick={refreshManagerProfile}>
+                다시 불러오기
               </Button>
-            </dd>
-          </div>
-        </dl>
+            </div>
+          </>
+        ) : (
+          <dl className="detail-list">
+            <div>
+              <dt>관리자 아이디</dt>
+              <dd>{apartmentManagerProfile.loginId}</dd>
+            </div>
+            <div>
+              <dt>관리자 이름</dt>
+              <dd>{apartmentManagerProfile.name}</dd>
+            </div>
+            <div>
+              <dt>이메일</dt>
+              <dd>{apartmentManagerProfile.email}</dd>
+            </div>
+            <div>
+              <dt>연락처</dt>
+              <dd>{apartmentManagerProfile.phone}</dd>
+            </div>
+            <div>
+              <dt>아파트 이름</dt>
+              <dd>{apartmentManagerProfile.apartmentName}</dd>
+            </div>
+            <div className="detail-wide">
+              <dt>아파트 주소</dt>
+              <dd>{apartmentManagerProfile.address}</dd>
+            </div>
+            <div>
+              <dt>아파트 비밀번호</dt>
+              <dd className="password-row">
+                <strong>{apartmentManagerProfile.apartmentPassword}</strong>
+                <Button variant="secondary" size="small" onClick={handleCopyPassword}>
+                  복사
+                </Button>
+              </dd>
+            </div>
+          </dl>
+        )}
 
         <div className="info-box">
           <strong>주민에게 이 비밀번호를 전달하세요.</strong>

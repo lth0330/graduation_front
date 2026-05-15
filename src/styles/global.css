@@ -184,7 +184,7 @@ textarea {
   display: flex;
   height: 72px;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   border-bottom: 1px solid var(--color-border);
   background: var(--color-surface);
   padding: 0 32px;
@@ -270,7 +270,16 @@ textarea {
 }
 
 .section-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
   margin-bottom: 18px;
+}
+
+.section-card-action {
+  width: 180px;
+  flex-shrink: 0;
 }
 
 .section-card h2 {
@@ -322,13 +331,14 @@ textarea {
 
 .parking-grid {
   display: grid;
-  grid-template-columns: repeat(8, minmax(72px, 1fr));
+  grid-template-columns: repeat(8, 72px);
+  grid-auto-rows: 72px;
   gap: 10px;
 }
 
 .parking-spot {
   display: grid;
-  min-height: 58px;
+  min-height: 0;
   place-items: center;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -363,7 +373,7 @@ textarea {
   display: flex;
   min-height: 900px;
   flex-direction: column;
-  background: var(--color-navy);
+  background: #0b1f3a;
   color: white;
   padding: 82px 56px 0 76px;
 }
@@ -374,7 +384,7 @@ textarea {
   bottom: 0;
   left: 0;
   height: 264px;
-  background: #d8e3f0;
+  background: #12345a;
   content: "";
 }
 
@@ -458,7 +468,7 @@ textarea {
 }
 
 .auth-panel.signup-panel {
-  top: 96px;
+  top: 48px;
   left: 710px;
   width: 526px;
   min-height: 756px;
@@ -832,6 +842,11 @@ textarea {
   font-weight: 700;
 }
 
+.status-filter {
+  width: 180px;
+  flex-shrink: 0;
+}
+
 .filter-row {
   display: grid;
   grid-template-columns: minmax(260px, 360px) auto;
@@ -852,6 +867,10 @@ textarea {
   gap: 12px;
   align-items: end;
   margin-bottom: 16px;
+}
+
+.parking-area-form-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
 }
 
 .data-table-wrap {
@@ -880,6 +899,17 @@ textarea {
   background: #f8fafc;
   color: var(--color-muted);
   font-size: 14px;
+  font-weight: 800;
+}
+
+.data-table .table-index-column {
+  width: 96px;
+  min-width: 96px;
+  max-width: 96px;
+  text-align: center;
+}
+
+.data-table td.table-index-column {
   font-weight: 800;
 }
 

@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
@@ -28,9 +30,14 @@ const recentSignupColumns = [
 
 export default function WebAdminDashboard() {
   const { signupRequests } = useWebAdmin();
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const pendingRequests = signupRequests.filter((request) => request.status === 'pending');
   const approvedRequests = signupRequests.filter((request) => request.status === 'approved');
-  const recentSignupRequests = signupRequests.slice(0, 4);
+  const filteredSignupRequests =
+    selectedStatus === 'all'
+      ? signupRequests
+      : signupRequests.filter((request) => request.status === selectedStatus);
+  const recentSignupRequests = filteredSignupRequests.slice(0, 4);
 
   return (
     <AdminLayout
@@ -50,7 +57,22 @@ export default function WebAdminDashboard() {
         <MetricCard label="답변 대기 문의" value="7" helper="빠른 답변 필요" />
       </div>
 
-      <SectionCard title="최근 관리자 가입 신청 목록" description="최근 접수된 아파트 관리자 가입 신청입니다.">
+      <SectionCard
+        title="최근 관리자 가입 신청 목록"
+        description="최근 접수된 아파트 관리자 가입 신청입니다."
+        headerAction={
+          <SelectBox
+            aria-label="가입 신청 상태 분류"
+            value={selectedStatus}
+            onChange={(event) => setSelectedStatus(event.target.value)}
+          >
+            <option value="all">전체</option>
+            <option value="pending">승인 대기</option>
+            <option value="approved">승인 완료</option>
+            <option value="rejected">거절</option>
+          </SelectBox>
+        }
+      >
         <DataTable columns={recentSignupColumns} rows={recentSignupRequests} emptyMessage="최근 가입 신청이 없습니다." />
       </SectionCard>
     </AdminLayout>

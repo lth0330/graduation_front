@@ -4,6 +4,7 @@ import Button from '../../components/common/Button.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
+import SelectBox from '../../components/forms/SelectBox.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
@@ -24,7 +25,12 @@ const columns = [
 
 export default function ApartmentManagerManagement() {
   const [keyword, setKeyword] = useState('');
-  const filteredManagers = filterByKeyword(apartmentManagers, keyword, ['id', 'loginId', 'email', 'apartmentName']);
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const searchedManagers = filterByKeyword(apartmentManagers, keyword, ['id', 'loginId', 'email', 'apartmentName']);
+  const filteredManagers =
+    selectedStatus === 'all'
+      ? searchedManagers
+      : searchedManagers.filter((manager) => manager.status === selectedStatus);
 
   return (
     <AdminLayout
@@ -39,7 +45,20 @@ export default function ApartmentManagerManagement() {
       />
 
       <SectionCard title="아파트 관리자 목록" description="행 클릭 상세, 수정, 삭제 기능은 다음 단계에서 확장합니다.">
-        <SearchBar placeholder="아이디, 이메일, 아파트 이름 검색" value={keyword} onChange={setKeyword} />
+        <div className="section-toolbar">
+          <SearchBar placeholder="아이디, 이메일, 아파트 이름 검색" value={keyword} onChange={setKeyword} />
+          <div className="status-filter">
+            <SelectBox
+              aria-label="아파트 관리자 상태 분류"
+              value={selectedStatus}
+              onChange={(event) => setSelectedStatus(event.target.value)}
+            >
+              <option value="all">전체</option>
+              <option value="active">활성</option>
+              <option value="inactive">비활성</option>
+            </SelectBox>
+          </div>
+        </div>
         <DataTable columns={columns} rows={filteredManagers} emptyMessage="조건에 맞는 관리자가 없습니다." />
         <Pagination currentPage={1} totalPages={2} />
       </SectionCard>
