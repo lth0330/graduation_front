@@ -8,10 +8,6 @@ import {
   answerWebAdminInquiry as answerWebAdminInquiryApi,
   getWebAdminInquiries,
 } from '../api/inquiryApi.js';
-import {
-  signupRequests as initialSignupRequests,
-  webAdminInquiries as initialWebAdminInquiries,
-} from '../data/webAdminData.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
 
 const WebAdminContext = createContext(null);
@@ -66,10 +62,10 @@ function mapWebAdminInquiry(apiInquiry) {
 }
 
 export function WebAdminProvider({ children }) {
-  const [signupRequests, setSignupRequests] = useState(initialSignupRequests);
+  const [signupRequests, setSignupRequests] = useState([]);
   const [isSignupRequestsLoading, setIsSignupRequestsLoading] = useState(false);
   const [signupRequestsError, setSignupRequestsError] = useState('');
-  const [webAdminInquiries, setWebAdminInquiries] = useState(initialWebAdminInquiries);
+  const [webAdminInquiries, setWebAdminInquiries] = useState([]);
   const [isWebAdminInquiriesLoading, setIsWebAdminInquiriesLoading] = useState(false);
   const [webAdminInquiriesError, setWebAdminInquiriesError] = useState('');
 

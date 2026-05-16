@@ -13,6 +13,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -44,6 +45,7 @@ export default function WebAdminInquiryList() {
     webAdminInquiriesError,
     refreshWebAdminInquiries,
   } = useWebAdmin();
+  const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const searchedInquiries = filterByKeyword(webAdminInquiries, keyword, ['id', 'title', 'writer', 'apartmentName']);
@@ -51,6 +53,10 @@ export default function WebAdminInquiryList() {
     selectedStatus === 'all'
       ? searchedInquiries
       : searchedInquiries.filter((inquiry) => inquiry.status === selectedStatus);
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredInquiries, 5, [
+    keyword,
+    selectedStatus,
+  ]);
 
   return (
     <AdminLayout
@@ -66,7 +72,12 @@ export default function WebAdminInquiryList() {
 
       <SectionCard title="문의 목록 테이블" description="답변 상세 화면에서 문의 내용을 확인하고 답변을 등록합니다.">
         <div className="section-toolbar">
-          <SearchBar placeholder="제목, 작성자, 아파트 이름 검색" value={keyword} onChange={setKeyword} />
+          <SearchBar
+            placeholder="제목, 작성자, 아파트 이름 검색"
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={() => setKeyword(searchInput)}
+          />
           <div className="status-filter">
             <SelectBox
               aria-label="문의 답변 상태 분류"
@@ -92,8 +103,13 @@ export default function WebAdminInquiryList() {
           </>
         ) : (
           <>
-            <DataTable columns={columns} rows={filteredInquiries} emptyMessage="조건에 맞는 문의가 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable
+              columns={columns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="조건에 맞는 문의가 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

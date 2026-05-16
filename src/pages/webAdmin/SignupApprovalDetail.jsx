@@ -12,6 +12,19 @@ import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
 
+function getUploadedFileUrl(path) {
+  if (!path) {
+    return '';
+  }
+
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+  return `${baseUrl}/${path.replace(/^\/+/, '')}`;
+}
+
 export default function SignupApprovalDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,6 +40,7 @@ export default function SignupApprovalDetail() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const proofImageUrl = getUploadedFileUrl(request?.picture);
 
   const handleApprove = async () => {
     try {
@@ -57,12 +71,7 @@ export default function SignupApprovalDetail() {
 
   if (isSignupRequestsLoading) {
     return (
-      <AdminLayout
-        roleLabel="웹 관리자"
-        consoleTitle="웹 관리자 콘솔"
-        userName="최고관리자"
-        menus={webAdminMenus}
-      >
+      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
         <PageTitle title="가입 신청 상세" description="가입 신청 정보를 불러오고 있습니다." />
         <SectionCard title="신청 정보">
           <LoadingState message="가입 신청 상세 불러오는 중" />
@@ -73,12 +82,7 @@ export default function SignupApprovalDetail() {
 
   if (signupRequestsError) {
     return (
-      <AdminLayout
-        roleLabel="웹 관리자"
-        consoleTitle="웹 관리자 콘솔"
-        userName="최고관리자"
-        menus={webAdminMenus}
-      >
+      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
         <PageTitle title="가입 신청 상세" description="가입 신청 정보를 불러오지 못했습니다." />
         <SectionCard title="조회 실패">
           <EmptyState title="상세 조회 실패" description={signupRequestsError} />
@@ -94,12 +98,7 @@ export default function SignupApprovalDetail() {
 
   if (!request) {
     return (
-      <AdminLayout
-        roleLabel="웹 관리자"
-        consoleTitle="웹 관리자 콘솔"
-        userName="최고관리자"
-        menus={webAdminMenus}
-      >
+      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
         <PageTitle title="가입 신청 상세" description="요청한 가입 신청 정보를 찾을 수 없습니다." />
         <SectionCard title="데이터 없음">
           <Link className="text-link" to="/web-admin/signup-approvals">
@@ -111,12 +110,7 @@ export default function SignupApprovalDetail() {
   }
 
   return (
-    <AdminLayout
-      roleLabel="웹 관리자"
-      consoleTitle="웹 관리자 콘솔"
-      userName="최고관리자"
-      menus={webAdminMenus}
-    >
+    <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
       <PageTitle
         title="가입 신청 상세"
         description="아파트 관리자 가입 신청 정보를 확인하고 승인 또는 거절합니다."
@@ -153,6 +147,18 @@ export default function SignupApprovalDetail() {
           <div className="detail-wide">
             <dt>아파트 주소</dt>
             <dd>{request.address}</dd>
+          </div>
+          <div className="detail-wide">
+            <dt>경력 증빙 이미지</dt>
+            <dd>
+              {proofImageUrl ? (
+                <a className="text-link" href={proofImageUrl} target="_blank" rel="noreferrer">
+                  업로드 이미지 열기
+                </a>
+              ) : (
+                '첨부 파일 없음'
+              )}
+            </dd>
           </div>
           <div>
             <dt>신청일</dt>

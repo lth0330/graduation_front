@@ -16,6 +16,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 
 const areaStatusLabel = {
   empty: '빈자리',
@@ -93,6 +94,10 @@ export default function ParkingAreaManagement() {
     selectedStatus === 'all'
       ? visibleAreas
       : visibleAreas.filter((parkingArea) => parkingArea.status === selectedStatus);
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredAreas, 5, [
+    selectedParkingLotId,
+    selectedStatus,
+  ]);
   const tableColumns = [
     ...columns,
     {
@@ -282,62 +287,7 @@ export default function ParkingAreaManagement() {
         description="주차장 선택 후 층별 구역을 등록, 삭제할 수 있습니다."
       />
 
-      <SectionCard title="주차장별 주차 구역 관리" description="등록과 삭제는 다음 단계에서 연결합니다.">
-        <div className="filter-row">
-          <label>
-            주차장 선택
-            <SelectBox value={selectedParkingLotId} onChange={(event) => setSelectedParkingLotId(event.target.value)}>
-              {parkingLots.map((parkingLot) => (
-                <option value={parkingLot.id} key={parkingLot.id}>
-                  {parkingLot.name} {parkingLot.floor}
-                </option>
-              ))}
-            </SelectBox>
-          </label>
-          <label>
-            상태 분류
-            <SelectBox value={selectedStatus} onChange={(event) => setSelectedStatus(event.target.value)}>
-              <option value="all">전체</option>
-              <option value="empty">빈자리</option>
-              <option value="occupied">주차됨</option>
-              <option value="disabled">사용 불가</option>
-            </SelectBox>
-          </label>
-        </div>
-
-        <div className="inline-form-grid parking-area-form-grid">
-          <FormField label="구역 번호">
-            <TextInput value={form.areaNumber} onChange={(event) => handleChange('areaNumber', event.target.value)} />
-          </FormField>
-          <FormField label="위치">
-            <TextInput value={form.location} onChange={(event) => handleChange('location', event.target.value)} />
-          </FormField>
-          <FormField label="상태">
-            <SelectBox value={form.status} onChange={(event) => handleChange('status', event.target.value)}>
-              <option value="empty">빈자리</option>
-              <option value="occupied">주차됨</option>
-              <option value="disabled">사용 불가</option>
-            </SelectBox>
-          </FormField>
-          <FormField label="배치 행">
-            <TextInput
-              min="1"
-              type="number"
-              value={form.layoutRow}
-              onChange={(event) => handleChange('layoutRow', event.target.value)}
-            />
-          </FormField>
-          <FormField label="배치 열">
-            <TextInput
-              min="1"
-              type="number"
-              value={form.layoutColumn}
-              onChange={(event) => handleChange('layoutColumn', event.target.value)}
-            />
-          </FormField>
-          <Button onClick={handleCreate}>구역 등록</Button>
-        </div>
-
+      <SectionCard title="주차장별 주차 구역 관리" description="주차 구역을 등록하고 상태, 배치, 삭제를 관리합니다.">
         {isParkingLoading ? (
           <LoadingState message="주차 구역 목록 불러오는 중" />
         ) : parkingError ? (
@@ -349,10 +299,72 @@ export default function ParkingAreaManagement() {
               </Button>
             </div>
           </>
+        ) : parkingLots.length === 0 ? (
+          <EmptyState title="등록된 주차장이 없습니다." description="주차장 정보 관리에서 주차장을 먼저 등록하세요." />
         ) : (
           <>
-            <DataTable columns={tableColumns} rows={filteredAreas} emptyMessage="등록된 주차 구역이 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <div className="filter-row">
+              <label>
+                주차장 선택
+                <SelectBox value={selectedParkingLotId} onChange={(event) => setSelectedParkingLotId(event.target.value)}>
+                  {parkingLots.map((parkingLot) => (
+                    <option value={parkingLot.id} key={parkingLot.id}>
+                      {parkingLot.name} {parkingLot.floor}
+                    </option>
+                  ))}
+                </SelectBox>
+              </label>
+              <label>
+                상태 분류
+                <SelectBox value={selectedStatus} onChange={(event) => setSelectedStatus(event.target.value)}>
+                  <option value="all">전체</option>
+                  <option value="empty">빈자리</option>
+                  <option value="occupied">주차됨</option>
+                  <option value="disabled">사용 불가</option>
+                </SelectBox>
+              </label>
+            </div>
+
+            <div className="inline-form-grid parking-area-form-grid">
+              <FormField label="구역 번호">
+                <TextInput value={form.areaNumber} onChange={(event) => handleChange('areaNumber', event.target.value)} />
+              </FormField>
+              <FormField label="위치">
+                <TextInput value={form.location} onChange={(event) => handleChange('location', event.target.value)} />
+              </FormField>
+              <FormField label="상태">
+                <SelectBox value={form.status} onChange={(event) => handleChange('status', event.target.value)}>
+                  <option value="empty">빈자리</option>
+                  <option value="occupied">주차됨</option>
+                  <option value="disabled">사용 불가</option>
+                </SelectBox>
+              </FormField>
+              <FormField label="배치 행">
+                <TextInput
+                  min="1"
+                  type="number"
+                  value={form.layoutRow}
+                  onChange={(event) => handleChange('layoutRow', event.target.value)}
+                />
+              </FormField>
+              <FormField label="배치 열">
+                <TextInput
+                  min="1"
+                  type="number"
+                  value={form.layoutColumn}
+                  onChange={(event) => handleChange('layoutColumn', event.target.value)}
+                />
+              </FormField>
+              <Button onClick={handleCreate}>구역 등록</Button>
+            </div>
+
+            <DataTable
+              columns={tableColumns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="등록된 주차 구역이 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

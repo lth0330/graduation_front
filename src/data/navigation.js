@@ -9,14 +9,14 @@ export const apartmentManagerMenus = [
   { label: '대시보드', path: '/apartment-admin' },
   { label: '마이페이지', path: '/apartment-manager/my-page' },
   {
-    label: '주민',
+    label: '입주민',
     children: [
-      { label: '주민 가입 신청 관리', path: '/apartment-manager/resident-requests' },
-      { label: '주민 정보 관리', path: '/apartment-manager/residents' },
+      { label: '입주민 가입 요청 관리', path: '/apartment-manager/resident-requests' },
+      { label: '입주민 정보 관리', path: '/apartment-manager/residents' },
     ],
   },
   {
-    label: '차량',
+    label: '주차 관리',
     children: [
       { label: '차량 정보 관리', path: '/apartment-manager/vehicles' },
       { label: '주차장 관리', path: '/apartment-manager/parking-lots' },
@@ -29,7 +29,7 @@ export const apartmentManagerMenus = [
     children: [
       { label: '웹 관리자 문의 작성', path: '/apartment-manager/inquiry-write' },
       { label: '문의 내역', path: '/apartment-manager/inquiry-history' },
-      { label: '주민 문의 관리', path: '/apartment-manager/resident-inquiries' },
+      { label: '입주민 문의 관리', path: '/apartment-manager/resident-inquiries' },
     ],
   },
 ];

@@ -8,5 +8,5 @@ const statusLabelMap = {
 };
 
 export default function Badge({ status = 'pending', children }) {
-  return <span className={`status-badge badge-${status}`}>{children || statusLabelMap[status]}</span>;
+  return <span className={`status-badge badge-${status}`}>{children || statusLabelMap[status] || status}</span>;
 }

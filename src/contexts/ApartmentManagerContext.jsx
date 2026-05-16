@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   approveResidentSignupRequest as approveResidentSignupRequestApi,
+  createResident as createResidentApi,
   createVehicle as createVehicleApi,
   deleteVehicle as deleteVehicleApi,
   deleteResident as deleteResidentApi,
@@ -27,15 +28,9 @@ import {
   getMyManagerInquiries,
 } from '../api/inquiryApi.js';
 import {
-  apartmentManagerProfile,
-  residentSignupRequests as initialResidentSignupRequests,
-  residents as initialResidents,
-  vehicles as initialVehicles,
-  parkingLots as initialParkingLots,
-  parkingAreas as initialParkingAreas,
-  managerInquiries as initialManagerInquiries,
-  residentParkingInquiries as initialResidentParkingInquiries,
-} from '../data/apartmentManagerData.js';
+  answerResidentInquiry as answerResidentInquiryApi,
+  getResidentInquiries,
+} from '../api/residentInquiryApi.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
 
 const ApartmentManagerContext = createContext(null);
@@ -44,6 +39,19 @@ const statusMap = {
   PENDING: 'pending',
   APPROVED: 'approved',
   REJECTED: 'rejected',
+};
+
+const emptyApartmentManagerProfile = {
+  managerNo: '',
+  loginId: '',
+  email: '',
+  phone: '',
+  name: '',
+  apartmentNo: '',
+  apartmentName: '',
+  address: '',
+  detailAddress: '',
+  apartmentPassword: '',
 };
 
 function formatDate(value) {
@@ -182,27 +190,50 @@ function mapManagerInquiry(apiInquiry) {
   };
 }
 
+function mapResidentParkingInquiry(apiInquiry) {
+  return {
+    id: String(apiInquiry.inquiryNo),
+    inquiryNo: apiInquiry.inquiryNo,
+    residentNo: apiInquiry.residentNo,
+    apartmentNo: apiInquiry.apartmentNo,
+    title: apiInquiry.title,
+    writer: apiInquiry.writer,
+    building: apiInquiry.building,
+    unit: apiInquiry.unit,
+    vehicleNo: apiInquiry.vehicleNo,
+    carNumber: apiInquiry.carNumber || '-',
+    status: apiInquiry.status,
+    content: apiInquiry.content,
+    answer: apiInquiry.answer || '',
+    createdAt: formatDate(apiInquiry.createdAt),
+    answeredAt: formatDate(apiInquiry.answeredAt),
+  };
+}
+
 export function ApartmentManagerProvider({ children }) {
-  const [managerProfile, setManagerProfile] = useState(apartmentManagerProfile);
+  const [managerProfile, setManagerProfile] = useState(emptyApartmentManagerProfile);
   const [isManagerProfileLoading, setIsManagerProfileLoading] = useState(false);
   const [managerProfileError, setManagerProfileError] = useState('');
-  const [residentSignupRequests, setResidentSignupRequests] = useState(initialResidentSignupRequests);
+  const [residentSignupRequests, setResidentSignupRequests] = useState([]);
   const [isResidentRequestsLoading, setIsResidentRequestsLoading] = useState(false);
   const [residentRequestsError, setResidentRequestsError] = useState('');
-  const [residents, setResidents] = useState(initialResidents);
+  const [residents, setResidents] = useState([]);
   const [isResidentsLoading, setIsResidentsLoading] = useState(false);
   const [residentsError, setResidentsError] = useState('');
-  const [vehicles, setVehicles] = useState(initialVehicles);
+  const [vehicles, setVehicles] = useState([]);
   const [isVehiclesLoading, setIsVehiclesLoading] = useState(false);
   const [vehiclesError, setVehiclesError] = useState('');
-  const [parkingLots, setParkingLots] = useState(initialParkingLots);
-  const [parkingAreas, setParkingAreas] = useState(initialParkingAreas);
+  const [parkingLots, setParkingLots] = useState([]);
+  const [parkingAreas, setParkingAreas] = useState([]);
   const [isParkingLoading, setIsParkingLoading] = useState(false);
   const [parkingError, setParkingError] = useState('');
-  const [managerInquiries, setManagerInquiries] = useState(initialManagerInquiries);
+  const [managerInquiries, setManagerInquiries] = useState([]);
   const [isManagerInquiriesLoading, setIsManagerInquiriesLoading] = useState(false);
   const [managerInquiriesError, setManagerInquiriesError] = useState('');
-  const [residentParkingInquiries, setResidentParkingInquiries] = useState(initialResidentParkingInquiries);
+  // 입주민 주차 문의 목록은 백엔드 API 응답을 기준으로 관리합니다.
+  const [residentParkingInquiries, setResidentParkingInquiries] = useState([]);
+  const [isResidentParkingInquiriesLoading, setIsResidentParkingInquiriesLoading] = useState(false);
+  const [residentParkingInquiriesError, setResidentParkingInquiriesError] = useState('');
 
   const refreshManagerProfile = async () => {
     try {
@@ -234,6 +265,7 @@ export function ApartmentManagerProvider({ children }) {
         refreshVehicles();
         refreshParkingData();
         refreshManagerInquiries();
+        refreshResidentParkingInquiries();
       }
     };
 
@@ -296,6 +328,16 @@ export function ApartmentManagerProvider({ children }) {
   const updateResident = async (id, updatedFields) => {
     await updateResidentApi(id, updatedFields);
     await refreshResidents();
+  };
+
+  const createResident = async (resident) => {
+    const createdResident = await createResidentApi({
+      ...resident,
+      apartmentNo: Number(resident.apartmentNo || getStoredApartmentNo()),
+    });
+    await refreshResidents();
+
+    return mapResident(createdResident);
   };
 
   const deleteResident = async (id) => {
@@ -453,18 +495,31 @@ export function ApartmentManagerProvider({ children }) {
     return mapManagerInquiry(createdInquiry);
   };
 
-  const answerResidentParkingInquiry = (id, answer) => {
-    setResidentParkingInquiries((currentInquiries) =>
-      currentInquiries.map((inquiry) =>
-        inquiry.id === id
-          ? {
-              ...inquiry,
-              status: 'answered',
-              answer,
-            }
-          : inquiry,
-      ),
-    );
+  const refreshResidentParkingInquiries = async () => {
+    try {
+      setIsResidentParkingInquiriesLoading(true);
+      setResidentParkingInquiriesError('');
+
+      const apartmentNo = getStoredApartmentNo();
+      const inquiries = await getResidentInquiries(apartmentNo);
+      setResidentParkingInquiries(inquiries.map(mapResidentParkingInquiry));
+    } catch (error) {
+      setResidentParkingInquiriesError('입주민 문의 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+    } finally {
+      setIsResidentParkingInquiriesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (getValidAuthSession(authRoles.APARTMENT_MANAGER)) {
+      refreshResidentParkingInquiries();
+    }
+  }, []);
+
+  const answerResidentParkingInquiry = async (id, answer) => {
+    const answeredInquiry = await answerResidentInquiryApi(id, answer);
+    await refreshResidentParkingInquiries();
+    return mapResidentParkingInquiry(answeredInquiry);
   };
 
   const value = useMemo(
@@ -486,6 +541,7 @@ export function ApartmentManagerProvider({ children }) {
       residentsError,
       refreshResidents,
       findResidentById: (id) => residents.find((resident) => resident.id === id),
+      createResident,
       updateResident,
       deleteResident,
       vehicles,
@@ -514,6 +570,9 @@ export function ApartmentManagerProvider({ children }) {
       refreshManagerInquiries,
       createManagerInquiry,
       residentParkingInquiries,
+      isResidentParkingInquiriesLoading,
+      residentParkingInquiriesError,
+      refreshResidentParkingInquiries,
       findResidentParkingInquiryById: (id) =>
         residentParkingInquiries.find((inquiry) => inquiry.id === id),
       answerResidentParkingInquiry,
@@ -539,6 +598,8 @@ export function ApartmentManagerProvider({ children }) {
       isManagerInquiriesLoading,
       managerInquiriesError,
       residentParkingInquiries,
+      isResidentParkingInquiriesLoading,
+      residentParkingInquiriesError,
     ],
   );
 

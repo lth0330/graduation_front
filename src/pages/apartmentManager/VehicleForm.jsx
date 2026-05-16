@@ -107,6 +107,33 @@ export default function VehicleForm() {
     );
   }
 
+  if (!isEditMode && residents.length === 0) {
+    return (
+      <AdminLayout
+        roleLabel="아파트 관리자"
+        consoleTitle="아파트 관리자 콘솔"
+        userName="한빛아파트 관리자"
+        menus={apartmentManagerMenus}
+      >
+        <PageTitle title="차량 등록" description="차량을 등록하려면 먼저 승인된 주민이 필요합니다." />
+        <SectionCard title="등록 가능한 주민 없음">
+          <EmptyState
+            title="차량 소유자를 선택할 수 없습니다."
+            description="주민 등록 또는 주민 가입 승인을 먼저 진행한 뒤 차량을 등록하세요."
+          />
+          <div className="detail-actions">
+            <Link to="/apartment-manager/residents">
+              <Button variant="secondary">주민 관리로 이동</Button>
+            </Link>
+            <Link to="/apartment-manager/vehicles">
+              <Button>차량 목록으로</Button>
+            </Link>
+          </div>
+        </SectionCard>
+      </AdminLayout>
+    );
+  }
+
   const selectedResident = residents.find((resident) => resident.id === form.ownerId);
 
   const handleChange = (field, value) => {
@@ -126,7 +153,7 @@ export default function VehicleForm() {
   const buildVehiclePayload = () => ({
     carNumber: form.carNumber.trim(),
     carType: form.carType.trim(),
-    ownerId: selectedResident.id,
+    ownerId: selectedResident?.id,
     ownerName: selectedResident.name,
     building: selectedResident.building,
     unit: selectedResident.unit,

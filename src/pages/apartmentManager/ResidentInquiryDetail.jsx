@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import EmptyState from '../../components/feedback/EmptyState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import FormField from '../../components/forms/FormField.jsx';
 import TextArea from '../../components/forms/TextArea.jsx';
@@ -14,51 +15,78 @@ import { apartmentManagerMenus } from '../../data/navigation.js';
 export default function ResidentInquiryDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { findResidentParkingInquiryById, answerResidentParkingInquiry } = useApartmentManager();
+  const {
+    findResidentParkingInquiryById,
+    answerResidentParkingInquiry,
+    residentParkingInquiriesError,
+    refreshResidentParkingInquiries,
+  } = useApartmentManager();
   const inquiry = findResidentParkingInquiryById(id);
-  const [answer, setAnswer] = useState(inquiry?.answer || '');
+  const [answer, setAnswer] = useState('');
   const [error, setError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    refreshResidentParkingInquiries();
+  }, []);
+
+  useEffect(() => {
+    setAnswer(inquiry?.answer || '');
+  }, [inquiry?.answer]);
 
   if (!inquiry) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 문의 상세" description="요청한 주민 문의 정보를 찾을 수 없습니다." />
+        <PageTitle title="입주민 문의 상세" description="요청한 입주민 문의 정보를 찾을 수 없습니다." />
         <SectionCard title="데이터 없음">
-          <Link className="text-link" to="/apartment-manager/resident-inquiries">
-            목록으로 돌아가기
-          </Link>
+          <EmptyState
+            title={residentParkingInquiriesError ? '입주민 문의 조회 실패' : '입주민 문의가 없습니다.'}
+            description={residentParkingInquiriesError || '목록에서 문의를 다시 선택하세요.'}
+          />
+          <div className="detail-actions">
+            <Link to="/apartment-manager/resident-inquiries">
+              <Button variant="secondary">목록으로</Button>
+            </Link>
+          </div>
         </SectionCard>
       </AdminLayout>
     );
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!answer.trim()) {
       setError('답변 내용을 입력하세요.');
       return;
     }
 
-    answerResidentParkingInquiry(inquiry.id, answer.trim());
-    setToastMessage('주민 문의 답변이 등록되었습니다.');
-    navigate('/apartment-manager/resident-inquiries');
+    try {
+      setIsSubmitting(true);
+      await answerResidentParkingInquiry(inquiry.id, answer.trim());
+      setToastMessage('입주민 문의 답변이 등록되었습니다.');
+      navigate('/apartment-manager/resident-inquiries');
+    } catch (submitError) {
+      setError('답변 등록에 실패했습니다. 백엔드 서버 상태를 확인하세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
-      <PageTitle title="주민 문의 상세 및 답변" description="주민이 앱에서 보낸 문의를 확인하고 답변을 등록합니다." />
+      <PageTitle title="입주민 문의 상세 및 답변" description="입주민이 보낸 문의를 확인하고 답변을 등록합니다." />
 
-      <SectionCard title="주민 문의 상세" description="문의 정보와 차량 정보를 확인한 뒤 답변을 작성합니다.">
+      <SectionCard title="입주민 문의 상세">
         <dl className="detail-list">
           <div>
             <dt>문의 ID</dt>
@@ -118,7 +146,9 @@ export default function ResidentInquiryDetail() {
           <Link to="/apartment-manager/resident-inquiries">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button onClick={handleSubmit}>답변 등록</Button>
+          <Button disabled={isSubmitting} onClick={handleSubmit}>
+            {isSubmitting ? '등록 중...' : '답변 등록'}
+          </Button>
         </div>
       </SectionCard>
 

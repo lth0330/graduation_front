@@ -139,6 +139,14 @@ export function getCurrentAuthRole() {
 export function getAccessTokenForRequest(requestUrl = '') {
   const url = String(requestUrl);
 
+  if (
+    (url === '/api/apartment-managers' || url === '/api/apartment-managers/') ||
+    url === '/api/apartment-managers/login' ||
+    url === '/api/web-admin/login'
+  ) {
+    return '';
+  }
+
   if (url.startsWith('/api/web-admin')) {
     return getValidAuthSession(authRoles.WEB_ADMIN)?.accessToken || '';
   }

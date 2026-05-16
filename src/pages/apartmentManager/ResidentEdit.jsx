@@ -16,10 +16,21 @@ import { apartmentManagerMenus } from '../../data/navigation.js';
 export default function ResidentEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { findResidentById, isResidentsLoading, residentsError, updateResident, deleteResident } = useApartmentManager();
+  const {
+    apartmentManagerProfile,
+    findResidentById,
+    isResidentsLoading,
+    residentsError,
+    createResident,
+    updateResident,
+    deleteResident,
+  } = useApartmentManager();
+  const isCreateMode = !id;
   const resident = findResidentById(id);
   const initialForm = useMemo(
     () => ({
+      loginId: '',
+      password: '',
       name: resident?.name || '',
       email: resident?.email || '',
       building: resident?.building || '',
@@ -29,6 +40,7 @@ export default function ResidentEdit() {
     [resident],
   );
   const [form, setForm] = useState(initialForm);
+  const [errors, setErrors] = useState({});
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +50,7 @@ export default function ResidentEdit() {
     setForm(initialForm);
   }, [initialForm]);
 
-  if (isResidentsLoading) {
+  if (!isCreateMode && isResidentsLoading) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -54,7 +66,7 @@ export default function ResidentEdit() {
     );
   }
 
-  if (residentsError) {
+  if (!isCreateMode && residentsError) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -75,7 +87,7 @@ export default function ResidentEdit() {
     );
   }
 
-  if (!resident) {
+  if (!isCreateMode && !resident) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -98,17 +110,67 @@ export default function ResidentEdit() {
       ...currentForm,
       [field]: value,
     }));
+    setErrors((currentErrors) => ({
+      ...currentErrors,
+      [field]: '',
+    }));
+  };
+
+  const validateCreateForm = () => {
+    const nextErrors = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!form.loginId.trim()) nextErrors.loginId = '아이디를 입력하세요.';
+    if (!form.password) nextErrors.password = '비밀번호를 입력하세요.';
+    if (!form.name.trim()) nextErrors.name = '이름을 입력하세요.';
+    if (!emailPattern.test(form.email)) nextErrors.email = '이메일 형식이 올바르지 않습니다.';
+    if (!form.building.trim()) nextErrors.building = '동을 입력하세요.';
+    if (!form.unit.trim()) nextErrors.unit = '호수를 입력하세요.';
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSave = async () => {
+    if (isCreateMode && !validateCreateForm()) {
+      return;
+    }
+
     try {
       setIsSubmitting(true);
-      await updateResident(resident.id, form);
+      if (isCreateMode) {
+        await createResident({
+          apartmentNo: apartmentManagerProfile.apartmentNo,
+          loginId: form.loginId.trim(),
+          password: form.password,
+          name: form.name.trim(),
+          email: form.email.trim(),
+          building: form.building.trim(),
+          unit: form.unit.trim(),
+          phone: form.phone.trim(),
+        });
+        navigate('/apartment-manager/residents');
+        return;
+      }
+
+      await updateResident(resident.id, {
+        name: form.name,
+        email: form.email,
+        building: form.building,
+        unit: form.unit,
+        phone: form.phone,
+      });
       setToastType('success');
       setToastMessage('주민 정보가 저장되었습니다.');
     } catch (error) {
       setToastType('error');
-      setToastMessage('주민 정보 저장에 실패했습니다.');
+      if (error.response?.status === 409) {
+        setToastMessage('이미 사용 중인 주민 아이디입니다.');
+      } else if (error.response?.status === 400) {
+        setToastMessage('필수 입력값을 다시 확인하세요.');
+      } else {
+        setToastMessage(isCreateMode ? '주민 등록에 실패했습니다.' : '주민 정보 저장에 실패했습니다.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -136,42 +198,82 @@ export default function ResidentEdit() {
       menus={apartmentManagerMenus}
     >
       <PageTitle
-        title="주민 정보 상세 및 수정"
-        description="승인된 주민 정보를 확인하고 필요한 항목을 수정합니다."
+        title={isCreateMode ? '주민 직접 등록' : '주민 정보 상세 및 수정'}
+        description={isCreateMode ? '아파트 관리자가 주민 계정을 직접 등록합니다.' : '승인된 주민 정보를 확인하고 필요한 항목을 수정합니다.'}
       />
 
-      <SectionCard title="주민 정보 수정" description="아이디와 가입일은 표시용이며, 나머지 정보는 수정 가능합니다.">
-        <dl className="detail-list">
-          <div>
-            <dt>주민 ID</dt>
-            <dd>{resident.id}</dd>
-          </div>
-          <div>
-            <dt>아이디</dt>
-            <dd>{resident.loginId}</dd>
-          </div>
-          <div>
-            <dt>가입일</dt>
-            <dd>{resident.joinedAt}</dd>
-          </div>
-          <div>
-            <dt>등록 차량 수</dt>
-            <dd>{resident.vehicleCount}대</dd>
-          </div>
-        </dl>
+      <SectionCard
+        title={isCreateMode ? '주민 등록 정보' : '주민 정보 수정'}
+        description={isCreateMode ? '등록한 주민은 승인 완료 상태로 바로 주민 목록에 표시됩니다.' : '아이디와 가입일은 표시용이며, 나머지 정보는 수정 가능합니다.'}
+      >
+        {!isCreateMode && (
+          <dl className="detail-list">
+            <div>
+              <dt>주민 ID</dt>
+              <dd>{resident.id}</dd>
+            </div>
+            <div>
+              <dt>아이디</dt>
+              <dd>{resident.loginId}</dd>
+            </div>
+            <div>
+              <dt>가입일</dt>
+              <dd>{resident.joinedAt}</dd>
+            </div>
+            <div>
+              <dt>등록 차량 수</dt>
+              <dd>{resident.vehicleCount}대</dd>
+            </div>
+          </dl>
+        )}
 
         <div className="form-grid">
-          <FormField label="이름">
-            <TextInput value={form.name} onChange={(event) => handleChange('name', event.target.value)} />
+          {isCreateMode && (
+            <>
+              <FormField label="아이디" error={errors.loginId}>
+                <TextInput
+                  error={Boolean(errors.loginId)}
+                  value={form.loginId}
+                  onChange={(event) => handleChange('loginId', event.target.value)}
+                />
+              </FormField>
+              <FormField label="비밀번호" error={errors.password}>
+                <TextInput
+                  error={Boolean(errors.password)}
+                  type="password"
+                  value={form.password}
+                  onChange={(event) => handleChange('password', event.target.value)}
+                />
+              </FormField>
+            </>
+          )}
+          <FormField label="이름" error={errors.name}>
+            <TextInput
+              error={Boolean(errors.name)}
+              value={form.name}
+              onChange={(event) => handleChange('name', event.target.value)}
+            />
           </FormField>
-          <FormField label="이메일">
-            <TextInput value={form.email} onChange={(event) => handleChange('email', event.target.value)} />
+          <FormField label="이메일" error={errors.email}>
+            <TextInput
+              error={Boolean(errors.email)}
+              value={form.email}
+              onChange={(event) => handleChange('email', event.target.value)}
+            />
           </FormField>
-          <FormField label="동">
-            <TextInput value={form.building} onChange={(event) => handleChange('building', event.target.value)} />
+          <FormField label="동" error={errors.building}>
+            <TextInput
+              error={Boolean(errors.building)}
+              value={form.building}
+              onChange={(event) => handleChange('building', event.target.value)}
+            />
           </FormField>
-          <FormField label="호수">
-            <TextInput value={form.unit} onChange={(event) => handleChange('unit', event.target.value)} />
+          <FormField label="호수" error={errors.unit}>
+            <TextInput
+              error={Boolean(errors.unit)}
+              value={form.unit}
+              onChange={(event) => handleChange('unit', event.target.value)}
+            />
           </FormField>
           <FormField label="연락처">
             <TextInput value={form.phone} onChange={(event) => handleChange('phone', event.target.value)} />
@@ -182,11 +284,13 @@ export default function ResidentEdit() {
           <Link to="/apartment-manager/residents">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button variant="danger" disabled={isSubmitting} onClick={() => setIsDeleteModalOpen(true)}>
-            삭제
-          </Button>
+          {!isCreateMode && (
+            <Button variant="danger" disabled={isSubmitting} onClick={() => setIsDeleteModalOpen(true)}>
+              삭제
+            </Button>
+          )}
           <Button disabled={isSubmitting} onClick={handleSave}>
-            {isSubmitting ? '저장 중...' : '저장'}
+            {isSubmitting ? '저장 중...' : isCreateMode ? '등록' : '저장'}
           </Button>
         </div>
       </SectionCard>

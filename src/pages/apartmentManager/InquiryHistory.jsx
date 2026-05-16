@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Badge from '../../components/common/Badge.jsx';
+import Button from '../../components/common/Button.jsx';
 import EmptyState from '../../components/feedback/EmptyState.jsx';
 import LoadingState from '../../components/feedback/LoadingState.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
@@ -11,6 +12,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -32,6 +34,7 @@ export default function InquiryHistory() {
     managerInquiriesError,
     refreshManagerInquiries,
   } = useApartmentManager();
+  const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const searchedInquiries = filterByKeyword(managerInquiries, keyword, ['id', 'title', 'category']);
@@ -39,19 +42,28 @@ export default function InquiryHistory() {
     selectedStatus === 'all'
       ? searchedInquiries
       : searchedInquiries.filter((inquiry) => inquiry.status === selectedStatus);
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredInquiries, 5, [
+    keyword,
+    selectedStatus,
+  ]);
 
   return (
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle title="문의 내역 확인" description="웹 관리자에게 등록한 문의와 답변 상태를 확인합니다." />
 
       <SectionCard title="문의 목록">
         <div className="section-toolbar">
-          <SearchBar placeholder="문의 제목, 카테고리 검색" value={keyword} onChange={setKeyword} />
+          <SearchBar
+            placeholder="문의 제목, 카테고리 검색"
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={() => setKeyword(searchInput)}
+          />
           <div className="status-filter">
             <SelectBox
               aria-label="문의 답변 상태 분류"
@@ -65,20 +77,25 @@ export default function InquiryHistory() {
           </div>
         </div>
         {isManagerInquiriesLoading ? (
-          <LoadingState message="문의 내역 불러오는 중" />
+          <LoadingState message="문의 내역을 불러오는 중" />
         ) : managerInquiriesError ? (
           <>
             <EmptyState title="문의 내역 조회 실패" description={managerInquiriesError} />
             <div className="detail-actions">
-              <button className="secondary-button" type="button" onClick={refreshManagerInquiries}>
+              <Button variant="secondary" onClick={refreshManagerInquiries}>
                 다시 불러오기
-              </button>
+              </Button>
             </div>
           </>
         ) : (
           <>
-            <DataTable columns={columns} rows={filteredInquiries} emptyMessage="조건에 맞는 문의 내역이 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable
+              columns={columns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="조건에 맞는 문의 내역이 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

@@ -15,6 +15,22 @@ export async function getSignupRequests() {
   return response.data;
 }
 
+export async function getApartmentManagers() {
+  const response = await apiClient.get('/api/apartment-managers');
+
+  return response.data;
+}
+
+export async function updateApartmentManager(managerNo, manager) {
+  const response = await apiClient.put(`/api/apartment-managers/${managerNo}`, manager);
+
+  return response.data;
+}
+
+export async function deleteApartmentManager(managerNo) {
+  await apiClient.delete(`/api/apartment-managers/${managerNo}`);
+}
+
 export async function approveSignupRequest(managerNo) {
   const response = await apiClient.patch(`/api/web-admin/signup-requests/${managerNo}/approve`);
 

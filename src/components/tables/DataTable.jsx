@@ -7,6 +7,7 @@ export default function DataTable({
   rowKey = 'id',
   emptyMessage = '표시할 데이터가 없습니다.',
   loading = false,
+  startIndex = 0,
 }) {
   if (loading) {
     return <LoadingState />;
@@ -33,7 +34,7 @@ export default function DataTable({
             <tr key={row[rowKey] || rowIndex}>
               {columns.map((column) => (
                 <td className={column.key === 'id' ? 'table-index-column' : undefined} key={column.key}>
-                  {column.render ? column.render(row) : column.key === 'id' ? rowIndex + 1 : row[column.key]}
+                  {column.render ? column.render(row) : column.key === 'id' ? startIndex + rowIndex + 1 : row[column.key]}
                 </td>
               ))}
             </tr>

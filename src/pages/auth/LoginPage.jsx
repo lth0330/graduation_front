@@ -51,26 +51,31 @@ export default function LoginPage() {
     setLoginError('');
   };
 
-  const handleLogin = async (role) => {
+  const validateForm = () => {
     const nextErrors = {};
 
     if (!form.loginId.trim()) {
-      nextErrors.loginId = '아이디는 필수 입력값입니다.';
+      nextErrors.loginId = '아이디를 입력하세요.';
     }
 
     if (!form.password.trim()) {
-      nextErrors.password = '비밀번호는 필수 입력값입니다.';
+      nextErrors.password = '비밀번호를 입력하세요.';
     }
 
     setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
 
-    if (Object.keys(nextErrors).length > 0) {
+  const handleLogin = async (role) => {
+    if (!validateForm()) {
       return;
     }
 
-    if (role === 'webAdmin') {
-      try {
-        setIsLoggingIn(true);
+    try {
+      setIsLoggingIn(true);
+      setLoginError('');
+
+      if (role === 'webAdmin') {
         const webAdmin = await loginWebAdmin({
           wId: form.loginId,
           wPwd: form.password,
@@ -78,46 +83,32 @@ export default function LoginPage() {
 
         saveAuthSession(authRoles.WEB_ADMIN, webAdmin);
         navigate('/web-admin');
-      } catch (error) {
-        if (error.response?.status === 401 || error.response?.status === 400) {
-          setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
-        } else {
-          setLoginError('서버와 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인하세요.');
-        }
-      } finally {
-        setIsLoggingIn(false);
+        return;
       }
-      return;
-    }
 
-    if (role === 'apartmentAdmin') {
-      try {
-        setIsLoggingIn(true);
-        const apartmentManager = await loginApartmentManager({
-          loginId: form.loginId,
-          password: form.password,
-        });
+      const apartmentManager = await loginApartmentManager({
+        loginId: form.loginId,
+        password: form.password,
+      });
 
-        if (apartmentManager.approvalStatus !== 'APPROVED') {
-          setLoginError('승인 완료된 아파트 관리자만 로그인할 수 있습니다.');
-          return;
-        }
-
-        saveAuthSession(authRoles.APARTMENT_MANAGER, apartmentManager);
-        navigate('/apartment-admin');
-      } catch (error) {
-        if (error.response?.status === 401 || error.response?.status === 400) {
-          setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
-        } else {
-          setLoginError('서버와 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인하세요.');
-        }
-      } finally {
-        setIsLoggingIn(false);
+      if (apartmentManager.approvalStatus !== 'APPROVED') {
+        setLoginError('승인 완료된 아파트 관리자만 로그인할 수 있습니다.');
+        return;
       }
-      return;
-    }
 
-    setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
+      saveAuthSession(authRoles.APARTMENT_MANAGER, apartmentManager);
+      navigate('/apartment-admin');
+    } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 400) {
+        setLoginError('아이디 또는 비밀번호가 올바르지 않습니다.');
+      } else if (role !== 'webAdmin' && error.response?.status === 403) {
+        setLoginError('승인 완료된 아파트 관리자만 로그인할 수 있습니다.');
+      } else {
+        setLoginError('서버에 연결할 수 없습니다. 백엔드 서버가 실행 중인지 확인하세요.');
+      }
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -131,11 +122,11 @@ export default function LoginPage() {
           </div>
         </div>
         <h1>관리자 로그인</h1>
-        <p>로그인 후 계정 역할에 따라 웹 관리자 또는 아파트 관리자 화면으로 이동합니다.</p>
+        <p>로그인 계정의 역할에 따라 웹 관리자 또는 아파트 관리자 화면으로 이동합니다.</p>
         <div className="auth-flow-card">
-          <strong>로그인 후 이동 흐름</strong>
-          <span>웹 관리자 → 웹 관리자 대시보드</span>
-          <span>아파트 관리자 → 아파트 관리자 대시보드</span>
+          <strong>로그인 이동 흐름</strong>
+          <span>웹 관리자 계정: 웹 관리자 대시보드</span>
+          <span>아파트 관리자 계정: 아파트 관리자 대시보드</span>
         </div>
       </section>
 
@@ -146,7 +137,7 @@ export default function LoginPage() {
         <FormField label="아이디" error={errors.loginId}>
           <TextInput
             error={Boolean(errors.loginId)}
-            placeholder="아이디를 입력하세요"
+            placeholder="아이디를 입력하세요."
             value={form.loginId}
             onChange={(event) => handleChange('loginId', event.target.value)}
           />
@@ -154,7 +145,7 @@ export default function LoginPage() {
         <FormField label="비밀번호" error={errors.password}>
           <TextInput
             error={Boolean(errors.password)}
-            placeholder="비밀번호를 입력하세요"
+            placeholder="비밀번호를 입력하세요."
             type="password"
             value={form.password}
             onChange={(event) => handleChange('password', event.target.value)}
@@ -169,8 +160,7 @@ export default function LoginPage() {
         </Button>
 
         <p className="auth-link-text">
-          아파트 관리자 계정이 없나요?{' '}
-          <Link to="/signup-request">회원가입 신청</Link>
+          아파트 관리자 계정이 없나요? <Link to="/signup-request">회원가입 신청</Link>
         </p>
         <div className="auth-notice">테스트 계정: admin / 1234, qwe123 / qwer1234</div>
       </section>

@@ -11,6 +11,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -33,6 +34,7 @@ const columns = [
 
 export default function VehicleManagement() {
   const { vehicles, isVehiclesLoading, vehiclesError, refreshVehicles } = useApartmentManager();
+  const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const filteredVehicles = filterByKeyword(vehicles, keyword, [
     'id',
@@ -41,6 +43,9 @@ export default function VehicleManagement() {
     'ownerName',
     'building',
     'unit',
+  ]);
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredVehicles, 5, [
+    keyword,
   ]);
 
   return (
@@ -55,9 +60,14 @@ export default function VehicleManagement() {
         description="차량번호, 차종, 소유자, 동/호수 기준으로 차량 정보를 관리합니다."
       />
 
-      <SectionCard title="차량 목록" description="등록/수정/삭제 버튼은 다음 단계에서 구현합니다.">
+      <SectionCard title="차량 목록" description="차량 정보를 조회하고 등록 또는 수정 화면으로 이동합니다.">
         <div className="section-toolbar">
-          <SearchBar placeholder="차량번호, 차종, 소유자, 동/호수 검색" value={keyword} onChange={setKeyword} />
+          <SearchBar
+            placeholder="차량번호, 차종, 소유자, 동/호수 검색"
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={() => setKeyword(searchInput)}
+          />
           <Link to="/apartment-manager/vehicles/new">
             <Button>차량 등록</Button>
           </Link>
@@ -75,8 +85,13 @@ export default function VehicleManagement() {
           </>
         ) : (
           <>
-            <DataTable columns={columns} rows={filteredVehicles} emptyMessage="조건에 맞는 차량이 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable
+              columns={columns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="조건에 맞는 차량이 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

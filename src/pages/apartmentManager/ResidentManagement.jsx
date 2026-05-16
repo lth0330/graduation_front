@@ -13,6 +13,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -36,10 +37,15 @@ const columns = [
 
 export default function ResidentManagement() {
   const { residents, isResidentsLoading, residentsError, refreshResidents } = useApartmentManager();
+  const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const searchedResidents = filterByKeyword(residents, keyword, ['id', 'name', 'loginId', 'email', 'building', 'unit']);
   const filteredResidents = selectedStatus === 'all' || selectedStatus === 'approved' ? searchedResidents : [];
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredResidents, 5, [
+    keyword,
+    selectedStatus,
+  ]);
 
   return (
     <AdminLayout
@@ -55,7 +61,12 @@ export default function ResidentManagement() {
 
       <SectionCard title="승인된 주민 목록" description="수정 화면에서 주민 정보를 변경하거나 삭제할 수 있습니다.">
         <div className="section-toolbar">
-          <SearchBar placeholder="이름, 아이디, 이메일, 동/호수 검색" value={keyword} onChange={setKeyword} />
+          <SearchBar
+            placeholder="이름, 아이디, 이메일, 동/호수 검색"
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={() => setKeyword(searchInput)}
+          />
           <div className="status-filter">
             <SelectBox
               aria-label="주민 상태 분류"
@@ -66,7 +77,9 @@ export default function ResidentManagement() {
               <option value="approved">승인 완료</option>
             </SelectBox>
           </div>
-          <Button>주민 등록</Button>
+          <Link to="/apartment-manager/residents/new">
+            <Button>주민 등록</Button>
+          </Link>
         </div>
         {isResidentsLoading ? (
           <LoadingState message="주민 목록 불러오는 중" />
@@ -81,8 +94,13 @@ export default function ResidentManagement() {
           </>
         ) : (
           <>
-            <DataTable columns={columns} rows={filteredResidents} emptyMessage="조건에 맞는 주민이 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable
+              columns={columns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="조건에 맞는 주민이 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

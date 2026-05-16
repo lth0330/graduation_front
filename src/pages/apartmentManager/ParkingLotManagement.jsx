@@ -14,6 +14,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 
 const columns = [
   { key: 'id', header: '주차장 ID' },
@@ -34,6 +35,7 @@ export default function ParkingLotManagement() {
   const [form, setForm] = useState({ name: '', floor: '', totalSpaces: '', usedSpaces: '' });
   const [deleteTargetId, setDeleteTargetId] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(parkingLots, 5);
   const totalSpaces = parkingLots.reduce((sum, parkingLot) => sum + parkingLot.totalSpaces, 0);
   const usedSpaces = parkingLots.reduce((sum, parkingLot) => sum + parkingLot.usedSpaces, 0);
   const tableColumns = [
@@ -139,8 +141,8 @@ export default function ParkingLotManagement() {
           </>
         ) : (
           <>
-            <DataTable columns={tableColumns} rows={parkingLots} />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable columns={tableColumns} rows={pagedRows} startIndex={startIndex} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

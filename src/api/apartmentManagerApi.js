@@ -1,17 +1,21 @@
 import apiClient from './axiosInstance.js';
 
 export async function signupApartmentManager(signupForm) {
-  const response = await apiClient.post('/api/apartment-managers', {
-    loginId: signupForm.loginId,
-    password: signupForm.password,
-    email: signupForm.email,
-    phone: signupForm.phone,
-    name: signupForm.name,
-    apartmentName: signupForm.apartmentName,
-    address: signupForm.address,
-    detailAddress: signupForm.detailAddress,
-    // 현재 백엔드 JSON 회원가입 API는 실제 파일이 아니라 이미지 경로/파일명을 문자열로 받습니다.
-    careerImage: signupForm.careerImage.name,
+  const formData = new FormData();
+
+  formData.append('loginId', signupForm.loginId);
+  formData.append('password', signupForm.password);
+  formData.append('email', signupForm.email);
+  formData.append('phone', signupForm.phone);
+  formData.append('name', signupForm.name);
+  formData.append('apartmentName', signupForm.apartmentName);
+  formData.append('address', signupForm.address);
+  formData.append('careerImageFile', signupForm.careerImage);
+
+  const response = await apiClient.post('/api/apartment-managers', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   });
 
   return response.data;
@@ -58,6 +62,12 @@ export async function getResidents(apartmentNo) {
   const response = await apiClient.get('/api/residents', {
     params: { apartmentNo },
   });
+
+  return response.data;
+}
+
+export async function createResident(resident) {
+  const response = await apiClient.post('/api/residents', resident);
 
   return response.data;
 }

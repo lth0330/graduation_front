@@ -61,6 +61,7 @@ export const router = createBrowserRouter([
   { path: '/apartment-manager/resident-requests', element: apartmentManagerRoute(<ResidentRequestList />) },
   { path: '/apartment-manager/resident-requests/:id', element: apartmentManagerRoute(<ResidentRequestDetail />) },
   { path: '/apartment-manager/residents', element: apartmentManagerRoute(<ResidentManagement />) },
+  { path: '/apartment-manager/residents/new', element: apartmentManagerRoute(<ResidentEdit />) },
   { path: '/apartment-manager/residents/:id/edit', element: apartmentManagerRoute(<ResidentEdit />) },
   { path: '/apartment-manager/vehicles', element: apartmentManagerRoute(<VehicleManagement />) },
   { path: '/apartment-manager/vehicles/new', element: apartmentManagerRoute(<VehicleForm />) },

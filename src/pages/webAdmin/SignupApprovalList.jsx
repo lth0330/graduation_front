@@ -13,6 +13,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -35,6 +36,7 @@ const columns = [
 
 export default function SignupApprovalList() {
   const { signupRequests, isSignupRequestsLoading, signupRequestsError, refreshSignupRequests } = useWebAdmin();
+  const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const searchedRequests = filterByKeyword(signupRequests, keyword, ['id', 'loginId', 'email', 'apartmentName']);
@@ -42,6 +44,10 @@ export default function SignupApprovalList() {
     selectedStatus === 'all'
       ? searchedRequests
       : searchedRequests.filter((request) => request.status === selectedStatus);
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredRequests, 5, [
+    keyword,
+    selectedStatus,
+  ]);
 
   return (
     <AdminLayout
@@ -55,9 +61,14 @@ export default function SignupApprovalList() {
         description="아파트 관리자 회원가입 신청을 검색하고 승인 상태를 확인합니다."
       />
 
-      <SectionCard title="신청 목록 테이블" description="상세/승인/거절 기능은 다음 단계에서 연결합니다.">
+      <SectionCard title="신청 목록 테이블" description="신청 정보를 확인하고 상세 화면에서 승인 또는 거절을 처리합니다.">
         <div className="section-toolbar">
-          <SearchBar placeholder="아이디, 이메일, 아파트 이름 검색" value={keyword} onChange={setKeyword} />
+          <SearchBar
+            placeholder="아이디, 이메일, 아파트 이름 검색"
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={() => setKeyword(searchInput)}
+          />
           <div className="status-filter">
             <SelectBox
               aria-label="가입 신청 상태 분류"
@@ -77,8 +88,13 @@ export default function SignupApprovalList() {
           <EmptyState title="목록 조회 실패" description={signupRequestsError} />
         ) : (
           <>
-            <DataTable columns={columns} rows={filteredRequests} emptyMessage="조건에 맞는 가입 신청이 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable
+              columns={columns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="조건에 맞는 가입 신청이 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
         {signupRequestsError && (

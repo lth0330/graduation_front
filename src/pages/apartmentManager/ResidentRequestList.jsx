@@ -13,6 +13,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -41,6 +42,7 @@ export default function ResidentRequestList() {
     residentRequestsError,
     refreshResidentSignupRequests,
   } = useApartmentManager();
+  const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const searchedRequests = filterByKeyword(residentSignupRequests, keyword, [
@@ -55,6 +57,10 @@ export default function ResidentRequestList() {
     selectedStatus === 'all'
       ? searchedRequests
       : searchedRequests.filter((request) => request.status === selectedStatus);
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredRequests, 5, [
+    keyword,
+    selectedStatus,
+  ]);
 
   return (
     <AdminLayout
@@ -68,9 +74,14 @@ export default function ResidentRequestList() {
         description="이름, 아이디, 동/호수, 차량번호로 신청 내역을 확인합니다."
       />
 
-      <SectionCard title="주민 가입 신청 목록" description="상세 승인 처리는 다음 단계에서 추가합니다.">
+      <SectionCard title="주민 가입 신청 목록" description="신청 상세 정보를 확인하고 주민 가입 승인 또는 거절을 처리합니다.">
         <div className="section-toolbar">
-          <SearchBar placeholder="이름, 아이디, 동/호수, 차량번호 검색" value={keyword} onChange={setKeyword} />
+          <SearchBar
+            placeholder="이름, 아이디, 동/호수, 차량번호 검색"
+            value={searchInput}
+            onChange={setSearchInput}
+            onSearch={() => setKeyword(searchInput)}
+          />
           <div className="status-filter">
             <SelectBox
               aria-label="주민 가입 신청 상태 분류"
@@ -97,8 +108,13 @@ export default function ResidentRequestList() {
           </>
         ) : (
           <>
-            <DataTable columns={columns} rows={filteredRequests} emptyMessage="조건에 맞는 주민 신청이 없습니다." />
-            <Pagination currentPage={1} totalPages={1} />
+            <DataTable
+              columns={columns}
+              rows={pagedRows}
+              startIndex={startIndex}
+              emptyMessage="조건에 맞는 주민 신청이 없습니다."
+            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         )}
       </SectionCard>

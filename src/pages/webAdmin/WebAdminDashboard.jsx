@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
@@ -8,6 +8,7 @@ import SectionCard from '../../components/common/SectionCard.jsx';
 import SelectBox from '../../components/forms/SelectBox.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
+import { getWebAdminDashboardSummary } from '../../api/dashboardApi.js';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
 
@@ -28,16 +29,36 @@ const recentSignupColumns = [
   },
 ];
 
+const initialSummary = {
+  pendingSignupCount: 0,
+  approvedManagerCount: 0,
+  pendingInquiryCount: 0,
+};
+
 export default function WebAdminDashboard() {
   const { signupRequests } = useWebAdmin();
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const pendingRequests = signupRequests.filter((request) => request.status === 'pending');
-  const approvedRequests = signupRequests.filter((request) => request.status === 'approved');
+  const [summary, setSummary] = useState(initialSummary);
+  const [summaryError, setSummaryError] = useState('');
   const filteredSignupRequests =
     selectedStatus === 'all'
       ? signupRequests
       : signupRequests.filter((request) => request.status === selectedStatus);
   const recentSignupRequests = filteredSignupRequests.slice(0, 4);
+
+  useEffect(() => {
+    async function loadSummary() {
+      try {
+        setSummaryError('');
+        const dashboardSummary = await getWebAdminDashboardSummary();
+        setSummary(dashboardSummary);
+      } catch (error) {
+        setSummaryError('대시보드 통계를 불러오지 못했습니다.');
+      }
+    }
+
+    loadSummary();
+  }, []);
 
   return (
     <AdminLayout
@@ -51,10 +72,11 @@ export default function WebAdminDashboard() {
         description="아파트 관리자 가입 승인과 문의 처리 상태를 한 화면에서 확인합니다."
       />
 
+      {summaryError && <div className="error-box">{summaryError}</div>}
       <div className="metric-grid">
-        <MetricCard label="승인 대기 가입 신청" value={pendingRequests.length} helper="처리가 필요한 신청" />
-        <MetricCard label="승인 완료 관리자" value={approvedRequests.length} helper="현재 승인된 관리자" />
-        <MetricCard label="답변 대기 문의" value="7" helper="빠른 답변 필요" />
+        <MetricCard label="승인 대기 가입 신청" value={summary.pendingSignupCount} helper="처리가 필요한 신청" />
+        <MetricCard label="승인 완료 관리자" value={summary.approvedManagerCount} helper="현재 활성 관리자" />
+        <MetricCard label="답변 대기 문의" value={summary.pendingInquiryCount} helper="빠른 답변 필요" />
       </div>
 
       <SectionCard
