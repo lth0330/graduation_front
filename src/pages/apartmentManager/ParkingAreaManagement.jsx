@@ -26,7 +26,7 @@ const areaStatusLabel = {
 
 const areaStatusBadge = {
   empty: 'active',
-  occupied: 'pending',
+  occupied: 'rejected',
   disabled: 'rejected',
 };
 

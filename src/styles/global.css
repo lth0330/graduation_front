@@ -351,8 +351,8 @@ textarea {
 }
 
 .parking-spot.used {
-  background: #eff6ff;
-  color: var(--color-blue);
+  background: #fef2f2;
+  color: var(--color-red);
 }
 
 .parking-spot.disabled {
