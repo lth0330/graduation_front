@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
-export default function Sidebar({ roleLabel, consoleTitle, menus }) {
+export default function Sidebar({ roleLabel, consoleTitle, menus, menuBadges = {} }) {
   const location = useLocation();
 
   // 대시보드는 정확히 해당 경로일 때만 활성화하고,
@@ -33,6 +33,12 @@ export default function Sidebar({ roleLabel, consoleTitle, menus }) {
       ...currentGroups,
       [label]: !currentGroups[label],
     }));
+  };
+
+  const getMenuBadge = (menu) => {
+    const badgeCount = menu.badgeCount ?? menuBadges[menu.path] ?? 0;
+
+    return Number(badgeCount) > 0 ? Number(badgeCount) : 0;
   };
 
   return (
@@ -91,7 +97,8 @@ export default function Sidebar({ roleLabel, consoleTitle, menus }) {
               to={menu.path}
               className={() => `nav-item ${isSameMenuPath(menu.path) ? 'active' : ''}`}
             >
-              {menu.label}
+              <span>{menu.label}</span>
+              {getMenuBadge(menu) > 0 && <span className="nav-notification-badge">{getMenuBadge(menu)}</span>}
             </NavLink>
           );
         })}

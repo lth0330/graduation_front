@@ -154,8 +154,10 @@ export function getAccessTokenForRequest(requestUrl = '') {
   if (
     url.startsWith('/api/resident') ||
     url.startsWith('/api/vehicles') ||
+    url.startsWith('/api/visitor-cars') ||
     url.startsWith('/api/parking') ||
     url.startsWith('/api/manager-inquiries') ||
+    url.startsWith('/api/manager-notifications') ||
     url.includes('/my-page')
   ) {
     return getValidAuthSession(authRoles.APARTMENT_MANAGER)?.accessToken || '';

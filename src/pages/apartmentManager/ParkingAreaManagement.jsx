@@ -30,6 +30,11 @@ const areaStatusBadge = {
   disabled: 'rejected',
 };
 
+const zoneTypeLabel = {
+  normal: '일반 주차칸',
+  double_lane: '통로 주차칸',
+};
+
 const getAreaPlacement = (area, index) => ({
   row: area.layoutRow || Math.floor(index / 8) + 1,
   column: area.layoutColumn || (index % 8) + 1,
@@ -39,6 +44,7 @@ const columns = [
   { key: 'id', header: '구역 ID' },
   { key: 'areaNumber', header: '구역 번호' },
   { key: 'location', header: '위치' },
+  { key: 'zoneType', header: '구역 종류', render: (row) => zoneTypeLabel[row.zoneType] || '일반 주차칸' },
   {
     key: 'status',
     header: '상태',
@@ -62,9 +68,16 @@ export default function ParkingAreaManagement() {
   } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [form, setForm] = useState({ areaNumber: '', location: '', status: 'empty', layoutRow: '1', layoutColumn: '1' });
+  const [form, setForm] = useState({
+    areaNumber: '',
+    location: '',
+    status: 'empty',
+    zoneType: 'normal',
+    layoutRow: '1',
+    layoutColumn: '1',
+  });
   const [statusTarget, setStatusTarget] = useState(null);
-  const [statusForm, setStatusForm] = useState({ status: 'empty', reason: '' });
+  const [statusForm, setStatusForm] = useState({ status: 'empty', zoneType: 'normal', reason: '' });
   const [statusError, setStatusError] = useState('');
   const [layoutTarget, setLayoutTarget] = useState(null);
   const [layoutForm, setLayoutForm] = useState({ layoutRow: '1', layoutColumn: '1' });
@@ -160,7 +173,14 @@ export default function ParkingAreaManagement() {
         parkingLotId: selectedParkingLotId,
         statusChangeReason: '신규 등록',
       });
-      setForm({ areaNumber: '', location: '', status: 'empty', layoutRow: '1', layoutColumn: '1' });
+      setForm({
+        areaNumber: '',
+        location: '',
+        status: 'empty',
+        zoneType: 'normal',
+        layoutRow: '1',
+        layoutColumn: '1',
+      });
       setToastMessage('주차 구역이 등록되었습니다.');
     } catch (error) {
       setToastMessage('주차 구역 등록에 실패했습니다.');
@@ -182,6 +202,7 @@ export default function ParkingAreaManagement() {
     setStatusTarget(parkingArea);
     setStatusForm({
       status: parkingArea.status,
+      zoneType: parkingArea.zoneType || 'normal',
       reason: parkingArea.statusChangeReason || '',
     });
     setStatusError('');
@@ -189,7 +210,7 @@ export default function ParkingAreaManagement() {
 
   const closeStatusModal = () => {
     setStatusTarget(null);
-    setStatusForm({ status: 'empty', reason: '' });
+    setStatusForm({ status: 'empty', zoneType: 'normal', reason: '' });
     setStatusError('');
   };
 
@@ -211,7 +232,12 @@ export default function ParkingAreaManagement() {
     }
 
     try {
-      await updateParkingAreaStatus(statusTarget.id, statusForm.status, statusForm.reason.trim());
+      await updateParkingAreaStatus(
+        statusTarget.id,
+        statusForm.status,
+        statusForm.reason.trim(),
+        statusForm.zoneType,
+      );
       closeStatusModal();
       setToastMessage('주차 구역 상태가 변경되었습니다.');
     } catch (error) {
@@ -339,6 +365,12 @@ export default function ParkingAreaManagement() {
                   <option value="disabled">사용 불가</option>
                 </SelectBox>
               </FormField>
+              <FormField label="구역 종류">
+                <SelectBox value={form.zoneType} onChange={(event) => handleChange('zoneType', event.target.value)}>
+                  <option value="normal">일반 주차칸</option>
+                  <option value="double_lane">통로 주차칸</option>
+                </SelectBox>
+              </FormField>
               <FormField label="배치 행">
                 <TextInput
                   min="1"
@@ -433,6 +465,15 @@ export default function ParkingAreaManagement() {
                   <option value="empty">빈자리</option>
                   <option value="occupied">주차됨</option>
                   <option value="disabled">사용 불가</option>
+                </SelectBox>
+              </FormField>
+              <FormField label="구역 종류">
+                <SelectBox
+                  value={statusForm.zoneType}
+                  onChange={(event) => handleStatusFormChange('zoneType', event.target.value)}
+                >
+                  <option value="normal">일반 주차칸</option>
+                  <option value="double_lane">통로 주차칸</option>
                 </SelectBox>
               </FormField>
             </div>

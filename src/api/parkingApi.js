@@ -32,10 +32,11 @@ export async function createParkingZone(parkingZone) {
   return response.data;
 }
 
-export async function updateParkingZoneStatus(parkingZoneNo, status, statusChangeReason) {
+export async function updateParkingZoneStatus(parkingZoneNo, status, statusChangeReason, zoneType) {
   const response = await apiClient.patch(`/api/parking-zones/${parkingZoneNo}/status`, {
     status,
     statusChangeReason,
+    zoneType,
   });
 
   return response.data;

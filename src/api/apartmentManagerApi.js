@@ -90,6 +90,14 @@ export async function getVehicles(apartmentNo) {
   return response.data;
 }
 
+export async function getVisitorCars(apartmentNo) {
+  const response = await apiClient.get('/api/visitor-cars', {
+    params: { apartmentNo },
+  });
+
+  return response.data;
+}
+
 export async function createVehicle(vehicle) {
   const response = await apiClient.post('/api/vehicles', vehicle);
 

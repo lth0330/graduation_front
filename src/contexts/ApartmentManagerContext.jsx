@@ -8,6 +8,7 @@ import {
   getApartmentManagerMyPage,
   getResidents,
   getResidentSignupRequests,
+  getVisitorCars,
   getVehicles,
   rejectResidentSignupRequest as rejectResidentSignupRequestApi,
   updateResident as updateResidentApi,
@@ -27,6 +28,10 @@ import {
   createManagerInquiry as createManagerInquiryApi,
   getMyManagerInquiries,
 } from '../api/inquiryApi.js';
+import {
+  getManagerNotifications,
+  markManagerNotificationAsRead as markManagerNotificationAsReadApi,
+} from '../api/managerNotificationApi.js';
 import {
   answerResidentInquiry as answerResidentInquiryApi,
   getResidentInquiries,
@@ -149,6 +154,22 @@ function mapVehicle(apiVehicle) {
   };
 }
 
+function mapVisitorCar(apiVisitorCar) {
+  return {
+    id: String(apiVisitorCar.visitorCarNo),
+    visitorCarNo: apiVisitorCar.visitorCarNo,
+    carNumber: apiVisitorCar.carNumber,
+    ownerId: String(apiVisitorCar.ownerId),
+    ownerName: apiVisitorCar.ownerName,
+    building: apiVisitorCar.building,
+    unit: apiVisitorCar.unit,
+    registeredAt: formatDate(apiVisitorCar.registeredAt),
+    parkedAt: formatDate(apiVisitorCar.parkedAt),
+    expiresAt: formatDate(apiVisitorCar.expiresAt),
+    status: apiVisitorCar.parkedAt ? 'parked' : 'waiting',
+  };
+}
+
 function mapParkingLot(apiParkingLot) {
   return {
     id: String(apiParkingLot.parkingLotNo),
@@ -172,7 +193,24 @@ function mapParkingArea(apiParkingZone) {
     status: apiParkingZone.status,
     layoutRow: Number(apiParkingZone.layoutRow),
     layoutColumn: Number(apiParkingZone.layoutColumn),
+    zoneType: apiParkingZone.zoneType || 'normal',
     statusChangeReason: apiParkingZone.statusChangeReason || '',
+  };
+}
+
+function mapManagerNotification(apiNotification) {
+  return {
+    id: String(apiNotification.notificationNo),
+    notificationNo: apiNotification.notificationNo,
+    managerNo: apiNotification.managerNo,
+    apartmentNo: apiNotification.apartmentNo,
+    notificationType: apiNotification.notificationType,
+    title: apiNotification.title,
+    message: apiNotification.message,
+    referenceType: apiNotification.referenceType || '',
+    referenceId: apiNotification.referenceId,
+    read: Boolean(apiNotification.read),
+    createdAt: formatDate(apiNotification.createdAt),
   };
 }
 
@@ -223,6 +261,9 @@ export function ApartmentManagerProvider({ children }) {
   const [vehicles, setVehicles] = useState([]);
   const [isVehiclesLoading, setIsVehiclesLoading] = useState(false);
   const [vehiclesError, setVehiclesError] = useState('');
+  const [visitorCars, setVisitorCars] = useState([]);
+  const [isVisitorCarsLoading, setIsVisitorCarsLoading] = useState(false);
+  const [visitorCarsError, setVisitorCarsError] = useState('');
   const [parkingLots, setParkingLots] = useState([]);
   const [parkingAreas, setParkingAreas] = useState([]);
   const [isParkingLoading, setIsParkingLoading] = useState(false);
@@ -230,6 +271,9 @@ export function ApartmentManagerProvider({ children }) {
   const [managerInquiries, setManagerInquiries] = useState([]);
   const [isManagerInquiriesLoading, setIsManagerInquiriesLoading] = useState(false);
   const [managerInquiriesError, setManagerInquiriesError] = useState('');
+  const [managerNotifications, setManagerNotifications] = useState([]);
+  const [isManagerNotificationsLoading, setIsManagerNotificationsLoading] = useState(false);
+  const [managerNotificationsError, setManagerNotificationsError] = useState('');
   // 입주민 주차 문의 목록은 백엔드 API 응답을 기준으로 관리합니다.
   const [residentParkingInquiries, setResidentParkingInquiries] = useState([]);
   const [isResidentParkingInquiriesLoading, setIsResidentParkingInquiriesLoading] = useState(false);
@@ -263,8 +307,10 @@ export function ApartmentManagerProvider({ children }) {
         refreshResidentSignupRequests();
         refreshResidents();
         refreshVehicles();
+        refreshVisitorCars();
         refreshParkingData();
         refreshManagerInquiries();
+        refreshManagerNotifications();
         refreshResidentParkingInquiries();
       }
     };
@@ -393,6 +439,27 @@ export function ApartmentManagerProvider({ children }) {
     await refreshVehicles();
   };
 
+  const refreshVisitorCars = async () => {
+    try {
+      setIsVisitorCarsLoading(true);
+      setVisitorCarsError('');
+
+      const apartmentNo = getStoredApartmentNo();
+      const visitorCarList = await getVisitorCars(apartmentNo);
+      setVisitorCars(visitorCarList.map(mapVisitorCar));
+    } catch (error) {
+      setVisitorCarsError('방문 차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+    } finally {
+      setIsVisitorCarsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (getValidAuthSession(authRoles.APARTMENT_MANAGER)) {
+      refreshVisitorCars();
+    }
+  }, []);
+
   const isDuplicateCarNumber = (carNumber, currentVehicleId) =>
     vehicles.some((vehicle) => vehicle.carNumber === carNumber && vehicle.id !== currentVehicleId);
 
@@ -449,13 +516,14 @@ export function ApartmentManagerProvider({ children }) {
       status: parkingArea.status,
       layoutRow: Number(parkingArea.layoutRow),
       layoutColumn: Number(parkingArea.layoutColumn),
+      zoneType: parkingArea.zoneType || 'normal',
       statusChangeReason: parkingArea.statusChangeReason || '',
     });
     await refreshParkingData();
   };
 
-  const updateParkingAreaStatus = async (id, status, statusChangeReason) => {
-    await updateParkingZoneStatus(id, status, statusChangeReason);
+  const updateParkingAreaStatus = async (id, status, statusChangeReason, zoneType) => {
+    await updateParkingZoneStatus(id, status, statusChangeReason, zoneType);
     await refreshParkingData();
   };
 
@@ -493,6 +561,32 @@ export function ApartmentManagerProvider({ children }) {
     const createdInquiry = await createManagerInquiryApi(inquiry);
     await refreshManagerInquiries();
     return mapManagerInquiry(createdInquiry);
+  };
+
+  const refreshManagerNotifications = async () => {
+    try {
+      setIsManagerNotificationsLoading(true);
+      setManagerNotificationsError('');
+
+      const notifications = await getManagerNotifications();
+      setManagerNotifications(notifications.map(mapManagerNotification));
+    } catch (error) {
+      setManagerNotificationsError('관리자 알림 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+    } finally {
+      setIsManagerNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (getValidAuthSession(authRoles.APARTMENT_MANAGER)) {
+      refreshManagerNotifications();
+    }
+  }, []);
+
+  const markManagerNotificationAsRead = async (notificationNo) => {
+    const updatedNotification = await markManagerNotificationAsReadApi(notificationNo);
+    await refreshManagerNotifications();
+    return mapManagerNotification(updatedNotification);
   };
 
   const refreshResidentParkingInquiries = async () => {
@@ -548,6 +642,10 @@ export function ApartmentManagerProvider({ children }) {
       isVehiclesLoading,
       vehiclesError,
       refreshVehicles,
+      visitorCars,
+      isVisitorCarsLoading,
+      visitorCarsError,
+      refreshVisitorCars,
       findVehicleById: (id) => vehicles.find((vehicle) => vehicle.id === id),
       createVehicle,
       updateVehicle,
@@ -569,6 +667,11 @@ export function ApartmentManagerProvider({ children }) {
       managerInquiriesError,
       refreshManagerInquiries,
       createManagerInquiry,
+      managerNotifications,
+      isManagerNotificationsLoading,
+      managerNotificationsError,
+      refreshManagerNotifications,
+      markManagerNotificationAsRead,
       residentParkingInquiries,
       isResidentParkingInquiriesLoading,
       residentParkingInquiriesError,
@@ -590,6 +693,9 @@ export function ApartmentManagerProvider({ children }) {
       vehicles,
       isVehiclesLoading,
       vehiclesError,
+      visitorCars,
+      isVisitorCarsLoading,
+      visitorCarsError,
       parkingLots,
       parkingAreas,
       isParkingLoading,
@@ -597,6 +703,9 @@ export function ApartmentManagerProvider({ children }) {
       managerInquiries,
       isManagerInquiriesLoading,
       managerInquiriesError,
+      managerNotifications,
+      isManagerNotificationsLoading,
+      managerNotificationsError,
       residentParkingInquiries,
       isResidentParkingInquiriesLoading,
       residentParkingInquiriesError,

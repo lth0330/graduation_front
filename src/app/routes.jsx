@@ -4,6 +4,7 @@ import {
   ApartmentDashboard,
   InquiryHistory,
   InquiryWrite,
+  ManagerNotificationList,
   MyPage,
   ParkingAreaManagement,
   ParkingLotManagement,
@@ -16,6 +17,7 @@ import {
   ResidentRequestList,
   VehicleForm,
   VehicleManagement,
+  VisitorCarManagement,
 } from '../pages/apartmentManager/index.js';
 import { LoginPage, SignupCompletePage, SignupPage } from '../pages/auth/index.js';
 import NotFoundPage from '../pages/NotFoundPage.jsx';
@@ -64,6 +66,7 @@ export const router = createBrowserRouter([
   { path: '/apartment-manager/residents/new', element: apartmentManagerRoute(<ResidentEdit />) },
   { path: '/apartment-manager/residents/:id/edit', element: apartmentManagerRoute(<ResidentEdit />) },
   { path: '/apartment-manager/vehicles', element: apartmentManagerRoute(<VehicleManagement />) },
+  { path: '/apartment-manager/visitor-cars', element: apartmentManagerRoute(<VisitorCarManagement />) },
   { path: '/apartment-manager/vehicles/new', element: apartmentManagerRoute(<VehicleForm />) },
   { path: '/apartment-manager/vehicles/:id/edit', element: apartmentManagerRoute(<VehicleForm />) },
   { path: '/apartment-manager/parking-lots', element: apartmentManagerRoute(<ParkingLotManagement />) },
@@ -73,5 +76,6 @@ export const router = createBrowserRouter([
   { path: '/apartment-manager/inquiry-history', element: apartmentManagerRoute(<InquiryHistory />) },
   { path: '/apartment-manager/resident-inquiries', element: apartmentManagerRoute(<ResidentInquiryList />) },
   { path: '/apartment-manager/resident-inquiries/:id', element: apartmentManagerRoute(<ResidentInquiryDetail />) },
+  { path: '/apartment-manager/notifications', element: apartmentManagerRoute(<ManagerNotificationList />) },
   { path: '*', element: <NotFoundPage /> },
 ]);

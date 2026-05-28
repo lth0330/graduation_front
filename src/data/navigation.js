@@ -8,6 +8,7 @@ export const webAdminMenus = [
 export const apartmentManagerMenus = [
   { label: '대시보드', path: '/apartment-admin' },
   { label: '마이페이지', path: '/apartment-manager/my-page' },
+  { label: '알림', path: '/apartment-manager/notifications' },
   {
     label: '입주민',
     children: [
@@ -19,6 +20,7 @@ export const apartmentManagerMenus = [
     label: '주차 관리',
     children: [
       { label: '차량 정보 관리', path: '/apartment-manager/vehicles' },
+      { label: '방문 차량 관리', path: '/apartment-manager/visitor-cars' },
       { label: '주차장 관리', path: '/apartment-manager/parking-lots' },
       { label: '주차 구역 관리', path: '/apartment-manager/parking-areas' },
       { label: '주차 상태 확인', path: '/apartment-manager/parking-status' },

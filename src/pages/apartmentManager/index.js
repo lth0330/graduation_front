@@ -1,6 +1,7 @@
 export { default as ApartmentDashboard } from './ApartmentDashboard.jsx';
 export { default as InquiryHistory } from './InquiryHistory.jsx';
 export { default as InquiryWrite } from './InquiryWrite.jsx';
+export { default as ManagerNotificationList } from './ManagerNotificationList.jsx';
 export { default as MyPage } from './MyPage.jsx';
 export { default as ParkingAreaManagement } from './ParkingAreaManagement.jsx';
 export { default as ParkingLotManagement } from './ParkingLotManagement.jsx';
@@ -13,3 +14,4 @@ export { default as ResidentRequestDetail } from './ResidentRequestDetail.jsx';
 export { default as ResidentRequestList } from './ResidentRequestList.jsx';
 export { default as VehicleForm } from './VehicleForm.jsx';
 export { default as VehicleManagement } from './VehicleManagement.jsx';
+export { default as VisitorCarManagement } from './VisitorCarManagement.jsx';
