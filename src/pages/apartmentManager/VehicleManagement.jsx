@@ -11,6 +11,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
@@ -36,6 +37,9 @@ export default function VehicleManagement() {
   const { vehicles, isVehiclesLoading, vehiclesError, refreshVehicles } = useApartmentManager();
   const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
+
+  useAutoRefresh(() => refreshVehicles({ silent: true }), 15000);
+
   const filteredVehicles = filterByKeyword(vehicles, keyword, [
     'id',
     'carNumber',

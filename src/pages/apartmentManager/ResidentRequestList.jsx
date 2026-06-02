@@ -13,6 +13,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
@@ -45,6 +46,9 @@ export default function ResidentRequestList() {
   const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
+
+  useAutoRefresh(() => refreshResidentSignupRequests({ silent: true }), 10000);
+
   const searchedRequests = filterByKeyword(residentSignupRequests, keyword, [
     'id',
     'name',

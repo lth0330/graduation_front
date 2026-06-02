@@ -11,6 +11,7 @@ import SectionCard from '../../components/common/SectionCard.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 
 export default function ResidentRequestDetail() {
   const { id } = useParams();
@@ -21,12 +22,19 @@ export default function ResidentRequestDetail() {
     residentRequestsError,
     approveResidentSignupRequest,
     rejectResidentSignupRequest,
+    refreshResidentSignupRequests,
   } = useApartmentManager();
   const request = findResidentSignupRequestById(id);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useAutoRefresh(
+    () => refreshResidentSignupRequests({ silent: true }),
+    10000,
+    !isRejectModalOpen && !isSubmitting,
+  );
 
   const handleApprove = async () => {
     try {

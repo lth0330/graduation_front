@@ -36,6 +36,8 @@ export default function ResidentEdit() {
       building: resident?.building || '',
       unit: resident?.unit || '',
       phone: resident?.phone || '',
+      residentCarLimit: String(resident?.residentCarLimit ?? 1),
+      visitorCarLimit: String(resident?.visitorCarLimit ?? 2),
     }),
     [resident],
   );
@@ -126,13 +128,35 @@ export default function ResidentEdit() {
     if (!emailPattern.test(form.email)) nextErrors.email = '이메일 형식이 올바르지 않습니다.';
     if (!form.building.trim()) nextErrors.building = '동을 입력하세요.';
     if (!form.unit.trim()) nextErrors.unit = '호수를 입력하세요.';
+    if (Number(form.residentCarLimit) < 0) nextErrors.residentCarLimit = '0 이상의 숫자를 입력하세요.';
+    if (Number(form.visitorCarLimit) < 0) nextErrors.visitorCarLimit = '0 이상의 숫자를 입력하세요.';
 
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
 
+  const validateLimitForm = () => {
+    const nextErrors = {};
+
+    if (Number(form.residentCarLimit) < 0) nextErrors.residentCarLimit = '0 이상의 숫자를 입력하세요.';
+    if (Number(form.visitorCarLimit) < 0) nextErrors.visitorCarLimit = '0 이상의 숫자를 입력하세요.';
+
+    setErrors((currentErrors) => ({ ...currentErrors, ...nextErrors }));
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const parseLimitValue = (value, defaultValue) => {
+    if (value === '' || value === null || value === undefined) {
+      return defaultValue;
+    }
+    return Number(value);
+  };
+
   const handleSave = async () => {
     if (isCreateMode && !validateCreateForm()) {
+      return;
+    }
+    if (!validateLimitForm()) {
       return;
     }
 
@@ -148,6 +172,8 @@ export default function ResidentEdit() {
           building: form.building.trim(),
           unit: form.unit.trim(),
           phone: form.phone.trim(),
+          residentCarLimit: parseLimitValue(form.residentCarLimit, 1),
+          visitorCarLimit: parseLimitValue(form.visitorCarLimit, 2),
         });
         navigate('/apartment-manager/residents');
         return;
@@ -159,6 +185,8 @@ export default function ResidentEdit() {
         building: form.building,
         unit: form.unit,
         phone: form.phone,
+        residentCarLimit: parseLimitValue(form.residentCarLimit, 1),
+        visitorCarLimit: parseLimitValue(form.visitorCarLimit, 2),
       });
       setToastType('success');
       setToastMessage('주민 정보가 저장되었습니다.');
@@ -224,6 +252,14 @@ export default function ResidentEdit() {
               <dt>등록 차량 수</dt>
               <dd>{resident.vehicleCount}대</dd>
             </div>
+            <div>
+              <dt>입주민 차량 제한</dt>
+              <dd>{resident.residentCarLimit}대</dd>
+            </div>
+            <div>
+              <dt>방문차량 제한</dt>
+              <dd>{resident.visitorCarLimit}대</dd>
+            </div>
           </dl>
         )}
 
@@ -277,6 +313,24 @@ export default function ResidentEdit() {
           </FormField>
           <FormField label="연락처">
             <TextInput value={form.phone} onChange={(event) => handleChange('phone', event.target.value)} />
+          </FormField>
+          <FormField label="입주민 차량 등록 가능 대수" error={errors.residentCarLimit}>
+            <TextInput
+              error={Boolean(errors.residentCarLimit)}
+              type="number"
+              min="0"
+              value={form.residentCarLimit}
+              onChange={(event) => handleChange('residentCarLimit', event.target.value)}
+            />
+          </FormField>
+          <FormField label="방문차량 등록 가능 대수" error={errors.visitorCarLimit}>
+            <TextInput
+              error={Boolean(errors.visitorCarLimit)}
+              type="number"
+              min="0"
+              value={form.visitorCarLimit}
+              onChange={(event) => handleChange('visitorCarLimit', event.target.value)}
+            />
           </FormField>
         </div>
 

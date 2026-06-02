@@ -16,6 +16,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 import { usePagination } from '../../utils/pagination.js';
 
 const areaStatusLabel = {
@@ -84,6 +85,9 @@ export default function ParkingAreaManagement() {
   const [layoutError, setLayoutError] = useState('');
   const [deleteTargetId, setDeleteTargetId] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const canAutoRefresh = !statusTarget && !layoutTarget && !deleteTargetId;
+
+  useAutoRefresh(() => refreshParkingData({ silent: true }), 10000, canAutoRefresh);
 
   useEffect(() => {
     if (parkingLots.length > 0 && !parkingLots.some((parkingLot) => parkingLot.id === selectedParkingLotId)) {

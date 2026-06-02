@@ -24,9 +24,9 @@ apiClient.interceptors.response.use(
   (error) => {
     const hadAuthHeader = Boolean(error.config?.headers?.Authorization);
 
-    if (hadAuthHeader && [401, 403].includes(error.response?.status)) {
+    if (hadAuthHeader && error.response?.status === 401) {
       clearAuthSessions();
-      setAuthMessage('로그인이 만료되었거나 접근 권한이 없습니다. 다시 로그인하세요.');
+      setAuthMessage('로그인이 만료되었습니다. 다시 로그인하세요.');
 
       if (!window.location.pathname.startsWith('/login')) {
         window.location.replace('/login');

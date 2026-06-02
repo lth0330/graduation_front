@@ -6,6 +6,7 @@ import SectionCard from '../../components/common/SectionCard.jsx';
 import SelectBox from '../../components/forms/SelectBox.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 
 const statusClassMap = {
   empty: 'empty',
@@ -14,8 +15,10 @@ const statusClassMap = {
 };
 
 export default function ParkingStatusGrid() {
-  const { parkingLots, parkingAreas } = useApartmentManager();
+  const { parkingLots, parkingAreas, refreshParkingData } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
+
+  useAutoRefresh(() => refreshParkingData({ silent: true }), 5000);
 
   useEffect(() => {
     if (parkingLots.length > 0 && !parkingLots.some((parkingLot) => parkingLot.id === selectedParkingLotId)) {

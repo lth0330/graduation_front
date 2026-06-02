@@ -15,6 +15,7 @@ import { apartmentManagerMenus } from '../../data/navigation.js';
 import { usePagination } from '../../utils/pagination.js';
 
 const notificationTypeLabel = {
+  resident_signup_request: '입주민 가입 신청',
   resident_inquiry: '입주민 문의',
   abnormal_parking: '주차 알림',
 };

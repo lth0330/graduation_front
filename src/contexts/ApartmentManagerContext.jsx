@@ -134,6 +134,8 @@ function mapResident(apiResident) {
     unit: apiResident.unit,
     phone: apiResident.phone,
     vehicleCount: Number(apiResident.vehicleCount || 0),
+    residentCarLimit: Number(apiResident.residentCarLimit ?? 1),
+    visitorCarLimit: Number(apiResident.visitorCarLimit ?? 2),
     joinedAt: formatDate(apiResident.joinedAt),
     status: statusMap[apiResident.approvalStatus] || 'approved',
   };
@@ -319,18 +321,24 @@ export function ApartmentManagerProvider({ children }) {
     return () => window.removeEventListener('auth-session-changed', handleAuthSessionChanged);
   }, []);
 
-  const refreshResidentSignupRequests = async () => {
+  const refreshResidentSignupRequests = async ({ silent = false } = {}) => {
     try {
-      setIsResidentRequestsLoading(true);
-      setResidentRequestsError('');
+      if (!silent) {
+        setIsResidentRequestsLoading(true);
+        setResidentRequestsError('');
+      }
 
       const apartmentNo = getStoredApartmentNo();
       const requests = await getResidentSignupRequests(apartmentNo);
       setResidentSignupRequests(requests.map(mapResidentSignupRequest));
     } catch (error) {
-      setResidentRequestsError('주민 가입 신청 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setResidentRequestsError('주민 가입 신청 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsResidentRequestsLoading(false);
+      if (!silent) {
+        setIsResidentRequestsLoading(false);
+      }
     }
   };
 
@@ -343,25 +351,35 @@ export function ApartmentManagerProvider({ children }) {
   const approveResidentSignupRequest = async (id) => {
     await approveResidentSignupRequestApi(id);
     await refreshResidentSignupRequests();
+    await refreshResidents();
+    await refreshVehicles();
   };
 
   const rejectResidentSignupRequest = async (id, rejectReason) => {
     await rejectResidentSignupRequestApi(id, rejectReason);
     await refreshResidentSignupRequests();
+    await refreshResidents();
+    await refreshVehicles();
   };
 
-  const refreshResidents = async () => {
+  const refreshResidents = async ({ silent = false } = {}) => {
     try {
-      setIsResidentsLoading(true);
-      setResidentsError('');
+      if (!silent) {
+        setIsResidentsLoading(true);
+        setResidentsError('');
+      }
 
       const apartmentNo = getStoredApartmentNo();
       const residentList = await getResidents(apartmentNo);
       setResidents(residentList.map(mapResident));
     } catch (error) {
-      setResidentsError('주민 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setResidentsError('주민 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsResidentsLoading(false);
+      if (!silent) {
+        setIsResidentsLoading(false);
+      }
     }
   };
 
@@ -380,6 +398,8 @@ export function ApartmentManagerProvider({ children }) {
     const createdResident = await createResidentApi({
       ...resident,
       apartmentNo: Number(resident.apartmentNo || getStoredApartmentNo()),
+      residentCarLimit: Number(resident.residentCarLimit ?? 1),
+      visitorCarLimit: Number(resident.visitorCarLimit ?? 2),
     });
     await refreshResidents();
 
@@ -391,18 +411,24 @@ export function ApartmentManagerProvider({ children }) {
     await refreshResidents();
   };
 
-  const refreshVehicles = async () => {
+  const refreshVehicles = async ({ silent = false } = {}) => {
     try {
-      setIsVehiclesLoading(true);
-      setVehiclesError('');
+      if (!silent) {
+        setIsVehiclesLoading(true);
+        setVehiclesError('');
+      }
 
       const apartmentNo = getStoredApartmentNo();
       const vehicleList = await getVehicles(apartmentNo);
       setVehicles(vehicleList.map(mapVehicle));
     } catch (error) {
-      setVehiclesError('차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setVehiclesError('차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsVehiclesLoading(false);
+      if (!silent) {
+        setIsVehiclesLoading(false);
+      }
     }
   };
 
@@ -439,18 +465,24 @@ export function ApartmentManagerProvider({ children }) {
     await refreshVehicles();
   };
 
-  const refreshVisitorCars = async () => {
+  const refreshVisitorCars = async ({ silent = false } = {}) => {
     try {
-      setIsVisitorCarsLoading(true);
-      setVisitorCarsError('');
+      if (!silent) {
+        setIsVisitorCarsLoading(true);
+        setVisitorCarsError('');
+      }
 
       const apartmentNo = getStoredApartmentNo();
       const visitorCarList = await getVisitorCars(apartmentNo);
       setVisitorCars(visitorCarList.map(mapVisitorCar));
     } catch (error) {
-      setVisitorCarsError('방문 차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setVisitorCarsError('방문 차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsVisitorCarsLoading(false);
+      if (!silent) {
+        setIsVisitorCarsLoading(false);
+      }
     }
   };
 
@@ -463,10 +495,12 @@ export function ApartmentManagerProvider({ children }) {
   const isDuplicateCarNumber = (carNumber, currentVehicleId) =>
     vehicles.some((vehicle) => vehicle.carNumber === carNumber && vehicle.id !== currentVehicleId);
 
-  const refreshParkingData = async () => {
+  const refreshParkingData = async ({ silent = false } = {}) => {
     try {
-      setIsParkingLoading(true);
-      setParkingError('');
+      if (!silent) {
+        setIsParkingLoading(true);
+        setParkingError('');
+      }
 
       const apartmentNo = getStoredApartmentNo();
       const parkingLotList = await getParkingLots(apartmentNo);
@@ -478,9 +512,13 @@ export function ApartmentManagerProvider({ children }) {
       setParkingLots(mappedParkingLots);
       setParkingAreas(parkingZoneGroups.flat().map(mapParkingArea));
     } catch (error) {
-      setParkingError('주차장 정보를 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setParkingError('주차장 정보를 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsParkingLoading(false);
+      if (!silent) {
+        setIsParkingLoading(false);
+      }
     }
   };
 
@@ -537,17 +575,23 @@ export function ApartmentManagerProvider({ children }) {
     await refreshParkingData();
   };
 
-  const refreshManagerInquiries = async () => {
+  const refreshManagerInquiries = async ({ silent = false } = {}) => {
     try {
-      setIsManagerInquiriesLoading(true);
-      setManagerInquiriesError('');
+      if (!silent) {
+        setIsManagerInquiriesLoading(true);
+        setManagerInquiriesError('');
+      }
 
       const inquiries = await getMyManagerInquiries();
       setManagerInquiries(inquiries.map(mapManagerInquiry));
     } catch (error) {
-      setManagerInquiriesError('문의 내역을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setManagerInquiriesError('문의 내역을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsManagerInquiriesLoading(false);
+      if (!silent) {
+        setIsManagerInquiriesLoading(false);
+      }
     }
   };
 
@@ -563,17 +607,23 @@ export function ApartmentManagerProvider({ children }) {
     return mapManagerInquiry(createdInquiry);
   };
 
-  const refreshManagerNotifications = async () => {
+  const refreshManagerNotifications = async ({ silent = false } = {}) => {
     try {
-      setIsManagerNotificationsLoading(true);
-      setManagerNotificationsError('');
+      if (!silent) {
+        setIsManagerNotificationsLoading(true);
+        setManagerNotificationsError('');
+      }
 
       const notifications = await getManagerNotifications();
       setManagerNotifications(notifications.map(mapManagerNotification));
     } catch (error) {
-      setManagerNotificationsError('관리자 알림 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setManagerNotificationsError('관리자 알림 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsManagerNotificationsLoading(false);
+      if (!silent) {
+        setIsManagerNotificationsLoading(false);
+      }
     }
   };
 
@@ -589,18 +639,24 @@ export function ApartmentManagerProvider({ children }) {
     return mapManagerNotification(updatedNotification);
   };
 
-  const refreshResidentParkingInquiries = async () => {
+  const refreshResidentParkingInquiries = async ({ silent = false } = {}) => {
     try {
-      setIsResidentParkingInquiriesLoading(true);
-      setResidentParkingInquiriesError('');
+      if (!silent) {
+        setIsResidentParkingInquiriesLoading(true);
+        setResidentParkingInquiriesError('');
+      }
 
       const apartmentNo = getStoredApartmentNo();
       const inquiries = await getResidentInquiries(apartmentNo);
       setResidentParkingInquiries(inquiries.map(mapResidentParkingInquiry));
     } catch (error) {
-      setResidentParkingInquiriesError('입주민 문의 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      if (!silent) {
+        setResidentParkingInquiriesError('입주민 문의 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+      }
     } finally {
-      setIsResidentParkingInquiriesLoading(false);
+      if (!silent) {
+        setIsResidentParkingInquiriesLoading(false);
+      }
     }
   };
 
@@ -613,6 +669,7 @@ export function ApartmentManagerProvider({ children }) {
   const answerResidentParkingInquiry = async (id, answer) => {
     const answeredInquiry = await answerResidentInquiryApi(id, answer);
     await refreshResidentParkingInquiries();
+    await refreshManagerNotifications({ silent: true });
     return mapResidentParkingInquiry(answeredInquiry);
   };
 

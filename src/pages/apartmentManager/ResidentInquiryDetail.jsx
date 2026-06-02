@@ -11,6 +11,7 @@ import SectionCard from '../../components/common/SectionCard.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 
 export default function ResidentInquiryDetail() {
   const { id } = useParams();
@@ -26,6 +27,8 @@ export default function ResidentInquiryDetail() {
   const [error, setError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useAutoRefresh(() => refreshResidentParkingInquiries({ silent: true }), 10000, !isSubmitting);
 
   useEffect(() => {
     refreshResidentParkingInquiries();

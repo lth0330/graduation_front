@@ -11,6 +11,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import { getApartmentManagerDashboardSummary } from '../../api/dashboardApi.js';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 
 const recentResidentRequestColumns = [
   { key: 'id', header: '신청 ID' },
@@ -41,7 +42,12 @@ const initialSummary = {
 };
 
 export default function ApartmentDashboard() {
-  const { residentSignupRequests } = useApartmentManager();
+  const {
+    residentSignupRequests,
+    refreshResidentSignupRequests,
+    refreshParkingData,
+    refreshResidentParkingInquiries,
+  } = useApartmentManager();
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [summary, setSummary] = useState(initialSummary);
   const [summaryError, setSummaryError] = useState('');
@@ -51,19 +57,30 @@ export default function ApartmentDashboard() {
       : residentSignupRequests.filter((request) => request.status === selectedStatus);
   const recentResidentRequests = filteredResidentRequests.slice(0, 4);
 
-  useEffect(() => {
-    async function loadSummary() {
-      try {
+  const loadSummary = async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
         setSummaryError('');
-        const dashboardSummary = await getApartmentManagerDashboardSummary();
-        setSummary(dashboardSummary);
-      } catch (error) {
+      }
+      const dashboardSummary = await getApartmentManagerDashboardSummary();
+      setSummary(dashboardSummary);
+    } catch (error) {
+      if (!silent) {
         setSummaryError('대시보드 통계를 불러오지 못했습니다.');
       }
     }
+  };
 
+  useEffect(() => {
     loadSummary();
   }, []);
+
+  useAutoRefresh(() => {
+    loadSummary({ silent: true });
+    refreshResidentSignupRequests({ silent: true });
+    refreshParkingData({ silent: true });
+    refreshResidentParkingInquiries({ silent: true });
+  }, 10000);
 
   return (
     <AdminLayout
