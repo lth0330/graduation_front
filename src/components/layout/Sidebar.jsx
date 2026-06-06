@@ -44,9 +44,9 @@ export default function Sidebar({ roleLabel, consoleTitle, menus, menuBadges = {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <div className="brand-mark">P</div>
+        <div className="brand-mark">p</div>
         <div>
-          <strong>Park on</strong>
+          <strong>아트파킹</strong>
           <span>{consoleTitle}</span>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function Sidebar({ roleLabel, consoleTitle, menus, menuBadges = {
                   onClick={() => toggleGroup(menu.label)}
                 >
                   <span>{menu.label}</span>
-                  <span className="nav-group-arrow">{isOpen ? '▲' : '▼'}</span>
+                  <span className="nav-group-arrow">{isOpen ? '⌄' : '›'}</span>
                 </button>
 
                 {isOpen && (

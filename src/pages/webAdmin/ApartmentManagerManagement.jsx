@@ -12,7 +12,12 @@ import TextInput from '../../components/forms/TextInput.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
-import { deleteApartmentManager, getApartmentManagers, updateApartmentManager } from '../../api/webAdminApi.js';
+import {
+  deleteApartmentManager,
+  getApartmentManager,
+  getApartmentManagers,
+  updateApartmentManager,
+} from '../../api/webAdminApi.js';
 import { webAdminMenus } from '../../data/navigation.js';
 import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
@@ -35,12 +40,16 @@ function mapApartmentManager(apiManager) {
   return {
     id: String(apiManager.managerNo),
     managerNo: apiManager.managerNo,
+    apartmentNo: apiManager.apartmentNo,
     loginId: apiManager.loginId,
     email: apiManager.email,
     phone: apiManager.phone || '',
     name: apiManager.name || '',
     address: apiManager.address || '',
     apartmentName: apiManager.apartmentName || '-',
+    picture: apiManager.picture || '',
+    rejectReason: apiManager.rejectReason || '',
+    requestedAt: formatDate(apiManager.requestedAt),
     status: statusMap[apiManager.approvalStatus] || 'inactive',
     approvedAt: formatDate(apiManager.approvedAt),
   };
@@ -53,6 +62,9 @@ export default function ApartmentManagerManagement() {
   const [apartmentManagers, setApartmentManagers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [detailTarget, setDetailTarget] = useState(null);
+  const [detailError, setDetailError] = useState('');
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [editForm, setEditForm] = useState({ loginId: '', email: '', phone: '', name: '', address: '' });
   const [editErrors, setEditErrors] = useState({});
@@ -101,24 +113,42 @@ export default function ApartmentManagerManagement() {
     { key: 'status', header: '상태', render: (row) => <Badge status={row.status} /> },
     { key: 'approvedAt', header: '승인일' },
     {
-      key: 'edit',
-      header: '수정',
+      key: 'actions',
+      header: '관리',
       render: (row) => (
-        <Button variant="secondary" size="small" onClick={() => openEditModal(row)}>
-          수정
-        </Button>
-      ),
-    },
-    {
-      key: 'delete',
-      header: '삭제',
-      render: (row) => (
-        <Button variant="danger" size="small" onClick={() => setDeleteTarget(row)}>
-          삭제
-        </Button>
+        <div className="table-actions">
+          <Button variant="secondary" size="small" onClick={() => openDetailModal(row)}>
+            상세
+          </Button>
+          <Button variant="secondary" size="small" onClick={() => openEditModal(row)}>
+            수정
+          </Button>
+          <Button variant="danger" size="small" onClick={() => setDeleteTarget(row)}>
+            삭제
+          </Button>
+        </div>
       ),
     },
   ];
+
+  const openDetailModal = async (manager) => {
+    try {
+      setDetailTarget(manager);
+      setDetailError('');
+      setIsDetailLoading(true);
+      const latestManager = await getApartmentManager(manager.managerNo);
+      setDetailTarget(mapApartmentManager(latestManager));
+    } catch (error) {
+      setDetailError('아파트 관리자 상세 정보를 불러오지 못했습니다.');
+    } finally {
+      setIsDetailLoading(false);
+    }
+  };
+
+  const closeDetailModal = () => {
+    setDetailTarget(null);
+    setDetailError('');
+  };
 
   const openEditModal = (manager) => {
     setEditTarget(manager);
@@ -296,6 +326,90 @@ export default function ApartmentManagerManagement() {
               </Button>
               <Button disabled={isSubmitting} onClick={handleUpdate}>
                 {isSubmitting ? '저장 중...' : '저장'}
+              </Button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {detailTarget && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="apartment-manager-detail-title">
+            <h2 id="apartment-manager-detail-title">아파트 관리자 상세</h2>
+            <p>{detailTarget.apartmentName} 관리자 계정의 최신 정보를 확인합니다.</p>
+
+            {isDetailLoading ? (
+              <p className="section-help">상세 정보를 불러오는 중입니다.</p>
+            ) : detailError ? (
+              <p className="form-error">{detailError}</p>
+            ) : (
+              <dl className="detail-list">
+                <div>
+                  <dt>관리자 ID</dt>
+                  <dd>{detailTarget.id}</dd>
+                </div>
+                <div>
+                  <dt>상태</dt>
+                  <dd>
+                    <Badge status={detailTarget.status} />
+                  </dd>
+                </div>
+                <div>
+                  <dt>아이디</dt>
+                  <dd>{detailTarget.loginId}</dd>
+                </div>
+                <div>
+                  <dt>관리자명</dt>
+                  <dd>{detailTarget.name || '-'}</dd>
+                </div>
+                <div>
+                  <dt>이메일</dt>
+                  <dd>{detailTarget.email}</dd>
+                </div>
+                <div>
+                  <dt>연락처</dt>
+                  <dd>{detailTarget.phone || '-'}</dd>
+                </div>
+                <div>
+                  <dt>아파트 번호</dt>
+                  <dd>{detailTarget.apartmentNo || '-'}</dd>
+                </div>
+                <div>
+                  <dt>아파트 이름</dt>
+                  <dd>{detailTarget.apartmentName}</dd>
+                </div>
+                <div className="detail-wide">
+                  <dt>주소</dt>
+                  <dd>{detailTarget.address || '-'}</dd>
+                </div>
+                <div>
+                  <dt>신청일</dt>
+                  <dd>{detailTarget.requestedAt || '-'}</dd>
+                </div>
+                <div>
+                  <dt>승인일</dt>
+                  <dd>{detailTarget.approvedAt || '-'}</dd>
+                </div>
+                {detailTarget.rejectReason && (
+                  <div className="detail-wide">
+                    <dt>반려 사유</dt>
+                    <dd>{detailTarget.rejectReason}</dd>
+                  </div>
+                )}
+              </dl>
+            )}
+
+            <div className="modal-actions">
+              <Button variant="secondary" onClick={closeDetailModal}>
+                닫기
+              </Button>
+              <Button
+                onClick={() => {
+                  openEditModal(detailTarget);
+                  closeDetailModal();
+                }}
+              >
+                수정
               </Button>
             </div>
           </section>

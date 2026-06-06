@@ -19,6 +19,7 @@ export default function ResidentEdit() {
   const {
     apartmentManagerProfile,
     findResidentById,
+    getResidentDetail,
     isResidentsLoading,
     residentsError,
     createResident,
@@ -26,7 +27,11 @@ export default function ResidentEdit() {
     deleteResident,
   } = useApartmentManager();
   const isCreateMode = !id;
-  const resident = findResidentById(id);
+  const listResident = findResidentById(id);
+  const [residentDetail, setResidentDetail] = useState(null);
+  const [isResidentDetailLoading, setIsResidentDetailLoading] = useState(false);
+  const [residentDetailError, setResidentDetailError] = useState('');
+  const resident = residentDetail || listResident;
   const initialForm = useMemo(
     () => ({
       loginId: '',
@@ -52,7 +57,40 @@ export default function ResidentEdit() {
     setForm(initialForm);
   }, [initialForm]);
 
-  if (!isCreateMode && isResidentsLoading) {
+  useEffect(() => {
+    if (isCreateMode) {
+      return;
+    }
+
+    let ignore = false;
+
+    const loadResidentDetail = async () => {
+      try {
+        setIsResidentDetailLoading(true);
+        setResidentDetailError('');
+        const detail = await getResidentDetail(id);
+        if (!ignore) {
+          setResidentDetail(detail);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setResidentDetailError('주민 상세 정보를 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!ignore) {
+          setIsResidentDetailLoading(false);
+        }
+      }
+    };
+
+    loadResidentDetail();
+
+    return () => {
+      ignore = true;
+    };
+  }, [id, isCreateMode]);
+
+  if (!isCreateMode && (isResidentDetailLoading || (isResidentsLoading && !resident))) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -68,7 +106,7 @@ export default function ResidentEdit() {
     );
   }
 
-  if (!isCreateMode && residentsError) {
+  if (!isCreateMode && ((residentDetailError && !resident) || (residentsError && !resident))) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -78,7 +116,7 @@ export default function ResidentEdit() {
       >
         <PageTitle title="주민 정보 수정" description="주민 정보를 불러오지 못했습니다." />
         <SectionCard title="조회 실패">
-          <EmptyState title="주민 정보 조회 실패" description={residentsError} />
+          <EmptyState title="주민 정보 조회 실패" description={residentDetailError || residentsError} />
           <div className="detail-actions">
             <Link to="/apartment-manager/residents">
               <Button variant="secondary">목록으로</Button>
@@ -188,6 +226,7 @@ export default function ResidentEdit() {
         residentCarLimit: parseLimitValue(form.residentCarLimit, 1),
         visitorCarLimit: parseLimitValue(form.visitorCarLimit, 2),
       });
+      setResidentDetail(await getResidentDetail(resident.id));
       setToastType('success');
       setToastMessage('주민 정보가 저장되었습니다.');
     } catch (error) {

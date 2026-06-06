@@ -36,6 +36,12 @@ export async function getApartmentManagerMyPage(managerNo) {
   return response.data;
 }
 
+export async function updateApartmentManagerProfile(managerNo, profile) {
+  const response = await apiClient.put(`/api/apartment-managers/${managerNo}`, profile);
+
+  return response.data;
+}
+
 export async function getResidentSignupRequests(apartmentNo) {
   const response = await apiClient.get('/api/resident-signup-requests', {
     params: { apartmentNo },
@@ -66,6 +72,12 @@ export async function getResidents(apartmentNo) {
   return response.data;
 }
 
+export async function getResident(residentNo) {
+  const response = await apiClient.get(`/api/residents/${residentNo}`);
+
+  return response.data;
+}
+
 export async function createResident(resident) {
   const response = await apiClient.post('/api/residents', resident);
 
@@ -86,6 +98,12 @@ export async function getVehicles(apartmentNo) {
   const response = await apiClient.get('/api/vehicles', {
     params: { apartmentNo },
   });
+
+  return response.data;
+}
+
+export async function getVehicle(vehicleNo) {
+  const response = await apiClient.get(`/api/vehicles/${vehicleNo}`);
 
   return response.data;
 }

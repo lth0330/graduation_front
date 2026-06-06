@@ -6,11 +6,14 @@ import {
   deleteVehicle as deleteVehicleApi,
   deleteResident as deleteResidentApi,
   getApartmentManagerMyPage,
+  getResident,
   getResidents,
   getResidentSignupRequests,
+  getVehicle,
   getVisitorCars,
   getVehicles,
   rejectResidentSignupRequest as rejectResidentSignupRequestApi,
+  updateApartmentManagerProfile as updateApartmentManagerProfileApi,
   updateResident as updateResidentApi,
   updateVehicle as updateVehicleApi,
 } from '../api/apartmentManagerApi.js';
@@ -313,6 +316,16 @@ export function ApartmentManagerProvider({ children }) {
     }
   };
 
+  const updateManagerProfile = async (updatedFields) => {
+    const managerNo = getStoredManagerNo();
+    await updateApartmentManagerProfileApi(managerNo, {
+      email: updatedFields.email,
+      phone: updatedFields.phone,
+      name: updatedFields.name,
+    });
+    await refreshManagerProfile();
+  };
+
   useEffect(() => {
     if (getValidAuthSession(authRoles.APARTMENT_MANAGER)) {
       refreshManagerProfile();
@@ -412,6 +425,8 @@ export function ApartmentManagerProvider({ children }) {
     await refreshResidents();
   };
 
+  const getResidentDetail = async (id) => mapResident(await getResident(id));
+
   const createResident = async (resident) => {
     const createdResident = await createResidentApi({
       ...resident,
@@ -468,6 +483,8 @@ export function ApartmentManagerProvider({ children }) {
 
     return mapVehicle(createdVehicle);
   };
+
+  const getVehicleDetail = async (id) => mapVehicle(await getVehicle(id));
 
   const updateVehicle = async (id, updatedFields) => {
     await updateVehicleApi(id, {
@@ -738,6 +755,7 @@ export function ApartmentManagerProvider({ children }) {
       isManagerProfileLoading,
       managerProfileError,
       refreshManagerProfile,
+      updateManagerProfile,
       findResidentSignupRequestById: (id) =>
         residentSignupRequests.find((request) => request.id === id),
       approveResidentSignupRequest,
@@ -747,6 +765,7 @@ export function ApartmentManagerProvider({ children }) {
       residentsError,
       refreshResidents,
       findResidentById: (id) => residents.find((resident) => resident.id === id),
+      getResidentDetail,
       createResident,
       updateResident,
       deleteResident,
@@ -759,6 +778,7 @@ export function ApartmentManagerProvider({ children }) {
       visitorCarsError,
       refreshVisitorCars,
       findVehicleById: (id) => vehicles.find((vehicle) => vehicle.id === id),
+      getVehicleDetail,
       createVehicle,
       updateVehicle,
       deleteVehicle,

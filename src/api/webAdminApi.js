@@ -21,6 +21,12 @@ export async function getApartmentManagers() {
   return response.data;
 }
 
+export async function getApartmentManager(managerNo) {
+  const response = await apiClient.get(`/api/apartment-managers/${managerNo}`);
+
+  return response.data;
+}
+
 export async function updateApartmentManager(managerNo, manager) {
   const response = await apiClient.put(`/api/apartment-managers/${managerNo}`, manager);
 

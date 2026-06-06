@@ -21,6 +21,7 @@ export default function VehicleForm() {
   const isEditMode = Boolean(id);
   const {
     findVehicleById,
+    getVehicleDetail,
     residents,
     vehicles,
     isVehiclesLoading,
@@ -31,7 +32,11 @@ export default function VehicleForm() {
     deleteVehicle,
     isDuplicateCarNumber,
   } = useApartmentManager();
-  const vehicle = isEditMode ? findVehicleById(id) : null;
+  const listVehicle = isEditMode ? findVehicleById(id) : null;
+  const [vehicleDetail, setVehicleDetail] = useState(null);
+  const [isVehicleDetailLoading, setIsVehicleDetailLoading] = useState(false);
+  const [vehicleDetailError, setVehicleDetailError] = useState('');
+  const vehicle = vehicleDetail || listVehicle;
   const firstResident = residents[0];
   const initialForm = useMemo(
     () => ({
@@ -53,7 +58,40 @@ export default function VehicleForm() {
     setForm(initialForm);
   }, [initialForm]);
 
-  if (isVehiclesLoading || isResidentsLoading) {
+  useEffect(() => {
+    if (!isEditMode) {
+      return;
+    }
+
+    let ignore = false;
+
+    const loadVehicleDetail = async () => {
+      try {
+        setIsVehicleDetailLoading(true);
+        setVehicleDetailError('');
+        const detail = await getVehicleDetail(id);
+        if (!ignore) {
+          setVehicleDetail(detail);
+        }
+      } catch (error) {
+        if (!ignore) {
+          setVehicleDetailError('차량 상세 정보를 불러오지 못했습니다.');
+        }
+      } finally {
+        if (!ignore) {
+          setIsVehicleDetailLoading(false);
+        }
+      }
+    };
+
+    loadVehicleDetail();
+
+    return () => {
+      ignore = true;
+    };
+  }, [id, isEditMode]);
+
+  if (isVehiclesLoading || isResidentsLoading || isVehicleDetailLoading) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -69,7 +107,7 @@ export default function VehicleForm() {
     );
   }
 
-  if (vehiclesError) {
+  if (vehiclesError || vehicleDetailError) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -79,7 +117,7 @@ export default function VehicleForm() {
       >
         <PageTitle title="차량 등록 및 수정" description="차량 정보를 불러오지 못했습니다." />
         <SectionCard title="조회 실패">
-          <EmptyState title="차량 정보 조회 실패" description={vehiclesError} />
+          <EmptyState title="차량 정보 조회 실패" description={vehicleDetailError || vehiclesError} />
           <div className="detail-actions">
             <Link to="/apartment-manager/vehicles">
               <Button variant="secondary">목록으로</Button>
@@ -205,6 +243,7 @@ export default function VehicleForm() {
 
       if (isEditMode) {
         await updateVehicle(vehicle.id, payload);
+        setVehicleDetail(await getVehicleDetail(vehicle.id));
         setToastType('success');
         setToastMessage('차량 정보가 저장되었습니다.');
         return;
