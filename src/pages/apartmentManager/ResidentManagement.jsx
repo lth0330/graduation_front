@@ -23,8 +23,8 @@ const columns = [
   { key: 'loginId', header: '아이디' },
   { key: 'email', header: '이메일' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
-  { key: 'vehicleCount', header: '차량 수', render: (row) => `${row.vehicleCount}대` },
-  { key: 'residentCarLimit', header: '입주민 차량 제한', render: (row) => `${row.residentCarLimit}대` },
+  { key: 'vehicleCount', header: '세대 차량 수', render: (row) => `${row.vehicleCount}대` },
+  { key: 'residentCarLimit', header: '세대 차량 제한', render: (row) => `${row.residentCarLimit}대` },
   { key: 'visitorCarLimit', header: '방문차량 제한', render: (row) => `${row.visitorCarLimit}대` },
   { key: 'status', header: '상태', render: () => <Badge status="approved">승인 완료</Badge> },
   {

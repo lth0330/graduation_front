@@ -18,6 +18,8 @@ const notificationTypeLabel = {
   resident_signup_request: '입주민 가입 신청',
   resident_inquiry: '입주민 문의',
   abnormal_parking: '주차 알림',
+  ocr_error: 'OCR 인식 실패',
+  gate_alert: '차단기 알림',
 };
 
 export default function ManagerNotificationList() {

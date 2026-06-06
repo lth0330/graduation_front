@@ -19,8 +19,10 @@ import {
   createParkingZone,
   deleteParkingLot as deleteParkingLotApi,
   deleteParkingZone,
+  getGatePolicy,
   getParkingLots,
   getParkingZones,
+  updateGatePolicy as updateGatePolicyApi,
   updateParkingZoneLayout,
   updateParkingZoneStatus,
 } from '../api/parkingApi.js';
@@ -200,6 +202,14 @@ function mapParkingArea(apiParkingZone) {
   };
 }
 
+function mapGatePolicy(apiPolicy) {
+  return {
+    apartmentNo: apiPolicy.apartmentNo,
+    gateOccupancyBlockEnabled: Boolean(apiPolicy.gateOccupancyBlockEnabled),
+    gateForceOpenEnabled: Boolean(apiPolicy.gateForceOpenEnabled),
+  };
+}
+
 function mapManagerNotification(apiNotification) {
   return {
     id: String(apiNotification.notificationNo),
@@ -270,6 +280,13 @@ export function ApartmentManagerProvider({ children }) {
   const [parkingAreas, setParkingAreas] = useState([]);
   const [isParkingLoading, setIsParkingLoading] = useState(false);
   const [parkingError, setParkingError] = useState('');
+  const [gatePolicy, setGatePolicy] = useState({
+    apartmentNo: '',
+    gateOccupancyBlockEnabled: true,
+    gateForceOpenEnabled: false,
+  });
+  const [isGatePolicyLoading, setIsGatePolicyLoading] = useState(false);
+  const [gatePolicyError, setGatePolicyError] = useState('');
   const [managerInquiries, setManagerInquiries] = useState([]);
   const [isManagerInquiriesLoading, setIsManagerInquiriesLoading] = useState(false);
   const [managerInquiriesError, setManagerInquiriesError] = useState('');
@@ -311,6 +328,7 @@ export function ApartmentManagerProvider({ children }) {
         refreshVehicles();
         refreshVisitorCars();
         refreshParkingData();
+        refreshGatePolicy();
         refreshManagerInquiries();
         refreshManagerNotifications();
         refreshResidentParkingInquiries();
@@ -446,6 +464,7 @@ export function ApartmentManagerProvider({ children }) {
       note: vehicle.note,
     });
     await refreshVehicles();
+    await refreshResidents({ silent: true });
 
     return mapVehicle(createdVehicle);
   };
@@ -454,7 +473,6 @@ export function ApartmentManagerProvider({ children }) {
     await updateVehicleApi(id, {
       carNumber: updatedFields.carNumber,
       carType: updatedFields.carType,
-      ownerId: Number(updatedFields.ownerId),
       note: updatedFields.note,
     });
     await refreshVehicles();
@@ -463,6 +481,7 @@ export function ApartmentManagerProvider({ children }) {
   const deleteVehicle = async (id) => {
     await deleteVehicleApi(id);
     await refreshVehicles();
+    await refreshResidents({ silent: true });
   };
 
   const refreshVisitorCars = async ({ silent = false } = {}) => {
@@ -528,6 +547,32 @@ export function ApartmentManagerProvider({ children }) {
     }
   }, []);
 
+  const refreshGatePolicy = async ({ silent = false } = {}) => {
+    try {
+      if (!silent) {
+        setIsGatePolicyLoading(true);
+        setGatePolicyError('');
+      }
+
+      const policy = await getGatePolicy();
+      setGatePolicy(mapGatePolicy(policy));
+    } catch (error) {
+      if (!silent) {
+        setGatePolicyError('차단기 정책을 불러오지 못했습니다.');
+      }
+    } finally {
+      if (!silent) {
+        setIsGatePolicyLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (getValidAuthSession(authRoles.APARTMENT_MANAGER)) {
+      refreshGatePolicy();
+    }
+  }, []);
+
   const createParkingLot = async (parkingLot) => {
     const apartmentNo = getStoredApartmentNo();
 
@@ -573,6 +618,16 @@ export function ApartmentManagerProvider({ children }) {
   const deleteParkingArea = async (id) => {
     await deleteParkingZone(id);
     await refreshParkingData();
+  };
+
+  const updateGatePolicy = async (nextPolicy) => {
+    const updatedPolicy = await updateGatePolicyApi({
+      gateOccupancyBlockEnabled: nextPolicy.gateOccupancyBlockEnabled,
+      gateForceOpenEnabled: nextPolicy.gateForceOpenEnabled,
+    });
+    const mappedPolicy = mapGatePolicy(updatedPolicy);
+    setGatePolicy(mappedPolicy);
+    return mappedPolicy;
   };
 
   const refreshManagerInquiries = async ({ silent = false } = {}) => {
@@ -713,6 +768,11 @@ export function ApartmentManagerProvider({ children }) {
       isParkingLoading,
       parkingError,
       refreshParkingData,
+      gatePolicy,
+      isGatePolicyLoading,
+      gatePolicyError,
+      refreshGatePolicy,
+      updateGatePolicy,
       createParkingLot,
       deleteParkingLot,
       createParkingArea,
@@ -757,6 +817,9 @@ export function ApartmentManagerProvider({ children }) {
       parkingAreas,
       isParkingLoading,
       parkingError,
+      gatePolicy,
+      isGatePolicyLoading,
+      gatePolicyError,
       managerInquiries,
       isManagerInquiriesLoading,
       managerInquiriesError,

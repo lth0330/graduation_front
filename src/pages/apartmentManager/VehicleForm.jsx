@@ -22,6 +22,7 @@ export default function VehicleForm() {
   const {
     findVehicleById,
     residents,
+    vehicles,
     isVehiclesLoading,
     vehiclesError,
     isResidentsLoading,
@@ -135,6 +136,14 @@ export default function VehicleForm() {
   }
 
   const selectedResident = residents.find((resident) => resident.id === form.ownerId);
+  const selectedHouseholdVehicles = selectedResident
+    ? vehicles.filter((registeredVehicle) => (
+      registeredVehicle.building === selectedResident.building
+      && registeredVehicle.unit === selectedResident.unit
+      && registeredVehicle.id !== vehicle?.id
+    ))
+    : [];
+  const selectedHouseholdCarLimit = Number(selectedResident?.residentCarLimit ?? 1);
 
   const handleChange = (field, value) => {
     setForm((currentForm) => ({
@@ -153,10 +162,10 @@ export default function VehicleForm() {
   const buildVehiclePayload = () => ({
     carNumber: form.carNumber.trim(),
     carType: form.carType.trim(),
-    ownerId: selectedResident?.id,
-    ownerName: selectedResident.name,
-    building: selectedResident.building,
-    unit: selectedResident.unit,
+    ownerId: isEditMode ? undefined : selectedResident?.id,
+    ownerName: selectedResident?.name,
+    building: selectedResident?.building,
+    unit: selectedResident?.unit,
     note: form.note.trim(),
   });
 
@@ -173,8 +182,11 @@ export default function VehicleForm() {
       nextErrors.carType = '차종을 입력하세요.';
     }
 
-    if (!selectedResident) {
+    if (!isEditMode && !selectedResident) {
       nextErrors.ownerId = '소유자를 선택하세요.';
+    }
+    if (!isEditMode && selectedResident && selectedHouseholdVehicles.length >= selectedHouseholdCarLimit) {
+      nextErrors.ownerId = `해당 세대는 입주민 차량을 최대 ${selectedHouseholdCarLimit}대까지 등록할 수 있습니다.`;
     }
 
     setErrors(nextErrors);
@@ -204,7 +216,11 @@ export default function VehicleForm() {
       navigate(`/apartment-manager/vehicles/${createdVehicle.id}/edit`);
     } catch (error) {
       setToastType('error');
-      setToastMessage('차량 정보 저장에 실패했습니다.');
+      if (error.response?.status === 409) {
+        setToastMessage('이미 등록된 차량번호이거나 해당 세대에 차량이 등록되어 있습니다.');
+      } else {
+        setToastMessage('차량 정보 저장에 실패했습니다.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -233,10 +249,13 @@ export default function VehicleForm() {
     >
       <PageTitle
         title={isEditMode ? '차량 정보 수정' : '차량 등록'}
-        description="차량번호와 소유자 정보를 확인한 뒤 저장합니다."
+        description={isEditMode ? '차량 소유자는 변경하지 않고 차량 정보만 수정합니다.' : '차량번호와 소유자 정보를 확인한 뒤 저장합니다.'}
       />
 
-      <SectionCard title="차량 정보 입력" description="차량번호 중복 여부는 저장 시 검증합니다.">
+      <SectionCard
+        title="차량 정보 입력"
+        description={isEditMode ? '소유자가 잘못된 경우 차량을 삭제한 뒤 올바른 입주민에게 다시 등록합니다.' : '입주민 차량은 세대별 등록 가능 대수 안에서 등록할 수 있습니다.'}
+      >
         <div className="form-grid">
           <FormField label="차량번호">
             <TextInput
@@ -256,23 +275,33 @@ export default function VehicleForm() {
             />
             {errors.carType && <small className="form-error">{errors.carType}</small>}
           </FormField>
-          <FormField label="소유자" error={errors.ownerId}>
-            <SelectBox
-              error={Boolean(errors.ownerId)}
-              value={form.ownerId}
-              onChange={(event) => handleChange('ownerId', event.target.value)}
-            >
-              {residents.map((resident) => (
-                <option value={resident.id} key={resident.id}>
-                  {resident.name} · {resident.building}동 {resident.unit}호
-                </option>
-              ))}
-            </SelectBox>
-          </FormField>
+          {isEditMode ? (
+            <FormField label="소유자">
+              <TextInput value={selectedResident?.name || vehicle?.ownerName || '-'} readOnly />
+            </FormField>
+          ) : (
+            <FormField label="소유자" error={errors.ownerId}>
+              <SelectBox
+                error={Boolean(errors.ownerId)}
+                value={form.ownerId}
+                onChange={(event) => handleChange('ownerId', event.target.value)}
+              >
+                {residents.map((resident) => (
+                  <option value={resident.id} key={resident.id}>
+                    {resident.name} · {resident.building}동 {resident.unit}호
+                  </option>
+                ))}
+              </SelectBox>
+            </FormField>
+          )}
           <FormField label="동/호수">
             <TextInput
               value={
-                selectedResident ? `${selectedResident.building}동 ${selectedResident.unit}호` : '소유자를 선택하세요'
+                selectedResident
+                  ? `${selectedResident.building}동 ${selectedResident.unit}호`
+                  : isEditMode && vehicle
+                    ? `${vehicle.building}동 ${vehicle.unit}호`
+                    : '소유자를 선택하세요'
               }
               readOnly
             />

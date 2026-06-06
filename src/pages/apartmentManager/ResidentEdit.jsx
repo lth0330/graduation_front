@@ -249,11 +249,11 @@ export default function ResidentEdit() {
               <dd>{resident.joinedAt}</dd>
             </div>
             <div>
-              <dt>등록 차량 수</dt>
+              <dt>세대 차량 수</dt>
               <dd>{resident.vehicleCount}대</dd>
             </div>
             <div>
-              <dt>입주민 차량 제한</dt>
+              <dt>세대 차량 제한</dt>
               <dd>{resident.residentCarLimit}대</dd>
             </div>
             <div>
@@ -314,7 +314,7 @@ export default function ResidentEdit() {
           <FormField label="연락처">
             <TextInput value={form.phone} onChange={(event) => handleChange('phone', event.target.value)} />
           </FormField>
-          <FormField label="입주민 차량 등록 가능 대수" error={errors.residentCarLimit}>
+          <FormField label="세대 입주민 차량 등록 가능 대수" error={errors.residentCarLimit}>
             <TextInput
               error={Boolean(errors.residentCarLimit)}
               type="number"

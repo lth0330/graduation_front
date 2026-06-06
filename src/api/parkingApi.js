@@ -18,6 +18,18 @@ export async function deleteParkingLot(parkingLotNo) {
   await apiClient.delete(`/api/parking-lots/${parkingLotNo}`);
 }
 
+export async function getGatePolicy() {
+  const response = await apiClient.get('/api/apartment-managers/gate-policy');
+
+  return response.data;
+}
+
+export async function updateGatePolicy(policy) {
+  const response = await apiClient.patch('/api/apartment-managers/gate-policy', policy);
+
+  return response.data;
+}
+
 export async function getParkingZones(parkingLotNo) {
   const response = await apiClient.get('/api/parking-zones', {
     params: { parkingLotNo },
