@@ -39,6 +39,8 @@ const zoneTypeLabel = {
 const getAreaPlacement = (area, index) => ({
   row: area.layoutRow || Math.floor(index / 8) + 1,
   column: area.layoutColumn || (index % 8) + 1,
+  width: area.layoutWidth || 2,
+  height: area.layoutHeight || 1,
 });
 
 const columns = [
@@ -51,7 +53,12 @@ const columns = [
     header: '상태',
     render: (row) => <Badge status={areaStatusBadge[row.status]}>{areaStatusLabel[row.status]}</Badge>,
   },
-  { key: 'placement', header: '배치 위치', render: (row) => `${row.layoutRow || '-'}행 ${row.layoutColumn || '-'}열` },
+  {
+    key: 'placement',
+    header: '배치',
+    render: (row) =>
+      `${row.layoutRow || '-'}행 ${row.layoutColumn || '-'}열 / ${row.layoutWidth || 2}x${row.layoutHeight || 1}`,
+  },
   { key: 'statusChangeReason', header: '변경 사유', render: (row) => row.statusChangeReason || '-' },
 ];
 
@@ -76,12 +83,19 @@ export default function ParkingAreaManagement() {
     zoneType: 'normal',
     layoutRow: '1',
     layoutColumn: '1',
+    layoutWidth: '2',
+    layoutHeight: '1',
   });
   const [statusTarget, setStatusTarget] = useState(null);
   const [statusForm, setStatusForm] = useState({ status: 'empty', zoneType: 'normal', reason: '' });
   const [statusError, setStatusError] = useState('');
   const [layoutTarget, setLayoutTarget] = useState(null);
-  const [layoutForm, setLayoutForm] = useState({ layoutRow: '1', layoutColumn: '1' });
+  const [layoutForm, setLayoutForm] = useState({
+    layoutRow: '1',
+    layoutColumn: '1',
+    layoutWidth: '2',
+    layoutHeight: '1',
+  });
   const [layoutError, setLayoutError] = useState('');
   const [deleteTargetId, setDeleteTargetId] = useState('');
   const [toastMessage, setToastMessage] = useState('');
@@ -105,6 +119,8 @@ export default function ParkingAreaManagement() {
         ...parkingArea,
         layoutRow: placement.row,
         layoutColumn: placement.column,
+        layoutWidth: placement.width,
+        layoutHeight: placement.height,
       };
     });
   const filteredAreas =
@@ -159,13 +175,13 @@ export default function ParkingAreaManagement() {
       return;
     }
 
-    if (!isValidPlacement(form.layoutRow, form.layoutColumn)) {
-      setToastMessage('배치 행과 열은 1 이상의 숫자로 입력하세요.');
+    if (!isValidPlacement(form.layoutRow, form.layoutColumn, form.layoutWidth, form.layoutHeight)) {
+      setToastMessage('배치 행, 열, 가로, 세로는 1 이상의 숫자로 입력하세요.');
       return;
     }
 
-    if (isDuplicatePlacement(form.layoutRow, form.layoutColumn)) {
-      setToastMessage('이미 사용 중인 배치 위치입니다.');
+    if (isDuplicatePlacement(form.layoutRow, form.layoutColumn, form.layoutWidth, form.layoutHeight)) {
+      setToastMessage('이미 사용 중인 배치 영역입니다.');
       return;
     }
 
@@ -184,6 +200,8 @@ export default function ParkingAreaManagement() {
         zoneType: 'normal',
         layoutRow: '1',
         layoutColumn: '1',
+        layoutWidth: '2',
+        layoutHeight: '1',
       });
       setToastMessage('주차 구역이 등록되었습니다.');
     } catch (error) {
@@ -191,16 +209,31 @@ export default function ParkingAreaManagement() {
     }
   };
 
-  const isValidPlacement = (layoutRow, layoutColumn) =>
-    Number(layoutRow) >= 1 && Number(layoutColumn) >= 1;
+  const isValidPlacement = (layoutRow, layoutColumn, layoutWidth = '2', layoutHeight = '1') =>
+    Number(layoutRow) >= 1 &&
+    Number(layoutColumn) >= 1 &&
+    Number(layoutWidth) >= 1 &&
+    Number(layoutHeight) >= 1;
 
-  const isDuplicatePlacement = (layoutRow, layoutColumn, currentAreaId) =>
-    visibleAreas.some(
-      (area) =>
-        area.id !== currentAreaId &&
-        Number(area.layoutRow) === Number(layoutRow) &&
-        Number(area.layoutColumn) === Number(layoutColumn),
-    );
+  const isDuplicatePlacement = (layoutRow, layoutColumn, layoutWidth, layoutHeight, currentAreaId) =>
+    visibleAreas.some((area) => {
+      if (area.id === currentAreaId) {
+        return false;
+      }
+
+      const rowStart = Number(layoutRow);
+      const rowEnd = rowStart + Number(layoutHeight || 1) - 1;
+      const columnStart = Number(layoutColumn);
+      const columnEnd = columnStart + Number(layoutWidth || 2) - 1;
+      const areaRowStart = Number(area.layoutRow);
+      const areaRowEnd = areaRowStart + Number(area.layoutHeight || 1) - 1;
+      const areaColumnStart = Number(area.layoutColumn);
+      const areaColumnEnd = areaColumnStart + Number(area.layoutWidth || 2) - 1;
+
+      const rowOverlaps = rowStart <= areaRowEnd && rowEnd >= areaRowStart;
+      const columnOverlaps = columnStart <= areaColumnEnd && columnEnd >= areaColumnStart;
+      return rowOverlaps && columnOverlaps;
+    });
 
   const openStatusModal = (parkingArea) => {
     setStatusTarget(parkingArea);
@@ -254,13 +287,20 @@ export default function ParkingAreaManagement() {
     setLayoutForm({
       layoutRow: String(parkingArea.layoutRow),
       layoutColumn: String(parkingArea.layoutColumn),
+      layoutWidth: String(parkingArea.layoutWidth || 2),
+      layoutHeight: String(parkingArea.layoutHeight || 1),
     });
     setLayoutError('');
   };
 
   const closeLayoutModal = () => {
     setLayoutTarget(null);
-    setLayoutForm({ layoutRow: '1', layoutColumn: '1' });
+    setLayoutForm({
+      layoutRow: '1',
+      layoutColumn: '1',
+      layoutWidth: '2',
+      layoutHeight: '1',
+    });
     setLayoutError('');
   };
 
@@ -276,18 +316,32 @@ export default function ParkingAreaManagement() {
   };
 
   const handleUpdateLayout = async () => {
-    if (!isValidPlacement(layoutForm.layoutRow, layoutForm.layoutColumn)) {
-      setLayoutError('배치 행과 열은 1 이상의 숫자로 입력하세요.');
+    if (!isValidPlacement(layoutForm.layoutRow, layoutForm.layoutColumn, layoutForm.layoutWidth, layoutForm.layoutHeight)) {
+      setLayoutError('배치 행, 열, 가로, 세로는 1 이상의 숫자로 입력하세요.');
       return;
     }
 
-    if (isDuplicatePlacement(layoutForm.layoutRow, layoutForm.layoutColumn, layoutTarget.id)) {
-      setLayoutError('이미 사용 중인 배치 위치입니다.');
+    if (
+      isDuplicatePlacement(
+        layoutForm.layoutRow,
+        layoutForm.layoutColumn,
+        layoutForm.layoutWidth,
+        layoutForm.layoutHeight,
+        layoutTarget.id,
+      )
+    ) {
+      setLayoutError('이미 사용 중인 배치 영역입니다.');
       return;
     }
 
     try {
-      await updateParkingAreaLayout(layoutTarget.id, layoutForm.layoutRow, layoutForm.layoutColumn);
+      await updateParkingAreaLayout(
+        layoutTarget.id,
+        layoutForm.layoutRow,
+        layoutForm.layoutColumn,
+        layoutForm.layoutWidth,
+        layoutForm.layoutHeight,
+      );
       closeLayoutModal();
       setToastMessage('주차 구역 배치가 수정되었습니다.');
     } catch (error) {
@@ -309,7 +363,7 @@ export default function ParkingAreaManagement() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle
@@ -391,6 +445,22 @@ export default function ParkingAreaManagement() {
                   onChange={(event) => handleChange('layoutColumn', event.target.value)}
                 />
               </FormField>
+              <FormField label="가로 칸 수">
+                <TextInput
+                  min="1"
+                  type="number"
+                  value={form.layoutWidth}
+                  onChange={(event) => handleChange('layoutWidth', event.target.value)}
+                />
+              </FormField>
+              <FormField label="세로 칸 수">
+                <TextInput
+                  min="1"
+                  type="number"
+                  value={form.layoutHeight}
+                  onChange={(event) => handleChange('layoutHeight', event.target.value)}
+                />
+              </FormField>
               <Button onClick={handleCreate}>구역 등록</Button>
             </div>
 
@@ -437,6 +507,24 @@ export default function ParkingAreaManagement() {
                   type="number"
                   value={layoutForm.layoutColumn}
                   onChange={(event) => handleLayoutFormChange('layoutColumn', event.target.value)}
+                />
+              </FormField>
+              <FormField label="가로 칸 수" error={layoutError}>
+                <TextInput
+                  error={Boolean(layoutError)}
+                  min="1"
+                  type="number"
+                  value={layoutForm.layoutWidth}
+                  onChange={(event) => handleLayoutFormChange('layoutWidth', event.target.value)}
+                />
+              </FormField>
+              <FormField label="세로 칸 수" error={layoutError}>
+                <TextInput
+                  error={Boolean(layoutError)}
+                  min="1"
+                  type="number"
+                  value={layoutForm.layoutHeight}
+                  onChange={(event) => handleLayoutFormChange('layoutHeight', event.target.value)}
                 />
               </FormField>
             </div>

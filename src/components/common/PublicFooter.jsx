@@ -2,7 +2,7 @@ export default function PublicFooter() {
   return (
     <footer className="public-footer">
       <div className="footer-nav">
-        <strong>아트파킹</strong>
+        <strong>Park On</strong>
         <a href="#service">서비스 소개</a>
         <a href="#features">주요 기능</a>
         <a href="#roles">도입 안내</a>
@@ -12,7 +12,7 @@ export default function PublicFooter() {
       <div className="footer-content">
         <section>
           <h2>CONTACT</h2>
-          <strong className="footer-phone">help@artparking.co.kr</strong>
+          <strong className="footer-phone">project@example.com</strong>
           <p>관리자 신청과 서비스 도입 문의를 받습니다.</p>
           <p>운영시간 09:00 - 18:00</p>
         </section>

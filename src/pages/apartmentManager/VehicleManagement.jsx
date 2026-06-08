@@ -56,7 +56,7 @@ export default function VehicleManagement() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle

@@ -33,6 +33,8 @@ export default function ParkingStatusGrid() {
       ...parkingArea,
       layoutRow: parkingArea.layoutRow || Math.floor(index / 8) + 1,
       layoutColumn: parkingArea.layoutColumn || (index % 8) + 1,
+      layoutWidth: parkingArea.layoutWidth || 2,
+      layoutHeight: parkingArea.layoutHeight || 1,
     }));
   const occupiedCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'occupied').length;
   const emptyCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'empty').length;
@@ -42,7 +44,7 @@ export default function ParkingStatusGrid() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle
@@ -75,10 +77,10 @@ export default function ParkingStatusGrid() {
               key={area.id}
               className={`parking-spot ${statusClassMap[area.status]}`}
               style={{
-                gridColumn: area.layoutColumn,
-                gridRow: area.layoutRow,
+                gridColumn: `${area.layoutColumn} / span ${area.layoutWidth}`,
+                gridRow: `${area.layoutRow} / span ${area.layoutHeight}`,
               }}
-              title={`${area.areaNumber}: ${area.layoutRow}행 ${area.layoutColumn}열`}
+              title={`${area.areaNumber}: ${area.layoutRow}행 ${area.layoutColumn}열, ${area.layoutWidth}x${area.layoutHeight}`}
             >
               {area.areaNumber}
             </div>

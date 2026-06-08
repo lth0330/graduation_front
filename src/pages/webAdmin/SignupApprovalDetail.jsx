@@ -71,7 +71,7 @@ export default function SignupApprovalDetail() {
 
   if (isSignupRequestsLoading) {
     return (
-      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
+      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="웹 관리자" menus={webAdminMenus}>
         <PageTitle title="가입 신청 상세" description="가입 신청 정보를 불러오고 있습니다." />
         <SectionCard title="신청 정보">
           <LoadingState message="가입 신청 상세 불러오는 중" />
@@ -82,7 +82,7 @@ export default function SignupApprovalDetail() {
 
   if (signupRequestsError) {
     return (
-      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
+      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="웹 관리자" menus={webAdminMenus}>
         <PageTitle title="가입 신청 상세" description="가입 신청 정보를 불러오지 못했습니다." />
         <SectionCard title="조회 실패">
           <EmptyState title="상세 조회 실패" description={signupRequestsError} />
@@ -98,7 +98,7 @@ export default function SignupApprovalDetail() {
 
   if (!request) {
     return (
-      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
+      <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="웹 관리자" menus={webAdminMenus}>
         <PageTitle title="가입 신청 상세" description="요청한 가입 신청 정보를 찾을 수 없습니다." />
         <SectionCard title="데이터 없음">
           <Link className="text-link" to="/web-admin/signup-approvals">
@@ -110,7 +110,7 @@ export default function SignupApprovalDetail() {
   }
 
   return (
-    <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="최고관리자" menus={webAdminMenus}>
+    <AdminLayout roleLabel="웹 관리자" consoleTitle="웹 관리자 콘솔" userName="웹 관리자" menus={webAdminMenus}>
       <PageTitle
         title="가입 신청 상세"
         description="아파트 관리자 가입 신청 정보를 확인하고 승인 또는 거절합니다."

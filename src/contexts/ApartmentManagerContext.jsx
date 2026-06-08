@@ -200,6 +200,8 @@ function mapParkingArea(apiParkingZone) {
     status: apiParkingZone.status,
     layoutRow: Number(apiParkingZone.layoutRow),
     layoutColumn: Number(apiParkingZone.layoutColumn),
+    layoutWidth: Number(apiParkingZone.layoutWidth || 1),
+    layoutHeight: Number(apiParkingZone.layoutHeight || 1),
     zoneType: apiParkingZone.zoneType || 'normal',
     statusChangeReason: apiParkingZone.statusChangeReason || '',
   };
@@ -616,6 +618,8 @@ export function ApartmentManagerProvider({ children }) {
       status: parkingArea.status,
       layoutRow: Number(parkingArea.layoutRow),
       layoutColumn: Number(parkingArea.layoutColumn),
+      layoutWidth: Number(parkingArea.layoutWidth || 1),
+      layoutHeight: Number(parkingArea.layoutHeight || 1),
       zoneType: parkingArea.zoneType || 'normal',
       statusChangeReason: parkingArea.statusChangeReason || '',
     });
@@ -627,8 +631,14 @@ export function ApartmentManagerProvider({ children }) {
     await refreshParkingData();
   };
 
-  const updateParkingAreaLayout = async (id, layoutRow, layoutColumn) => {
-    await updateParkingZoneLayout(id, Number(layoutRow), Number(layoutColumn));
+  const updateParkingAreaLayout = async (id, layoutRow, layoutColumn, layoutWidth, layoutHeight) => {
+    await updateParkingZoneLayout(
+      id,
+      Number(layoutRow),
+      Number(layoutColumn),
+      Number(layoutWidth || 1),
+      Number(layoutHeight || 1),
+    );
     await refreshParkingData();
   };
 

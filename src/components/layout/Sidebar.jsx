@@ -46,7 +46,7 @@ export default function Sidebar({ roleLabel, consoleTitle, menus, menuBadges = {
       <div className="brand">
         <div className="brand-mark">p</div>
         <div>
-          <strong>아트파킹</strong>
+          <strong>Park On</strong>
           <span>{consoleTitle}</span>
         </div>
       </div>

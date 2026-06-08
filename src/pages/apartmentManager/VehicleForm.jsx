@@ -96,7 +96,7 @@ export default function VehicleForm() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title={isEditMode ? '차량 정보 수정' : '차량 등록'} description="차량 정보를 불러오고 있습니다." />
@@ -112,7 +112,7 @@ export default function VehicleForm() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title="차량 등록 및 수정" description="차량 정보를 불러오지 못했습니다." />
@@ -133,7 +133,7 @@ export default function VehicleForm() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title="차량 등록 및 수정" description="요청한 차량 정보를 찾을 수 없습니다." />
@@ -151,7 +151,7 @@ export default function VehicleForm() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title="차량 등록" description="차량을 등록하려면 먼저 승인된 주민이 필요합니다." />
@@ -283,7 +283,7 @@ export default function VehicleForm() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle

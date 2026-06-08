@@ -26,7 +26,7 @@ export default function WebAdminInquiryDetail() {
       <AdminLayout
         roleLabel="웹 관리자"
         consoleTitle="웹 관리자 콘솔"
-        userName="최고관리자"
+        userName="웹 관리자"
         menus={webAdminMenus}
       >
         <PageTitle title="문의 상세" description="요청한 문의 정보를 찾을 수 없습니다." />
@@ -59,7 +59,7 @@ export default function WebAdminInquiryDetail() {
     <AdminLayout
       roleLabel="웹 관리자"
       consoleTitle="웹 관리자 콘솔"
-      userName="최고관리자"
+      userName="웹 관리자"
       menus={webAdminMenus}
     >
       <PageTitle

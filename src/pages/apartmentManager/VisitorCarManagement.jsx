@@ -72,7 +72,7 @@ export default function VisitorCarManagement() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="서초 아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle

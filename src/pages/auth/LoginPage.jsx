@@ -117,17 +117,11 @@ export default function LoginPage() {
         <div className="brand auth-brand">
           <div className="brand-mark">P</div>
           <div>
-            <strong>Park on</strong>
+            <strong>Park On</strong>
             <span>아파트 주차 관리 시스템</span>
           </div>
         </div>
         <h1>관리자 로그인</h1>
-        <p>로그인 계정의 역할에 따라 웹 관리자 또는 아파트 관리자 화면으로 이동합니다.</p>
-        <div className="auth-flow-card">
-          <strong>로그인 이동 흐름</strong>
-          <span>웹 관리자 계정: 웹 관리자 대시보드</span>
-          <span>아파트 관리자 계정: 아파트 관리자 대시보드</span>
-        </div>
       </section>
 
       <section className="auth-panel">
@@ -162,7 +156,6 @@ export default function LoginPage() {
         <p className="auth-link-text">
           아파트 관리자 계정이 없나요? <Link to="/signup-request">회원가입 신청</Link>
         </p>
-        <div className="auth-notice">테스트 계정: admin / 1234, qwe123 / qwer1234</div>
       </section>
     </main>
   );

@@ -54,10 +54,12 @@ export async function updateParkingZoneStatus(parkingZoneNo, status, statusChang
   return response.data;
 }
 
-export async function updateParkingZoneLayout(parkingZoneNo, layoutRow, layoutColumn) {
+export async function updateParkingZoneLayout(parkingZoneNo, layoutRow, layoutColumn, layoutWidth, layoutHeight) {
   const response = await apiClient.patch(`/api/parking-zones/${parkingZoneNo}/layout`, {
     layoutRow,
     layoutColumn,
+    layoutWidth,
+    layoutHeight,
   });
 
   return response.data;

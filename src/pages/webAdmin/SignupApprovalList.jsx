@@ -53,7 +53,7 @@ export default function SignupApprovalList() {
     <AdminLayout
       roleLabel="웹 관리자"
       consoleTitle="웹 관리자 콘솔"
-      userName="최고관리자"
+      userName="웹 관리자"
       menus={webAdminMenus}
     >
       <PageTitle

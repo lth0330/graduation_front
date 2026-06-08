@@ -8,18 +8,11 @@ export default function SignupCompletePage() {
         <div className="brand auth-brand">
           <div className="brand-mark">P</div>
           <div>
-            <strong>Park on</strong>
+            <strong>Park On</strong>
             <span>아파트 주차 관리 시스템</span>
           </div>
         </div>
         <h1>가입 신청 완료</h1>
-        <p>웹 관리자 승인 후 아파트 관리자 계정으로 로그인할 수 있습니다.</p>
-        <div className="auth-flow-card signup-flow-card">
-          <strong>승인 상태 안내</strong>
-          <span>신청 정보 접수</span>
-          <span>웹 관리자 승인 대기</span>
-          <span>승인 후 로그인 가능</span>
-        </div>
       </section>
 
       <section className="auth-panel complete-panel">
@@ -29,7 +22,6 @@ export default function SignupCompletePage() {
         <Link to="/login">
           <Button fullWidth>로그인 화면으로</Button>
         </Link>
-        <div className="auth-notice">승인 상태는 웹 관리자 승인 목록에서 대기 상태로 관리됩니다.</div>
       </section>
     </main>
   );

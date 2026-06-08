@@ -165,23 +165,15 @@ export default function SignupPage() {
         <div className="brand auth-brand">
           <div className="brand-mark">P</div>
           <div>
-            <strong>Park on</strong>
+            <strong>Park On</strong>
             <span>아파트 주차 관리 시스템</span>
           </div>
         </div>
         <h1>아파트 관리자 회원가입 신청</h1>
-        <p>아파트 정보와 관리자 계정 정보를 입력하면 웹 관리자 승인 대기 상태가 됩니다.</p>
-        <div className="auth-flow-card signup-flow-card">
-          <strong>신청 처리 흐름</strong>
-          <span>정보 입력 및 신청</span>
-          <span>웹 관리자 승인 대기</span>
-          <span>승인 후 로그인 가능</span>
-        </div>
       </section>
 
       <section className="auth-panel signup-panel">
         <h2>아파트 관리자 회원가입 신청</h2>
-        <p className="auth-panel-desc">아파트 정보와 관리자 계정 정보를 입력하면 승인 대기 상태로 신청됩니다.</p>
         {signupError && <div className="error-box">{signupError}</div>}
 
         <div className="signup-field-grid">
@@ -240,7 +232,7 @@ export default function SignupPage() {
         <FormField label="아파트 이름" error={errors.apartmentName}>
           <TextInput
             error={Boolean(errors.apartmentName)}
-            placeholder="예: 한빛아파트"
+            placeholder="예: 테스트아파트"
             value={form.apartmentName}
             onChange={(event) => handleChange('apartmentName', event.target.value)}
           />
@@ -267,8 +259,6 @@ export default function SignupPage() {
             onChange={(event) => handleChange('careerImage', event.target.files?.[0] || null)}
           />
         </FormField>
-
-        <div className="auth-notice">신청 후 바로 로그인할 수 없으며, 웹 관리자 승인 전까지 승인 대기 상태로 표시됩니다.</div>
 
         <Button fullWidth disabled={isSubmitting} onClick={handleSubmit}>
           {isSubmitting ? '신청 중...' : '신청하기'}

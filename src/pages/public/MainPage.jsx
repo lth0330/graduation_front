@@ -33,7 +33,7 @@ export default function MainPage() {
         <Link className="public-logo" to="/">
           <span className="brand-mark">p</span>
           <span>
-            <strong>아트파킹</strong>
+            <strong>Park On</strong>
           </span>
         </Link>
 
@@ -59,7 +59,7 @@ export default function MainPage() {
           <div className="hero-copy">
             <Link className="hero-notice" to="/signup-request">
               <span>공지</span>
-              아트파킹 웹사이트가 새롭게 오픈했습니다.
+              Park On 웹사이트가 새롭게 오픈했습니다.
               <strong>›</strong>
             </Link>
             <h1>
@@ -69,7 +69,7 @@ export default function MainPage() {
             <p>
               입주민은 편리하게, 관리는 효율적으로
               <br />
-              아트파킹으로 주차 관리의 모든 순간을 간편하게 만드세요.
+              Park On으로 주차 관리의 모든 순간을 간편하게 만드세요.
             </p>
             <div className="hero-actions">
               <Link className="public-button primary large" to="/login">
@@ -82,7 +82,7 @@ export default function MainPage() {
             </div>
           </div>
 
-          <div className="hero-product" aria-label="아트파킹 관리자 화면 미리보기">
+          <div className="hero-product" aria-label="Park On 관리자 화면 미리보기">
             <div className="browser-frame">
               <div className="browser-topbar">
                 <div className="window-dots" aria-hidden="true">
@@ -91,7 +91,7 @@ export default function MainPage() {
                   <span />
                 </div>
                 <div className="address-bar">
-                  <span>artparking.com</span>
+                  <span>park-on.local</span>
                 </div>
                 <span className="browser-menu" aria-hidden="true">⋮</span>
               </div>
@@ -100,7 +100,7 @@ export default function MainPage() {
                 <aside className="preview-sidebar">
                   <strong>
                     <span className="mini-logo">p</span>
-                    아트파킹
+                    Park On
                   </strong>
                   {['홈', '차량 관리', '주차 현황', '출입 기록', '공지사항', '설정'].map((menu, index) => (
                     <span className={index === 0 ? 'is-active' : ''} key={menu}>
@@ -126,7 +126,7 @@ export default function MainPage() {
                     </div>
                     <div>
                       <span>주차 가능 대수</span>
-                      <strong className="is-blue">312 대</strong>
+                      <strong className="is-accent">312 대</strong>
                     </div>
                   </div>
 

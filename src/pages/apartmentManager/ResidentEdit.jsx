@@ -95,7 +95,7 @@ export default function ResidentEdit() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title="주민 정보 수정" description="주민 정보를 불러오고 있습니다." />
@@ -111,7 +111,7 @@ export default function ResidentEdit() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title="주민 정보 수정" description="주민 정보를 불러오지 못했습니다." />
@@ -132,7 +132,7 @@ export default function ResidentEdit() {
       <AdminLayout
         roleLabel="아파트 관리자"
         consoleTitle="아파트 관리자 콘솔"
-        userName="한빛아파트 관리자"
+        userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
         <PageTitle title="주민 정보 수정" description="요청한 주민 정보를 찾을 수 없습니다." />
@@ -261,7 +261,7 @@ export default function ResidentEdit() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle

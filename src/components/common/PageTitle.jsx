@@ -1,8 +1,7 @@
-export default function PageTitle({ title, description }) {
+export default function PageTitle({ title }) {
   return (
     <div className="page-title">
       <h1>{title}</h1>
-      <p>{description}</p>
     </div>
   );
 }

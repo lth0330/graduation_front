@@ -112,7 +112,7 @@ export default function MyPage() {
     <AdminLayout
       roleLabel="아파트 관리자"
       consoleTitle="아파트 관리자 콘솔"
-      userName="한빛아파트 관리자"
+      userName="아파트 관리자"
       menus={apartmentManagerMenus}
     >
       <PageTitle title="아파트 관리자 정보" description="아파트 관리자 계정과 아파트 인증 정보를 확인합니다." />
