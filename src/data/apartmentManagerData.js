@@ -197,6 +197,10 @@ export const parkingAreas = [
     areaNumber: 'A-B1-001',
     location: 'A동 지하주차장 B1 입구 옆',
     status: 'empty',
+    layoutRow: 1,
+    layoutColumn: 1,
+    layoutWidth: 1,
+    layoutHeight: 2,
   },
   {
     id: 'AREA-1002',
@@ -204,6 +208,10 @@ export const parkingAreas = [
     areaNumber: 'A-B1-002',
     location: 'A동 지하주차장 B1 중앙',
     status: 'occupied',
+    layoutRow: 1,
+    layoutColumn: 2,
+    layoutWidth: 1,
+    layoutHeight: 2,
   },
   {
     id: 'AREA-1003',
@@ -211,6 +219,10 @@ export const parkingAreas = [
     areaNumber: 'A-B1-003',
     location: 'A동 지하주차장 B1 엘리베이터 근처',
     status: 'empty',
+    layoutRow: 1,
+    layoutColumn: 4,
+    layoutWidth: 1,
+    layoutHeight: 2,
   },
   {
     id: 'AREA-1004',
@@ -218,6 +230,10 @@ export const parkingAreas = [
     areaNumber: 'A-B1-004',
     location: 'A동 지하주차장 B1 전기차 구역',
     status: 'disabled',
+    layoutRow: 1,
+    layoutColumn: 5,
+    layoutWidth: 1,
+    layoutHeight: 2,
   },
   {
     id: 'AREA-2001',
@@ -225,6 +241,10 @@ export const parkingAreas = [
     areaNumber: 'A-B2-001',
     location: 'A동 지하주차장 B2 입구 옆',
     status: 'occupied',
+    layoutRow: 1,
+    layoutColumn: 1,
+    layoutWidth: 2,
+    layoutHeight: 1,
   },
 ];
 
