@@ -907,6 +907,18 @@ button,
   border-color: var(--color-red);
 }
 
+.range-input-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.range-input-group span {
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
 .textarea {
   min-height: 120px;
   resize: vertical;
