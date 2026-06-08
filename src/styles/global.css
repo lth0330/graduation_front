@@ -452,7 +452,9 @@ button,
   place-items: center;
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  font: inherit;
   font-weight: 800;
+  text-align: center;
 }
 
 .parking-spot.empty {
@@ -468,6 +470,52 @@ button,
 .parking-spot.disabled {
   background: #fef2f2;
   color: var(--color-red);
+}
+
+.parking-spot.error {
+  border-color: #f59e0b;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.parking-spot.is-clickable {
+  cursor: pointer;
+}
+
+.parking-spot.is-clickable:hover {
+  border-color: #ea580c;
+  background: #ffedd5;
+}
+
+.parking-error-modal {
+  width: min(720px, 100%);
+}
+
+.parking-error-image {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  object-fit: contain;
+  background: #111827;
+}
+
+.parking-error-empty {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
+.parking-error-meta {
+  margin-top: 12px;
+  color: var(--color-muted);
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .auth-page {

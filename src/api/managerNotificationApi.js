@@ -6,6 +6,12 @@ export async function getManagerNotifications() {
   return response.data;
 }
 
+export async function getManagerNotification(notificationNo) {
+  const response = await apiClient.get(`/api/manager-notifications/${notificationNo}`);
+
+  return response.data;
+}
+
 export async function markManagerNotificationAsRead(notificationNo) {
   const response = await apiClient.patch(`/api/manager-notifications/${notificationNo}/read`);
 

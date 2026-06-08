@@ -34,6 +34,7 @@ import {
   getMyManagerInquiries,
 } from '../api/inquiryApi.js';
 import {
+  getManagerNotification as getManagerNotificationApi,
   getManagerNotifications,
   markManagerNotificationAsRead as markManagerNotificationAsReadApi,
 } from '../api/managerNotificationApi.js';
@@ -49,6 +50,14 @@ const statusMap = {
   PENDING: 'pending',
   APPROVED: 'approved',
   REJECTED: 'rejected',
+};
+
+const parkingZoneStatusMap = {
+  EMPTY: 'empty',
+  OCCUPIED: 'occupied',
+  DISABLED: 'disabled',
+  ERROR: 'error',
+  UNKNOWN: 'unknown',
 };
 
 const emptyApartmentManagerProfile = {
@@ -190,6 +199,18 @@ function mapParkingLot(apiParkingLot) {
 }
 
 function mapParkingArea(apiParkingZone) {
+  const apiStatus = String(apiParkingZone.status || '');
+  const errorImage =
+    apiParkingZone.errorImageUrl ||
+    apiParkingZone.errorImagePath ||
+    apiParkingZone.errorImage ||
+    apiParkingZone.imageUrl ||
+    apiParkingZone.imagePath ||
+    apiParkingZone.captureImageUrl ||
+    apiParkingZone.captureImagePath ||
+    '';
+  const errorImageBase64 = apiParkingZone.errorImageBase64 || apiParkingZone.imageBase64 || '';
+
   return {
     id: String(apiParkingZone.parkingZoneNo),
     parkingZoneNo: apiParkingZone.parkingZoneNo,
@@ -197,11 +218,14 @@ function mapParkingArea(apiParkingZone) {
     parkingLotNo: apiParkingZone.parkingLotNo,
     areaNumber: apiParkingZone.areaNumber,
     location: apiParkingZone.location,
-    status: apiParkingZone.status,
+    status: parkingZoneStatusMap[apiStatus.toUpperCase()] || apiStatus,
     layoutRow: Number(apiParkingZone.layoutRow),
     layoutColumn: Number(apiParkingZone.layoutColumn),
     layoutWidth: Number(apiParkingZone.layoutWidth || 2),
     layoutHeight: Number(apiParkingZone.layoutHeight || 1),
+    currentCarNumber: apiParkingZone.currentCarNumber || '',
+    errorImage: errorImageBase64 ? `data:image/jpeg;base64,${errorImageBase64}` : errorImage,
+    errorMessage: apiParkingZone.errorMessage || apiParkingZone.statusChangeReason || '',
     zoneType: apiParkingZone.zoneType || 'normal',
     statusChangeReason: apiParkingZone.statusChangeReason || '',
   };
@@ -226,8 +250,30 @@ function mapManagerNotification(apiNotification) {
     message: apiNotification.message,
     referenceType: apiNotification.referenceType || '',
     referenceId: apiNotification.referenceId,
+    parkingHistory: mapParkingHistory(apiNotification.parkingHistory),
     read: Boolean(apiNotification.read),
     createdAt: formatDate(apiNotification.createdAt),
+  };
+}
+
+function mapParkingHistory(apiParkingHistory) {
+  if (!apiParkingHistory) {
+    return null;
+  }
+
+  return {
+    historyId: apiParkingHistory.historyId,
+    parkingZoneNo: apiParkingHistory.parkingZoneNo,
+    parkingLotNo: apiParkingHistory.parkingLotNo,
+    apartmentNo: apiParkingHistory.apartmentNo,
+    zone: apiParkingHistory.zone,
+    plate: apiParkingHistory.plate,
+    entryTime: apiParkingHistory.entryTime,
+    exitTime: apiParkingHistory.exitTime,
+    status: apiParkingHistory.status,
+    parkType: apiParkingHistory.parkType,
+    linkedZone: apiParkingHistory.linkedZone,
+    imagePath: apiParkingHistory.imagePath || '',
   };
 }
 
@@ -721,6 +767,11 @@ export function ApartmentManagerProvider({ children }) {
     return mapManagerNotification(updatedNotification);
   };
 
+  const getManagerNotificationDetail = async (notificationNo) => {
+    const notification = await getManagerNotificationApi(notificationNo);
+    return mapManagerNotification(notification);
+  };
+
   const refreshResidentParkingInquiries = async ({ silent = false } = {}) => {
     try {
       if (!silent) {
@@ -819,6 +870,7 @@ export function ApartmentManagerProvider({ children }) {
       managerNotificationsError,
       refreshManagerNotifications,
       markManagerNotificationAsRead,
+      getManagerNotificationDetail,
       residentParkingInquiries,
       isResidentParkingInquiriesLoading,
       residentParkingInquiriesError,

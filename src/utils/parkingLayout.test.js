@@ -3,7 +3,10 @@ import test from 'node:test';
 
 import {
   buildParkingPlacementFromRange,
+  getParkingSpotDisplayText,
   getParkingRangeFromPlacement,
+  isParkingImageInspectableArea,
+  isParkingImageInspectableStatus,
   isValidParkingRange,
 } from './parkingLayout.js';
 
@@ -46,6 +49,52 @@ test('끝 행이나 끝 열이 시작보다 작으면 잘못된 범위로 본다
       rowEnd: '1',
       columnStart: '1',
       columnEnd: '1',
+    }),
+    false,
+  );
+});
+
+test('주차 중이고 차량번호가 있으면 상태 화면에 차량번호를 표시한다', () => {
+  assert.equal(
+    getParkingSpotDisplayText({
+      areaNumber: 'A1',
+      status: 'occupied',
+      currentCarNumber: '12가3456',
+    }),
+    '12가3456',
+  );
+});
+
+test('주차 중이어도 차량번호가 없으면 구역 번호를 표시한다', () => {
+  assert.equal(
+    getParkingSpotDisplayText({
+      areaNumber: 'A1',
+      status: 'occupied',
+      currentCarNumber: '',
+    }),
+    'A1',
+  );
+});
+
+test('오류와 unknown 상태는 이미지 확인 대상으로 본다', () => {
+  assert.equal(isParkingImageInspectableStatus('error'), true);
+  assert.equal(isParkingImageInspectableStatus('unknown'), true);
+  assert.equal(isParkingImageInspectableStatus('occupied'), false);
+});
+
+test('번호판이 UNKNOWN인 주차칸은 이미지 확인 대상으로 본다', () => {
+  assert.equal(
+    isParkingImageInspectableArea({
+      status: 'occupied',
+      currentCarNumber: 'UNKNOWN',
+    }),
+    true,
+  );
+
+  assert.equal(
+    isParkingImageInspectableArea({
+      status: 'occupied',
+      currentCarNumber: '12가3456',
     }),
     false,
   );

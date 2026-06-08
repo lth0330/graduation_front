@@ -63,3 +63,29 @@ export function formatParkingRange(area) {
   const range = getParkingRangeFromPlacement(area);
   return `행 ${range.rowStart}~${range.rowEnd} / 열 ${range.columnStart}~${range.columnEnd}`;
 }
+
+export function getParkingSpotDisplayText(area) {
+  const currentCarNumber = String(area.currentCarNumber || '').trim();
+
+  if (area.status === 'occupied' && currentCarNumber) {
+    return currentCarNumber;
+  }
+
+  return area.areaNumber;
+}
+
+export function isParkingImageInspectableStatus(status) {
+  return ['error', 'unknown'].includes(String(status || '').toLowerCase());
+}
+
+function isUnknownCarNumber(currentCarNumber) {
+  return String(currentCarNumber || '').trim().toUpperCase() === 'UNKNOWN';
+}
+
+export function isParkingImageInspectableArea(area) {
+  return (
+    isParkingImageInspectableStatus(area?.status) ||
+    isUnknownCarNumber(area?.currentCarNumber) ||
+    Boolean(area?.errorImage)
+  );
+}

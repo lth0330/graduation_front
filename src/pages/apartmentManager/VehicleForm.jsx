@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../../components/common/Button.jsx';
-import ConfirmModal from '../../components/feedback/ConfirmModal.jsx';
 import EmptyState from '../../components/feedback/EmptyState.jsx';
 import LoadingState from '../../components/feedback/LoadingState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
@@ -52,7 +51,6 @@ export default function VehicleForm() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     setForm(initialForm);
@@ -269,7 +267,6 @@ export default function VehicleForm() {
     try {
       setIsSubmitting(true);
       await deleteVehicle(vehicle.id);
-      setIsDeleteModalOpen(false);
       navigate('/apartment-manager/vehicles');
     } catch (error) {
       setToastType('error');
@@ -362,8 +359,8 @@ export default function VehicleForm() {
             <Button variant="secondary">취소</Button>
           </Link>
           {isEditMode && (
-            <Button variant="danger" disabled={isSubmitting} onClick={() => setIsDeleteModalOpen(true)}>
-              삭제
+            <Button variant="danger" disabled={isSubmitting} onClick={handleDelete}>
+              {isSubmitting ? '삭제 중...' : '삭제'}
             </Button>
           )}
           <Button disabled={isSubmitting} onClick={handleSave}>
@@ -372,15 +369,6 @@ export default function VehicleForm() {
         </div>
       </SectionCard>
 
-      <ConfirmModal
-        open={isDeleteModalOpen}
-        title="정말 삭제하시겠습니까?"
-        description="삭제된 차량 정보는 복구할 수 없습니다."
-        confirmLabel="삭제"
-        danger
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-      />
       <Toast message={toastMessage} type={toastType} onClose={() => setToastMessage('')} />
     </AdminLayout>
   );

@@ -11,19 +11,7 @@ import SectionCard from '../../components/common/SectionCard.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
-
-function getUploadedFileUrl(path) {
-  if (!path) {
-    return '';
-  }
-
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path;
-  }
-
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-  return `${baseUrl}/${path.replace(/^\/+/, '')}`;
-}
+import { getUploadedFileUrl } from '../../utils/fileUrl.js';
 
 export default function SignupApprovalDetail() {
   const { id } = useParams();
