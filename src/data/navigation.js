@@ -19,7 +19,7 @@ export const apartmentManagerMenus = [
   {
     label: '주차 관리',
     children: [
-      { label: '차량 정보 관리', path: '/apartment-manager/vehicles' },
+      { label: '입주민 차량 정보 관리', path: '/apartment-manager/vehicles' },
       { label: '방문 차량 관리', path: '/apartment-manager/visitor-cars' },
       { label: '주차장 관리', path: '/apartment-manager/parking-lots' },
       { label: '주차 구역 관리', path: '/apartment-manager/parking-areas' },

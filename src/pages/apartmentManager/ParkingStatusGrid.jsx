@@ -23,7 +23,7 @@ const statusClassMap = {
   unknown: 'error',
 };
 
-const issueNotificationTypes = ['ocr_error', 'gate_alert', 'abnormal_parking'];
+const imageNotificationTypes = ['ocr_error', 'abnormal_parking'];
 
 function findAreaIssueNotification(area, notifications) {
   const areaNumber = String(area.areaNumber || '').trim();
@@ -33,33 +33,44 @@ function findAreaIssueNotification(area, notifications) {
   }
 
   return notifications.find((notification) => {
-    if (!issueNotificationTypes.includes(notification.notificationType)) {
+    if (
+      !imageNotificationTypes.includes(notification.notificationType) ||
+      notification.referenceType !== 'parking_history'
+    ) {
       return false;
     }
 
     const historyZone = String(notification.parkingHistory?.zone || '').trim();
+    if (historyZone) {
+      return historyZone === areaNumber;
+    }
+
     const searchableText = [
       notification.title,
       notification.message,
-      notification.referenceType,
     ]
       .filter(Boolean)
       .join(' ');
 
-    return historyZone === areaNumber || searchableText.includes(areaNumber);
+    return searchableText.includes(areaNumber);
   }) || null;
 }
 
 function mergeAreaWithNotificationDetail(area, notificationDetail) {
   const parkingHistory = notificationDetail?.parkingHistory;
+  const areaNumber = String(area.areaNumber || '').trim();
+  const historyZone = String(parkingHistory?.zone || '').trim();
+  const isSameAreaHistory = Boolean(parkingHistory) && (!historyZone || historyZone === areaNumber);
 
   return {
     ...area,
-    relatedNotificationNo: notificationDetail?.notificationNo || area.relatedNotificationNo,
-    errorImage: area.errorImage || parkingHistory?.imagePath || '',
-    errorMessage: notificationDetail?.message || area.errorMessage,
-    errorPlate: parkingHistory?.plate || area.currentCarNumber,
-    errorEntryTime: parkingHistory?.entryTime || '',
+    relatedNotificationNo: isSameAreaHistory
+      ? notificationDetail?.notificationNo || area.relatedNotificationNo
+      : area.relatedNotificationNo,
+    errorImage: area.errorImage || (isSameAreaHistory ? parkingHistory?.imagePath : '') || '',
+    errorMessage: isSameAreaHistory ? notificationDetail?.message || area.errorMessage : area.errorMessage,
+    errorPlate: isSameAreaHistory ? parkingHistory?.plate || area.currentCarNumber : area.currentCarNumber,
+    errorEntryTime: isSameAreaHistory ? parkingHistory?.entryTime || '' : '',
   };
 }
 
@@ -67,8 +78,10 @@ export default function ParkingStatusGrid() {
   const {
     parkingLots,
     parkingAreas,
+    isParkingLoading,
     refreshParkingData,
     managerNotifications,
+    refreshManagerNotifications,
     getManagerNotificationDetail,
   } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
@@ -99,6 +112,14 @@ export default function ParkingStatusGrid() {
   ).length;
   const selectedErrorImageUrl = getUploadedFileUrl(selectedErrorArea?.errorImage);
   const selectedErrorImagePath = String(selectedErrorArea?.errorImage || '').trim();
+  const hasSelectedErrorImage = Boolean(selectedErrorImageUrl) && !errorImageError;
+
+  const handleManualRefresh = async () => {
+    await Promise.all([
+      refreshParkingData(),
+      refreshManagerNotifications({ silent: true }),
+    ]);
+  };
 
   const handleInspectArea = async (area) => {
     const matchedNotification = findAreaIssueNotification(area, managerNotifications);
@@ -106,7 +127,7 @@ export default function ParkingStatusGrid() {
     setSelectedErrorArea({
       ...area,
       relatedNotificationNo: matchedNotification?.notificationNo,
-      errorMessage: matchedNotification?.message || area.errorMessage,
+      errorMessage: area.errorMessage,
     });
     setErrorImageError('');
 
@@ -195,6 +216,22 @@ export default function ParkingStatusGrid() {
               ))}
             </SelectBox>
           </label>
+          <div className="parking-refresh-control">
+            <span>5초마다 자동 갱신</span>
+            <Button
+              className="parking-refresh-button"
+              variant="secondary"
+              size="small"
+              onClick={handleManualRefresh}
+              disabled={isParkingLoading}
+              aria-label="주차 상태 수동 새로고침"
+            >
+              <span className={isParkingLoading ? 'refresh-symbol is-spinning' : 'refresh-symbol'} aria-hidden="true">
+                ↻
+              </span>
+              {isParkingLoading ? '갱신 중' : '새로고침'}
+            </Button>
+          </div>
         </div>
         <div className="parking-grid">
           {visibleAreas.map(renderParkingSpot)}
@@ -207,20 +244,25 @@ export default function ParkingStatusGrid() {
             <h2 id="parking-error-title">{selectedErrorArea.areaNumber} 확인 이미지</h2>
             <p>
               {selectedErrorArea.errorMessage ||
-                '주차칸 상태를 확인해야 하는 시점의 이미지를 확인합니다.'}
+                '주차칸 상태 확인 이미지와 연결된 주차 이력을 조회합니다.'}
             </p>
 
-            {selectedErrorImageUrl ? (
+            {hasSelectedErrorImage ? (
               <img
                 className="parking-error-image"
                 src={selectedErrorImageUrl}
                 alt={`${selectedErrorArea.areaNumber} 주차칸 확인 이미지`}
+                onLoad={() => setErrorImageError('')}
+                onError={() => {
+                  setErrorImageError('이미지 파일을 불러오지 못했습니다. 서버 uploads 경로와 파일 존재 여부를 확인하세요.');
+                }}
               />
             ) : isErrorImageLoading ? (
               <div className="parking-error-empty">확인 이미지를 불러오는 중입니다.</div>
             ) : (
               <div className="parking-error-empty">
-                {errorImageError || '표시할 오류 이미지가 없습니다.'}
+                {errorImageError ||
+                  '저장된 이미지 경로가 없습니다. Python이 image_base64를 보내고 Spring Boot가 image_path를 저장해야 표시됩니다.'}
               </div>
             )}
 
@@ -231,14 +273,14 @@ export default function ParkingStatusGrid() {
               </p>
             )}
 
-            {!selectedErrorImageUrl && selectedErrorImagePath && (
+            {(!selectedErrorImageUrl || errorImageError) && selectedErrorImagePath && (
               <p className="parking-error-meta">
                 저장 경로: {selectedErrorImagePath}
               </p>
             )}
 
             <div className="modal-actions">
-              {selectedErrorImageUrl && (
+              {hasSelectedErrorImage && (
                 <a className="text-link" href={selectedErrorImageUrl} target="_blank" rel="noreferrer">
                   새 탭에서 열기
                 </a>

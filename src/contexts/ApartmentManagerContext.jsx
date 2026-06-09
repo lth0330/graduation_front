@@ -3,6 +3,7 @@ import {
   approveResidentSignupRequest as approveResidentSignupRequestApi,
   createResident as createResidentApi,
   createVehicle as createVehicleApi,
+  deleteVisitorCar as deleteVisitorCarApi,
   deleteVehicle as deleteVehicleApi,
   deleteResident as deleteResidentApi,
   getApartmentManagerMyPage,
@@ -15,6 +16,7 @@ import {
   rejectResidentSignupRequest as rejectResidentSignupRequestApi,
   updateApartmentManagerProfile as updateApartmentManagerProfileApi,
   updateResident as updateResidentApi,
+  updateVisitorCarExpiration as updateVisitorCarExpirationApi,
   updateVehicle as updateVehicleApi,
 } from '../api/apartmentManagerApi.js';
 import {
@@ -79,6 +81,22 @@ function formatDate(value) {
   }
 
   return String(value).slice(0, 10);
+}
+
+function formatDateTimeInput(value) {
+  if (!value) {
+    return '';
+  }
+
+  return String(value).slice(0, 16);
+}
+
+function formatDateTimeDisplay(value) {
+  if (!value) {
+    return '';
+  }
+
+  return String(value).replace('T', ' ').slice(0, 16);
 }
 
 function getStoredApartmentNo() {
@@ -179,9 +197,10 @@ function mapVisitorCar(apiVisitorCar) {
     ownerName: apiVisitorCar.ownerName,
     building: apiVisitorCar.building,
     unit: apiVisitorCar.unit,
-    registeredAt: formatDate(apiVisitorCar.registeredAt),
+    registeredAt: formatDateTimeDisplay(apiVisitorCar.registeredAt),
     parkedAt: formatDate(apiVisitorCar.parkedAt),
-    expiresAt: formatDate(apiVisitorCar.expiresAt),
+    expiresAt: formatDateTimeDisplay(apiVisitorCar.expiresAt),
+    expiresAtInput: formatDateTimeInput(apiVisitorCar.expiresAt),
     status: apiVisitorCar.parkedAt ? 'parked' : 'waiting',
   };
 }
@@ -576,6 +595,16 @@ export function ApartmentManagerProvider({ children }) {
     }
   }, []);
 
+  const updateVisitorCarExpiration = async (id, expiresAt) => {
+    await updateVisitorCarExpirationApi(id, getStoredApartmentNo(), expiresAt);
+    await refreshVisitorCars();
+  };
+
+  const deleteVisitorCar = async (id) => {
+    await deleteVisitorCarApi(id, getStoredApartmentNo());
+    await refreshVisitorCars();
+  };
+
   const isDuplicateCarNumber = (carNumber, currentVehicleId) =>
     vehicles.some((vehicle) => vehicle.carNumber === carNumber && vehicle.id !== currentVehicleId);
 
@@ -838,6 +867,8 @@ export function ApartmentManagerProvider({ children }) {
       isVisitorCarsLoading,
       visitorCarsError,
       refreshVisitorCars,
+      updateVisitorCarExpiration,
+      deleteVisitorCar,
       findVehicleById: (id) => vehicles.find((vehicle) => vehicle.id === id),
       getVehicleDetail,
       createVehicle,

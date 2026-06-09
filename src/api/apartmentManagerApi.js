@@ -116,6 +116,22 @@ export async function getVisitorCars(apartmentNo) {
   return response.data;
 }
 
+export async function updateVisitorCarExpiration(visitorCarNo, apartmentNo, expiresAt) {
+  const response = await apiClient.patch(`/api/visitor-cars/${visitorCarNo}/expires-at`, {
+    expiresAt,
+  }, {
+    params: { apartmentNo },
+  });
+
+  return response.data;
+}
+
+export async function deleteVisitorCar(visitorCarNo, apartmentNo) {
+  await apiClient.delete(`/api/visitor-cars/${visitorCarNo}`, {
+    params: { apartmentNo },
+  });
+}
+
 export async function createVehicle(vehicle) {
   const response = await apiClient.post('/api/vehicles', vehicle);
 
