@@ -99,3 +99,14 @@ test('번호판이 UNKNOWN인 주차칸은 이미지 확인 대상으로 본다'
     false,
   );
 });
+
+test('빈 주차칸은 이전 UNKNOWN 번호판이나 이미지가 남아도 이미지 확인 대상으로 보지 않는다', () => {
+  assert.equal(
+    isParkingImageInspectableArea({
+      status: 'empty',
+      currentCarNumber: 'UNKNOWN',
+      errorImage: '/uploads/parking-snapshots/old.jpg',
+    }),
+    false,
+  );
+});

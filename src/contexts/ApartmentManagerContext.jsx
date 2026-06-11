@@ -41,10 +41,15 @@ import {
   markManagerNotificationAsRead as markManagerNotificationAsReadApi,
 } from '../api/managerNotificationApi.js';
 import {
+  confirmPlateCorrectionReview as confirmPlateCorrectionReviewApi,
+  getPendingPlateCorrectionReviews,
+} from '../api/plateCorrectionReviewApi.js';
+import {
   answerResidentInquiry as answerResidentInquiryApi,
   getResidentInquiries,
 } from '../api/residentInquiryApi.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
+import { loadManagerNotificationResources } from '../utils/managerNotificationRefresh.js';
 
 const ApartmentManagerContext = createContext(null);
 
@@ -296,6 +301,25 @@ function mapParkingHistory(apiParkingHistory) {
   };
 }
 
+function mapPlateCorrectionReview(apiReview) {
+  return {
+    id: String(apiReview.reviewId),
+    reviewId: apiReview.reviewId,
+    apartmentNo: apiReview.apartmentNo,
+    historyId: apiReview.historyId,
+    zone: apiReview.zone,
+    ocrPlate: apiReview.ocrPlate || '',
+    matchedPlate: apiReview.matchedPlate || '',
+    selectedPlate: apiReview.selectedPlate || '',
+    candidateList: Array.isArray(apiReview.candidateList) ? apiReview.candidateList : [],
+    distance: apiReview.distance,
+    status: apiReview.status,
+    createdAt: formatDateTimeDisplay(apiReview.createdAt),
+    resolvedAt: formatDateTimeDisplay(apiReview.resolvedAt),
+    parkingHistory: mapParkingHistory(apiReview.parkingHistory),
+  };
+}
+
 function mapManagerInquiry(apiInquiry) {
   return {
     id: String(apiInquiry.inquiryNo),
@@ -363,6 +387,8 @@ export function ApartmentManagerProvider({ children }) {
   const [managerNotifications, setManagerNotifications] = useState([]);
   const [isManagerNotificationsLoading, setIsManagerNotificationsLoading] = useState(false);
   const [managerNotificationsError, setManagerNotificationsError] = useState('');
+  const [plateCorrectionReviews, setPlateCorrectionReviews] = useState([]);
+  const [plateCorrectionReviewsError, setPlateCorrectionReviewsError] = useState('');
   // 입주민 주차 문의 목록은 백엔드 API 응답을 기준으로 관리합니다.
   const [residentParkingInquiries, setResidentParkingInquiries] = useState([]);
   const [isResidentParkingInquiriesLoading, setIsResidentParkingInquiriesLoading] = useState(false);
@@ -769,14 +795,25 @@ export function ApartmentManagerProvider({ children }) {
       if (!silent) {
         setIsManagerNotificationsLoading(true);
         setManagerNotificationsError('');
+        setPlateCorrectionReviewsError('');
       }
 
-      const notifications = await getManagerNotifications();
-      setManagerNotifications(notifications.map(mapManagerNotification));
+      const result = await loadManagerNotificationResources({
+        getNotifications: getManagerNotifications,
+        getPlateCorrectionReviews: getPendingPlateCorrectionReviews,
+        mapNotification: mapManagerNotification,
+        mapPlateCorrectionReview: mapPlateCorrectionReview,
+      });
+
+      setManagerNotifications(result.managerNotifications);
+      setPlateCorrectionReviews(result.plateCorrectionReviews);
+      setManagerNotificationsError(result.managerNotificationsError);
+      setPlateCorrectionReviewsError(result.plateCorrectionReviewsError);
     } catch (error) {
       if (!silent) {
         setManagerNotificationsError('관리자 알림 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
       }
+      setPlateCorrectionReviewsError('번호판 확인 필요 목록을 불러오지 못했습니다.');
     } finally {
       if (!silent) {
         setIsManagerNotificationsLoading(false);
@@ -799,6 +836,15 @@ export function ApartmentManagerProvider({ children }) {
   const getManagerNotificationDetail = async (notificationNo) => {
     const notification = await getManagerNotificationApi(notificationNo);
     return mapManagerNotification(notification);
+  };
+
+  const confirmPlateCorrectionReview = async (reviewId, plate) => {
+    const result = await confirmPlateCorrectionReviewApi(reviewId, plate);
+    await Promise.all([
+      refreshManagerNotifications({ silent: true }),
+      refreshParkingData({ silent: true }),
+    ]);
+    return result;
   };
 
   const refreshResidentParkingInquiries = async ({ silent = false } = {}) => {
@@ -899,9 +945,12 @@ export function ApartmentManagerProvider({ children }) {
       managerNotifications,
       isManagerNotificationsLoading,
       managerNotificationsError,
+      plateCorrectionReviews,
+      plateCorrectionReviewsError,
       refreshManagerNotifications,
       markManagerNotificationAsRead,
       getManagerNotificationDetail,
+      confirmPlateCorrectionReview,
       residentParkingInquiries,
       isResidentParkingInquiriesLoading,
       residentParkingInquiriesError,
@@ -939,6 +988,8 @@ export function ApartmentManagerProvider({ children }) {
       managerNotifications,
       isManagerNotificationsLoading,
       managerNotificationsError,
+      plateCorrectionReviews,
+      plateCorrectionReviewsError,
       residentParkingInquiries,
       isResidentParkingInquiriesLoading,
       residentParkingInquiriesError,

@@ -83,6 +83,10 @@ function isUnknownCarNumber(currentCarNumber) {
 }
 
 export function isParkingImageInspectableArea(area) {
+  if (String(area?.status || '').toLowerCase() === 'empty') {
+    return false;
+  }
+
   return (
     isParkingImageInspectableStatus(area?.status) ||
     isUnknownCarNumber(area?.currentCarNumber) ||
