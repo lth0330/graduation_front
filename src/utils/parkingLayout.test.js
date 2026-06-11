@@ -54,14 +54,14 @@ test('끝 행이나 끝 열이 시작보다 작으면 잘못된 범위로 본다
   );
 });
 
-test('주차 중이고 차량번호가 있으면 상태 화면에 차량번호를 표시한다', () => {
+test('주차 중이고 차량번호가 있으면 주차칸 번호와 차량번호를 함께 표시한다', () => {
   assert.equal(
     getParkingSpotDisplayText({
       areaNumber: 'A1',
       status: 'occupied',
       currentCarNumber: '12가3456',
     }),
-    '12가3456',
+    'A1\n12가3456',
   );
 });
 

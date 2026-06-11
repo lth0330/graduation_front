@@ -14,6 +14,7 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { calculateGateOccupancy } from '../../utils/gateOccupancy.js';
 import { usePagination } from '../../utils/pagination.js';
 
 const columns = [
@@ -32,6 +33,7 @@ const columns = [
 export default function ParkingLotManagement() {
   const {
     parkingLots,
+    parkingAreas,
     isParkingLoading,
     parkingError,
     refreshParkingData,
@@ -48,11 +50,7 @@ export default function ParkingLotManagement() {
   const [toastMessage, setToastMessage] = useState('');
   const [savingPolicyField, setSavingPolicyField] = useState('');
   const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(parkingLots, 5);
-  const totalSpaces = parkingLots.reduce((sum, parkingLot) => sum + parkingLot.totalSpaces, 0);
-  const usedSpaces = parkingLots.reduce((sum, parkingLot) => sum + parkingLot.usedSpaces, 0);
-  const availableSpaces = totalSpaces - usedSpaces;
-  const occupancyRate = totalSpaces > 0 ? usedSpaces / totalSpaces : 0;
-  const occupancyRateLabel = totalSpaces > 0 ? `${Math.round(occupancyRate * 100)}%` : '-';
+  const { totalSpaces, availableSpaces, occupancyRateLabel } = calculateGateOccupancy(parkingAreas);
   const gateModeLabel = gatePolicy.gateForceOpenEnabled ? '상시개방 모드' : '번호판 자동제어';
   const gateModeDescription = gatePolicy.gateForceOpenEnabled
     ? '번호판과 주차장 점유율 조건을 보지 않고 차단기를 열린 상태로 유지합니다.'
@@ -145,8 +143,8 @@ export default function ParkingLotManagement() {
 
       <div className="metric-grid">
         <MetricCard label="전체 주차장" value={`${parkingLots.length}곳`} helper="등록된 주차장 수" />
-        <MetricCard label="전체 주차면" value={`${totalSpaces}면`} helper="전체 운영 주차면" />
-        <MetricCard label="사용 가능" value={`${availableSpaces}면`} helper="현재 여유 주차면" />
+        <MetricCard label="일반 주차면" value={`${totalSpaces}면`} helper="차단기 혼잡도 계산 대상" />
+        <MetricCard label="사용 가능" value={`${availableSpaces}면`} helper="통로 주차칸 제외 여유 면수" />
       </div>
 
       <SectionCard title="차단기 운행 설정" description="방문차량 입차 제한과 상시개방 모드를 관리합니다.">

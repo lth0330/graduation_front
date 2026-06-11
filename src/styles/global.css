@@ -454,7 +454,9 @@ button,
   border-radius: 8px;
   font: inherit;
   font-weight: 800;
+  line-height: 1.25;
   text-align: center;
+  white-space: pre-line;
 }
 
 .parking-spot.empty {

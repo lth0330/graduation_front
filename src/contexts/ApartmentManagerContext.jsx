@@ -50,6 +50,7 @@ import {
 } from '../api/residentInquiryApi.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
 import { loadManagerNotificationResources } from '../utils/managerNotificationRefresh.js';
+import { resolveVisitorCarStatus } from '../utils/visitorCarStatus.js';
 
 const ApartmentManagerContext = createContext(null);
 
@@ -194,6 +195,8 @@ function mapVehicle(apiVehicle) {
 }
 
 function mapVisitorCar(apiVisitorCar) {
+  const gateEnteredAt = formatDateTimeDisplay(apiVisitorCar.gateEnteredAt);
+  const parkedAt = formatDateTimeDisplay(apiVisitorCar.parkedAt);
   return {
     id: String(apiVisitorCar.visitorCarNo),
     visitorCarNo: apiVisitorCar.visitorCarNo,
@@ -203,10 +206,11 @@ function mapVisitorCar(apiVisitorCar) {
     building: apiVisitorCar.building,
     unit: apiVisitorCar.unit,
     registeredAt: formatDateTimeDisplay(apiVisitorCar.registeredAt),
-    parkedAt: formatDate(apiVisitorCar.parkedAt),
+    gateEnteredAt,
+    parkedAt,
     expiresAt: formatDateTimeDisplay(apiVisitorCar.expiresAt),
     expiresAtInput: formatDateTimeInput(apiVisitorCar.expiresAt),
-    status: apiVisitorCar.parkedAt ? 'parked' : 'waiting',
+    status: resolveVisitorCarStatus({ gateEnteredAt, parkedAt }),
   };
 }
 

@@ -68,7 +68,7 @@ export function getParkingSpotDisplayText(area) {
   const currentCarNumber = String(area.currentCarNumber || '').trim();
 
   if (area.status === 'occupied' && currentCarNumber) {
-    return currentCarNumber;
+    return `${area.areaNumber}\n${currentCarNumber}`;
   }
 
   return area.areaNumber;

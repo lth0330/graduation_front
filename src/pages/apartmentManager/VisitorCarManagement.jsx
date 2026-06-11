@@ -21,11 +21,13 @@ import { filterByKeyword } from '../../utils/search.js';
 
 const visitorCarStatusLabel = {
   waiting: '입차 대기',
+  entered: '입차 완료',
   parked: '주차 중',
 };
 
 const visitorCarStatusBadge = {
   waiting: 'pending',
+  entered: 'approved',
   parked: 'active',
 };
 
@@ -35,7 +37,8 @@ const columns = [
   { key: 'ownerName', header: '신청 입주민' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building || '-'}동 ${row.unit || '-'}호` },
   { key: 'registeredAt', header: '등록일시' },
-  { key: 'parkedAt', header: '입차일', render: (row) => row.parkedAt || '입차 전' },
+  { key: 'gateEnteredAt', header: '입차시간', render: (row) => row.gateEnteredAt || '입차 전' },
+  { key: 'parkedAt', header: '주차시간', render: (row) => row.parkedAt || '주차 전' },
   { key: 'expiresAt', header: '만료일', render: (row) => row.expiresAt || '-' },
   {
     key: 'status',
