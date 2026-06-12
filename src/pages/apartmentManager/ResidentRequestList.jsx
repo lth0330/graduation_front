@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
@@ -15,6 +15,11 @@ import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx'
 import { apartmentManagerMenus } from '../../data/navigation.js';
 import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 import { usePagination } from '../../utils/pagination.js';
+import {
+  filterResidentRequestsByStatus,
+  getResidentRequestStatusLabel,
+  residentRequestStatusOptions,
+} from '../../utils/residentRequestFilters.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
@@ -47,7 +52,11 @@ export default function ResidentRequestList() {
   const [keyword, setKeyword] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
-  useAutoRefresh(() => refreshResidentSignupRequests({ silent: true }), 10000);
+  useEffect(() => {
+    refreshResidentSignupRequests({ silent: true });
+  }, []);
+
+  useAutoRefresh(() => refreshResidentSignupRequests({ silent: true }), 5000);
 
   const searchedRequests = filterByKeyword(residentSignupRequests, keyword, [
     'id',
@@ -57,10 +66,8 @@ export default function ResidentRequestList() {
     'unit',
     'carNumber',
   ]);
-  const filteredRequests =
-    selectedStatus === 'all'
-      ? searchedRequests
-      : searchedRequests.filter((request) => request.status === selectedStatus);
+  const filteredRequests = filterResidentRequestsByStatus(searchedRequests, selectedStatus);
+  const selectedStatusLabel = getResidentRequestStatusLabel(selectedStatus);
   const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredRequests, 5, [
     keyword,
     selectedStatus,
@@ -87,15 +94,17 @@ export default function ResidentRequestList() {
             onSearch={() => setKeyword(searchInput)}
           />
           <div className="status-filter">
+            <span className="filter-label">승인 상태</span>
             <SelectBox
               aria-label="주민 가입 신청 상태 분류"
               value={selectedStatus}
               onChange={(event) => setSelectedStatus(event.target.value)}
             >
-              <option value="all">전체</option>
-              <option value="pending">승인 대기</option>
-              <option value="approved">승인 완료</option>
-              <option value="rejected">거절</option>
+              {residentRequestStatusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </SelectBox>
           </div>
         </div>
@@ -116,7 +125,7 @@ export default function ResidentRequestList() {
               columns={columns}
               rows={pagedRows}
               startIndex={startIndex}
-              emptyMessage="조건에 맞는 주민 신청이 없습니다."
+              emptyMessage={`${selectedStatusLabel} 조건에 맞는 주민 신청이 없습니다.`}
             />
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>

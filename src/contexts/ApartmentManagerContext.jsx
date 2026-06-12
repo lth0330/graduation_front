@@ -49,6 +49,7 @@ import {
   getResidentInquiries,
 } from '../api/residentInquiryApi.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
+import { sortByNewest } from '../utils/listOrdering.js';
 import { loadManagerNotificationResources } from '../utils/managerNotificationRefresh.js';
 import { resolveVisitorCarStatus } from '../utils/visitorCarStatus.js';
 
@@ -458,7 +459,7 @@ export function ApartmentManagerProvider({ children }) {
 
       const apartmentNo = getStoredApartmentNo();
       const requests = await getResidentSignupRequests(apartmentNo);
-      setResidentSignupRequests(requests.map(mapResidentSignupRequest));
+      setResidentSignupRequests(sortByNewest(requests.map(mapResidentSignupRequest)));
     } catch (error) {
       if (!silent) {
         setResidentRequestsError('주민 가입 신청 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
@@ -499,7 +500,7 @@ export function ApartmentManagerProvider({ children }) {
 
       const apartmentNo = getStoredApartmentNo();
       const residentList = await getResidents(apartmentNo);
-      setResidents(residentList.map(mapResident));
+      setResidents(sortByNewest(residentList.map(mapResident)));
     } catch (error) {
       if (!silent) {
         setResidentsError('주민 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
@@ -550,7 +551,7 @@ export function ApartmentManagerProvider({ children }) {
 
       const apartmentNo = getStoredApartmentNo();
       const vehicleList = await getVehicles(apartmentNo);
-      setVehicles(vehicleList.map(mapVehicle));
+      setVehicles(sortByNewest(vehicleList.map(mapVehicle)));
     } catch (error) {
       if (!silent) {
         setVehiclesError('차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
@@ -607,7 +608,7 @@ export function ApartmentManagerProvider({ children }) {
 
       const apartmentNo = getStoredApartmentNo();
       const visitorCarList = await getVisitorCars(apartmentNo);
-      setVisitorCars(visitorCarList.map(mapVisitorCar));
+      setVisitorCars(sortByNewest(visitorCarList.map(mapVisitorCar)));
     } catch (error) {
       if (!silent) {
         setVisitorCarsError('방문 차량 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
@@ -770,7 +771,7 @@ export function ApartmentManagerProvider({ children }) {
       }
 
       const inquiries = await getMyManagerInquiries();
-      setManagerInquiries(inquiries.map(mapManagerInquiry));
+      setManagerInquiries(sortByNewest(inquiries.map(mapManagerInquiry)));
     } catch (error) {
       if (!silent) {
         setManagerInquiriesError('문의 내역을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
@@ -809,8 +810,8 @@ export function ApartmentManagerProvider({ children }) {
         mapPlateCorrectionReview: mapPlateCorrectionReview,
       });
 
-      setManagerNotifications(result.managerNotifications);
-      setPlateCorrectionReviews(result.plateCorrectionReviews);
+      setManagerNotifications(sortByNewest(result.managerNotifications));
+      setPlateCorrectionReviews(sortByNewest(result.plateCorrectionReviews));
       setManagerNotificationsError(result.managerNotificationsError);
       setPlateCorrectionReviewsError(result.plateCorrectionReviewsError);
     } catch (error) {
@@ -860,7 +861,7 @@ export function ApartmentManagerProvider({ children }) {
 
       const apartmentNo = getStoredApartmentNo();
       const inquiries = await getResidentInquiries(apartmentNo);
-      setResidentParkingInquiries(inquiries.map(mapResidentParkingInquiry));
+      setResidentParkingInquiries(sortByNewest(inquiries.map(mapResidentParkingInquiry)));
     } catch (error) {
       if (!silent) {
         setResidentParkingInquiriesError('입주민 문의 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');

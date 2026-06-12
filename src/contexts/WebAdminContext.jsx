@@ -9,6 +9,7 @@ import {
   getWebAdminInquiries,
 } from '../api/inquiryApi.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
+import { sortByNewest } from '../utils/listOrdering.js';
 
 const WebAdminContext = createContext(null);
 
@@ -75,7 +76,7 @@ export function WebAdminProvider({ children }) {
       setSignupRequestsError('');
 
       const requests = await getSignupRequests();
-      setSignupRequests(requests.map(mapSignupRequest));
+      setSignupRequests(sortByNewest(requests.map(mapSignupRequest)));
     } catch (error) {
       setSignupRequestsError('가입 신청 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
     } finally {
@@ -95,7 +96,7 @@ export function WebAdminProvider({ children }) {
       setWebAdminInquiriesError('');
 
       const inquiries = await getWebAdminInquiries();
-      setWebAdminInquiries(inquiries.map(mapWebAdminInquiry));
+      setWebAdminInquiries(sortByNewest(inquiries.map(mapWebAdminInquiry)));
     } catch (error) {
       setWebAdminInquiriesError('문의 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
     } finally {

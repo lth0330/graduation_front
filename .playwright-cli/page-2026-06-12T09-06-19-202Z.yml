@@ -1,0 +1,25 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: P
+      - generic [ref=e7]:
+        - strong [ref=e8]: Park On
+        - generic [ref=e9]: 아파트 주차 관리 시스템
+    - heading "관리자 로그인" [level=1] [ref=e10]
+  - generic [ref=e11]:
+    - generic [ref=e12]: Common Login
+    - heading "관리자 로그인" [level=2] [ref=e13]
+    - generic [ref=e14]:
+      - generic [ref=e15]: 아이디
+      - textbox "아이디" [ref=e16]:
+        - /placeholder: 아이디를 입력하세요.
+    - generic [ref=e17]:
+      - generic [ref=e18]: 비밀번호
+      - textbox "비밀번호" [ref=e19]:
+        - /placeholder: 비밀번호를 입력하세요.
+    - button "웹 관리자로 로그인" [ref=e20] [cursor=pointer]
+    - button "아파트 관리자로 로그인" [ref=e21] [cursor=pointer]
+    - paragraph [ref=e22]:
+      - text: 아파트 관리자 계정이 없나요?
+      - link "회원가입 신청" [ref=e23] [cursor=pointer]:
+        - /url: /signup-request

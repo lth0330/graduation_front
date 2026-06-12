@@ -223,7 +223,7 @@ export default function ManagerNotificationList() {
                 alt={`${selectedReview.zone} 구역 번호판 확인 이미지`}
                 onLoad={() => setReviewImageError('')}
                 onError={() => {
-                  setReviewImageError('이미지 파일을 불러오지 못했습니다. 서버 uploads 경로와 파일 존재 여부를 확인하세요.');
+                  setReviewImageError('이미지 파일을 불러오지 못했습니다. 서버 uploads/S3 경로와 파일 존재 여부를 확인하세요.');
                 }}
               />
             ) : (

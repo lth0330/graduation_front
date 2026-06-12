@@ -1,0 +1,52 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: p
+      - generic [ref=e7]:
+        - strong [ref=e8]: Park On
+        - generic [ref=e9]: 아파트 관리자 콘솔
+    - generic [ref=e10]:
+      - generic [ref=e11]: 관리자 역할
+      - strong [ref=e12]: 아파트 관리자
+    - navigation "아파트 관리자 메뉴" [ref=e13]:
+      - link "대시보드" [ref=e14] [cursor=pointer]:
+        - /url: /apartment-admin
+        - generic [ref=e15]: 대시보드
+      - link "마이페이지" [ref=e16] [cursor=pointer]:
+        - /url: /apartment-manager/my-page
+        - generic [ref=e17]: 마이페이지
+      - link "알림" [ref=e18] [cursor=pointer]:
+        - /url: /apartment-manager/notifications
+        - generic [ref=e19]: 알림
+      - button "입주민 ›" [ref=e21] [cursor=pointer]:
+        - generic [ref=e22]: 입주민
+        - generic [ref=e23]: ›
+      - button "주차 관리 ›" [ref=e25] [cursor=pointer]:
+        - generic [ref=e26]: 주차 관리
+        - generic [ref=e27]: ›
+      - button "문의 ›" [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]: 문의
+        - generic [ref=e31]: ›
+  - generic [ref=e32]:
+    - banner [ref=e33]:
+      - generic "현재 관리자 정보" [ref=e34]:
+        - generic [ref=e35]: 아파트 관리자
+        - strong [ref=e36]: 아파트 관리자
+      - button "로그아웃" [ref=e38] [cursor=pointer]
+    - main [ref=e39]:
+      - heading "관리자 알림" [level=1] [ref=e41]
+      - generic [ref=e42]:
+        - heading "알림 목록" [level=2] [ref=e45]
+        - generic [ref=e46]:
+          - combobox "알림 읽음 상태 분류" [ref=e48]:
+            - option "전체" [selected]
+            - option "안 읽음"
+            - option "읽음"
+          - button "새로고침" [ref=e49] [cursor=pointer]
+        - generic [ref=e50]:
+          - strong [ref=e51]: 표시할 관리자 알림이 없습니다.
+          - paragraph [ref=e52]: 조건을 변경하거나 새 데이터를 등록하세요.
+        - navigation "페이지 이동" [ref=e53]:
+          - button "이전" [disabled] [ref=e54]
+          - button "1" [ref=e55] [cursor=pointer]
+          - button "다음" [disabled] [ref=e56]

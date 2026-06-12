@@ -1,0 +1,48 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: p
+      - generic [ref=e7]:
+        - strong [ref=e8]: Park On
+        - generic [ref=e9]: 웹 관리자 콘솔
+    - generic [ref=e10]:
+      - generic [ref=e11]: 관리자 역할
+      - strong [ref=e12]: 웹 관리자
+    - navigation "웹 관리자 메뉴" [ref=e13]:
+      - link "대시보드" [ref=e14] [cursor=pointer]:
+        - /url: /web-admin
+        - generic [ref=e15]: 대시보드
+      - link "가입 승인" [ref=e16] [cursor=pointer]:
+        - /url: /web-admin/signup-approvals
+        - generic [ref=e17]: 가입 승인
+      - link "관리자 정보 관리" [ref=e18] [cursor=pointer]:
+        - /url: /web-admin/apartment-managers
+        - generic [ref=e19]: 관리자 정보 관리
+      - link "문의 관리" [ref=e20] [cursor=pointer]:
+        - /url: /web-admin/inquiries
+        - generic [ref=e21]: 문의 관리
+  - generic [ref=e22]:
+    - banner [ref=e23]:
+      - generic "현재 관리자 정보" [ref=e24]:
+        - generic [ref=e25]: 웹 관리자
+        - strong [ref=e26]: 웹 관리자
+      - generic [ref=e27]:
+        - generic [ref=e28]: 운영 콘솔
+        - button "로그아웃" [ref=e29] [cursor=pointer]
+    - main [ref=e30]:
+      - heading "아파트 관리자 관리" [level=1] [ref=e32]
+      - generic [ref=e33]:
+        - heading "아파트 관리자 목록" [level=2] [ref=e36]
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - textbox "아이디, 이메일, 아파트 이름 검색" [ref=e39]
+            - button "검색" [ref=e40] [cursor=pointer]
+          - combobox "아파트 관리자 상태 분류" [ref=e42]:
+            - option "전체" [selected]
+            - option "활성"
+            - option "비활성"
+        - paragraph [ref=e46]: 목록을 불러오는 중
+        - navigation "페이지 이동" [ref=e47]:
+          - button "이전" [disabled] [ref=e48]
+          - button "1" [ref=e49] [cursor=pointer]
+          - button "다음" [disabled] [ref=e50]

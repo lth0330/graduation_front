@@ -254,7 +254,7 @@ export default function ParkingStatusGrid() {
                 alt={`${selectedErrorArea.areaNumber} 주차칸 확인 이미지`}
                 onLoad={() => setErrorImageError('')}
                 onError={() => {
-                  setErrorImageError('이미지 파일을 불러오지 못했습니다. 서버 uploads 경로와 파일 존재 여부를 확인하세요.');
+                  setErrorImageError('이미지 파일을 불러오지 못했습니다. 서버 uploads/S3 경로와 파일 존재 여부를 확인하세요.');
                 }}
               />
             ) : isErrorImageLoading ? (

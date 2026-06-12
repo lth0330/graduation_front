@@ -21,6 +21,16 @@ test('이미 완성된 URL이나 data URL은 그대로 사용한다', () => {
   );
 });
 
+test('S3 객체 URL은 백엔드 프록시 업로드 URL로 변환한다', () => {
+  assert.equal(
+    getUploadedFileUrl(
+      'https://elasticbeanstalk-ap-northeast-2-236998701623.s3.ap-northeast-2.amazonaws.com/parking-snapshots/test.jpg',
+      'http://localhost:8080',
+    ),
+    'http://localhost:8080/uploads/s3/parking-snapshots/test.jpg',
+  );
+});
+
 test('브라우저에서 직접 접근할 수 없는 로컬 파일 경로는 URL로 만들지 않는다', () => {
   assert.equal(
     getUploadedFileUrl('C:\\Users\\xm300\\Desktop\\snapshots\\error.jpg', 'http://localhost:8080'),

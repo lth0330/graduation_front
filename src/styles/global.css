@@ -1018,8 +1018,16 @@ button,
 }
 
 .status-filter {
-  width: 180px;
+  display: grid;
+  width: 200px;
+  gap: 6px;
   flex-shrink: 0;
+}
+
+.filter-label {
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .filter-row {

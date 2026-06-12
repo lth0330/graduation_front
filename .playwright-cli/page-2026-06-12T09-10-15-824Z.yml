@@ -1,0 +1,59 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: p
+      - generic [ref=e7]:
+        - strong [ref=e8]: Park On
+        - generic [ref=e9]: 아파트 관리자 콘솔
+    - generic [ref=e10]:
+      - generic [ref=e11]: 관리자 역할
+      - strong [ref=e12]: 아파트 관리자
+    - navigation "아파트 관리자 메뉴" [ref=e13]:
+      - link "대시보드" [ref=e14] [cursor=pointer]:
+        - /url: /apartment-admin
+        - generic [ref=e15]: 대시보드
+      - link "마이페이지" [ref=e16] [cursor=pointer]:
+        - /url: /apartment-manager/my-page
+        - generic [ref=e17]: 마이페이지
+      - link "알림" [ref=e18] [cursor=pointer]:
+        - /url: /apartment-manager/notifications
+        - generic [ref=e19]: 알림
+      - generic [ref=e20]:
+        - button "입주민 ⌄" [expanded] [ref=e21] [cursor=pointer]:
+          - generic [ref=e22]: 입주민
+          - generic [ref=e23]: ⌄
+        - generic [ref=e24]:
+          - link "입주민 가입 요청 관리" [ref=e25] [cursor=pointer]:
+            - /url: /apartment-manager/resident-requests
+          - link "입주민 정보 관리" [ref=e26] [cursor=pointer]:
+            - /url: /apartment-manager/residents
+      - button "주차 관리 ›" [ref=e28] [cursor=pointer]:
+        - generic [ref=e29]: 주차 관리
+        - generic [ref=e30]: ›
+      - button "문의 ›" [ref=e32] [cursor=pointer]:
+        - generic [ref=e33]: 문의
+        - generic [ref=e34]: ›
+  - generic [ref=e35]:
+    - banner [ref=e36]:
+      - generic "현재 관리자 정보" [ref=e37]:
+        - generic [ref=e38]: 아파트 관리자
+        - strong [ref=e39]: 아파트 관리자
+      - generic [ref=e40]:
+        - generic [ref=e41]: 운영 콘솔
+        - button "로그아웃" [ref=e42] [cursor=pointer]
+    - main [ref=e43]:
+      - heading "주민 회원가입 신청 관리" [level=1] [ref=e45]
+      - generic [ref=e46]:
+        - heading "주민 가입 신청 목록" [level=2] [ref=e49]
+        - generic [ref=e50]:
+          - generic [ref=e51]:
+            - textbox "이름, 아이디, 동/호수, 차량번호 검색" [ref=e52]
+            - button "검색" [ref=e53] [cursor=pointer]
+          - generic [ref=e54]:
+            - generic [ref=e55]: 승인 상태
+            - combobox "주민 가입 신청 상태 분류" [ref=e56]:
+              - option "전체" [selected]
+              - option "승인 대기"
+              - option "승인 완료"
+              - option "거절"
+        - paragraph [ref=e60]: 주민 가입 신청 목록 불러오는 중

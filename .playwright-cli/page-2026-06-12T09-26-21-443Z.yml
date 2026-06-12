@@ -1,0 +1,54 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: p
+      - generic [ref=e7]:
+        - strong [ref=e8]: Park On
+        - generic [ref=e9]: 아파트 관리자 콘솔
+    - generic [ref=e10]:
+      - generic [ref=e11]: 관리자 역할
+      - strong [ref=e12]: 아파트 관리자
+    - navigation "아파트 관리자 메뉴" [ref=e13]:
+      - link "대시보드" [ref=e14] [cursor=pointer]:
+        - /url: /apartment-admin
+        - generic [ref=e15]: 대시보드
+      - link "마이페이지" [ref=e16] [cursor=pointer]:
+        - /url: /apartment-manager/my-page
+        - generic [ref=e17]: 마이페이지
+      - link "알림" [ref=e18] [cursor=pointer]:
+        - /url: /apartment-manager/notifications
+        - generic [ref=e19]: 알림
+      - button "입주민 ›" [ref=e21] [cursor=pointer]:
+        - generic [ref=e22]: 입주민
+        - generic [ref=e23]: ›
+      - generic [ref=e24]:
+        - button "주차 관리 ⌄" [expanded] [ref=e25] [cursor=pointer]:
+          - generic [ref=e26]: 주차 관리
+          - generic [ref=e27]: ⌄
+        - generic [ref=e28]:
+          - link "입주민 차량 정보 관리" [ref=e29] [cursor=pointer]:
+            - /url: /apartment-manager/vehicles
+          - link "방문 차량 관리" [ref=e30] [cursor=pointer]:
+            - /url: /apartment-manager/visitor-cars
+          - link "주차장 관리" [ref=e31] [cursor=pointer]:
+            - /url: /apartment-manager/parking-lots
+          - link "주차 구역 관리" [ref=e32] [cursor=pointer]:
+            - /url: /apartment-manager/parking-areas
+          - link "주차 상태 확인" [ref=e33] [cursor=pointer]:
+            - /url: /apartment-manager/parking-status
+      - button "문의 ›" [ref=e35] [cursor=pointer]:
+        - generic [ref=e36]: 문의
+        - generic [ref=e37]: ›
+  - generic [ref=e38]:
+    - banner [ref=e39]:
+      - generic "현재 관리자 정보" [ref=e40]:
+        - generic [ref=e41]: 아파트 관리자
+        - strong [ref=e42]: 아파트 관리자
+      - generic [ref=e43]:
+        - generic [ref=e44]: 운영 콘솔
+        - button "로그아웃" [ref=e45] [cursor=pointer]
+    - main [ref=e46]:
+      - heading "주차 구역 관리" [level=1] [ref=e48]
+      - generic [ref=e49]:
+        - heading "주차장별 주차 구역 관리" [level=2] [ref=e52]
+        - paragraph [ref=e56]: 주차 구역 목록 불러오는 중

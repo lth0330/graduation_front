@@ -4,6 +4,11 @@ export function getUploadedFileUrl(path, baseUrl = import.meta.env?.VITE_API_BAS
   }
 
   const filePath = String(path).trim();
+  const s3ObjectKey = getS3ObjectKey(filePath);
+
+  if (s3ObjectKey) {
+    return `${baseUrl}/uploads/s3/${s3ObjectKey}`;
+  }
 
   if (
     filePath.startsWith('http://') ||
@@ -19,4 +24,26 @@ export function getUploadedFileUrl(path, baseUrl = import.meta.env?.VITE_API_BAS
   }
 
   return `${baseUrl}/${filePath.replace(/^\/+/, '')}`;
+}
+
+function getS3ObjectKey(filePath) {
+  if (filePath.startsWith('/uploads/s3/')) {
+    return filePath.substring('/uploads/s3/'.length);
+  }
+
+  if (!/^https?:\/\//.test(filePath)) {
+    return '';
+  }
+
+  try {
+    const url = new URL(filePath);
+    const host = url.hostname;
+    if (host.includes('.s3.') && host.endsWith('.amazonaws.com')) {
+      return url.pathname.replace(/^\/+/, '');
+    }
+  } catch (error) {
+    return '';
+  }
+
+  return '';
 }
