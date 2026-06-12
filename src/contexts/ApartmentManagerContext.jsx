@@ -36,8 +36,11 @@ import {
   getMyManagerInquiries,
 } from '../api/inquiryApi.js';
 import {
+  deleteAllManagerNotifications as deleteAllManagerNotificationsApi,
+  deleteManagerNotification as deleteManagerNotificationApi,
   getManagerNotification as getManagerNotificationApi,
   getManagerNotifications,
+  markAllManagerNotificationsAsRead as markAllManagerNotificationsAsReadApi,
   markManagerNotificationAsRead as markManagerNotificationAsReadApi,
 } from '../api/managerNotificationApi.js';
 import {
@@ -838,6 +841,24 @@ export function ApartmentManagerProvider({ children }) {
     return mapManagerNotification(updatedNotification);
   };
 
+  const markAllManagerNotificationsAsRead = async () => {
+    const result = await markAllManagerNotificationsAsReadApi();
+    await refreshManagerNotifications();
+    return result;
+  };
+
+  const deleteManagerNotification = async (notificationNo) => {
+    const result = await deleteManagerNotificationApi(notificationNo);
+    await refreshManagerNotifications();
+    return result;
+  };
+
+  const deleteAllManagerNotifications = async () => {
+    const result = await deleteAllManagerNotificationsApi();
+    await refreshManagerNotifications();
+    return result;
+  };
+
   const getManagerNotificationDetail = async (notificationNo) => {
     const notification = await getManagerNotificationApi(notificationNo);
     return mapManagerNotification(notification);
@@ -954,6 +975,9 @@ export function ApartmentManagerProvider({ children }) {
       plateCorrectionReviewsError,
       refreshManagerNotifications,
       markManagerNotificationAsRead,
+      markAllManagerNotificationsAsRead,
+      deleteManagerNotification,
+      deleteAllManagerNotifications,
       getManagerNotificationDetail,
       confirmPlateCorrectionReview,
       residentParkingInquiries,

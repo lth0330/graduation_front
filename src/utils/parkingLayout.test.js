@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   buildParkingPlacementFromRange,
+  getParkingSpotAreaLabel,
   getParkingSpotDisplayText,
   getParkingRangeFromPlacement,
   isParkingImageInspectableArea,
@@ -57,23 +58,28 @@ test('끝 행이나 끝 열이 시작보다 작으면 잘못된 범위로 본다
 test('주차 중이고 차량번호가 있으면 주차칸 번호와 차량번호를 함께 표시한다', () => {
   assert.equal(
     getParkingSpotDisplayText({
-      areaNumber: 'A1',
+      areaNumber: 'a-b1-001',
       status: 'occupied',
       currentCarNumber: '12가3456',
     }),
-    'A1\n12가3456',
+    '001\n12가3456',
   );
 });
 
 test('주차 중이어도 차량번호가 없으면 구역 번호를 표시한다', () => {
   assert.equal(
     getParkingSpotDisplayText({
-      areaNumber: 'A1',
+      areaNumber: 'a-b1-001',
       status: 'occupied',
       currentCarNumber: '',
     }),
-    'A1',
+    '001',
   );
+});
+
+test('주차칸 화면 라벨은 마지막 하이픈 구간만 표시한다', () => {
+  assert.equal(getParkingSpotAreaLabel('a-b1-001'), '001');
+  assert.equal(getParkingSpotAreaLabel('A1'), 'A1');
 });
 
 test('오류와 unknown 상태는 이미지 확인 대상으로 본다', () => {

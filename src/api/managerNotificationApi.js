@@ -17,3 +17,21 @@ export async function markManagerNotificationAsRead(notificationNo) {
 
   return response.data;
 }
+
+export async function markAllManagerNotificationsAsRead() {
+  const response = await apiClient.patch('/api/manager-notifications/read-all');
+
+  return response.data;
+}
+
+export async function deleteManagerNotification(notificationNo) {
+  const response = await apiClient.delete(`/api/manager-notifications/${notificationNo}`);
+
+  return response.data;
+}
+
+export async function deleteAllManagerNotifications() {
+  const response = await apiClient.delete('/api/manager-notifications');
+
+  return response.data;
+}

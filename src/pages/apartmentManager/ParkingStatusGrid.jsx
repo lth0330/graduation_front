@@ -14,6 +14,10 @@ import {
   getParkingPlacement,
   getParkingSpotDisplayText,
 } from '../../utils/parkingLayout.js';
+import {
+  findAreaIssueNotification,
+  mergeAreaWithNotificationDetail,
+} from '../../utils/parkingIssueImage.js';
 
 const statusClassMap = {
   empty: 'empty',
@@ -22,57 +26,6 @@ const statusClassMap = {
   error: 'error',
   unknown: 'error',
 };
-
-const imageNotificationTypes = ['ocr_error', 'abnormal_parking'];
-
-function findAreaIssueNotification(area, notifications) {
-  const areaNumber = String(area.areaNumber || '').trim();
-
-  if (!areaNumber) {
-    return null;
-  }
-
-  return notifications.find((notification) => {
-    if (
-      !imageNotificationTypes.includes(notification.notificationType) ||
-      notification.referenceType !== 'parking_history'
-    ) {
-      return false;
-    }
-
-    const historyZone = String(notification.parkingHistory?.zone || '').trim();
-    if (historyZone) {
-      return historyZone === areaNumber;
-    }
-
-    const searchableText = [
-      notification.title,
-      notification.message,
-    ]
-      .filter(Boolean)
-      .join(' ');
-
-    return searchableText.includes(areaNumber);
-  }) || null;
-}
-
-function mergeAreaWithNotificationDetail(area, notificationDetail) {
-  const parkingHistory = notificationDetail?.parkingHistory;
-  const areaNumber = String(area.areaNumber || '').trim();
-  const historyZone = String(parkingHistory?.zone || '').trim();
-  const isSameAreaHistory = Boolean(parkingHistory) && (!historyZone || historyZone === areaNumber);
-
-  return {
-    ...area,
-    relatedNotificationNo: isSameAreaHistory
-      ? notificationDetail?.notificationNo || area.relatedNotificationNo
-      : area.relatedNotificationNo,
-    errorImage: area.errorImage || (isSameAreaHistory ? parkingHistory?.imagePath : '') || '',
-    errorMessage: isSameAreaHistory ? notificationDetail?.message || area.errorMessage : area.errorMessage,
-    errorPlate: isSameAreaHistory ? parkingHistory?.plate || area.currentCarNumber : area.currentCarNumber,
-    errorEntryTime: isSameAreaHistory ? parkingHistory?.entryTime || '' : '',
-  };
-}
 
 export default function ParkingStatusGrid() {
   const {
@@ -113,6 +66,50 @@ export default function ParkingStatusGrid() {
   const selectedErrorImageUrl = getUploadedFileUrl(selectedErrorArea?.errorImage);
   const selectedErrorImagePath = String(selectedErrorArea?.errorImage || '').trim();
   const hasSelectedErrorImage = Boolean(selectedErrorImageUrl) && !errorImageError;
+
+  useEffect(() => {
+    if (!selectedErrorArea?.id) {
+      return;
+    }
+
+    const latestArea = parkingAreas.find((parkingArea) => parkingArea.id === selectedErrorArea.id);
+    if (!latestArea || !isParkingImageInspectableArea(latestArea)) {
+      setSelectedErrorArea(null);
+      setErrorImageError('');
+      return;
+    }
+
+    setSelectedErrorArea((currentArea) => {
+      if (!currentArea || currentArea.id !== latestArea.id) {
+        return currentArea;
+      }
+
+      const nextArea = {
+        ...currentArea,
+        ...latestArea,
+        relatedNotificationNo: currentArea.relatedNotificationNo,
+        errorImage: latestArea.errorImage || currentArea.errorImage,
+        errorMessage: latestArea.errorMessage || currentArea.errorMessage,
+        errorPlate: latestArea.currentCarNumber || currentArea.errorPlate,
+        errorEntryTime: currentArea.errorEntryTime,
+      };
+
+      if (
+        nextArea.status === currentArea.status &&
+        nextArea.currentCarNumber === currentArea.currentCarNumber &&
+        nextArea.errorImage === currentArea.errorImage &&
+        nextArea.errorMessage === currentArea.errorMessage
+      ) {
+        return currentArea;
+      }
+
+      return nextArea;
+    });
+
+    if (latestArea.errorImage && latestArea.errorImage !== selectedErrorArea.errorImage) {
+      setErrorImageError('');
+    }
+  }, [parkingAreas, selectedErrorArea?.id, selectedErrorArea?.errorImage]);
 
   const handleManualRefresh = async () => {
     await Promise.all([

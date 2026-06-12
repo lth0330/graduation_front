@@ -24,6 +24,7 @@ export const apartmentManagerMenus = [
       { label: '주차장 관리', path: '/apartment-manager/parking-lots' },
       { label: '주차 구역 관리', path: '/apartment-manager/parking-areas' },
       { label: '주차 상태 확인', path: '/apartment-manager/parking-status' },
+      { label: '번호판 보정', path: '/apartment-manager/plate-corrections' },
     ],
   },
   {

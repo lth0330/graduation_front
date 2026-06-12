@@ -64,14 +64,22 @@ export function formatParkingRange(area) {
   return `행 ${range.rowStart}~${range.rowEnd} / 열 ${range.columnStart}~${range.columnEnd}`;
 }
 
+export function getParkingSpotAreaLabel(areaNumber) {
+  const normalizedAreaNumber = String(areaNumber || '').trim();
+  const areaParts = normalizedAreaNumber.split('-').filter(Boolean);
+
+  return areaParts.length > 1 ? areaParts[areaParts.length - 1] : normalizedAreaNumber;
+}
+
 export function getParkingSpotDisplayText(area) {
   const currentCarNumber = String(area.currentCarNumber || '').trim();
+  const areaLabel = getParkingSpotAreaLabel(area.areaNumber);
 
   if (area.status === 'occupied' && currentCarNumber) {
-    return `${area.areaNumber}\n${currentCarNumber}`;
+    return `${areaLabel}\n${currentCarNumber}`;
   }
 
-  return area.areaNumber;
+  return areaLabel;
 }
 
 export function isParkingImageInspectableStatus(status) {
