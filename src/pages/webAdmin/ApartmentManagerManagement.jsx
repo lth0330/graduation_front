@@ -262,16 +262,21 @@ export default function ApartmentManagerManagement() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <div className="status-filter">
-            <SelectBox
-              aria-label="아파트 관리자 상태 분류"
-              value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
-            >
-              <option value="all">전체</option>
-              <option value="active">활성</option>
-              <option value="inactive">비활성</option>
-            </SelectBox>
+          <div className="toolbar-actions">
+            <div className="status-filter">
+              <SelectBox
+                aria-label="아파트 관리자 상태 분류"
+                value={selectedStatus}
+                onChange={(event) => setSelectedStatus(event.target.value)}
+              >
+                <option value="all">전체</option>
+                <option value="active">활성</option>
+                <option value="inactive">비활성</option>
+              </SelectBox>
+            </div>
+            <Button variant="secondary" onClick={loadApartmentManagers}>
+              새로고침
+            </Button>
           </div>
         </div>
         {errorMessage && <p className="form-error">{errorMessage}</p>}

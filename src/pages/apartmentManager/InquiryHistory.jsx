@@ -68,16 +68,21 @@ export default function InquiryHistory() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <div className="status-filter">
-            <SelectBox
-              aria-label="문의 답변 상태 분류"
-              value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
-            >
-              <option value="all">전체</option>
-              <option value="pending">답변 대기</option>
-              <option value="answered">답변 완료</option>
-            </SelectBox>
+          <div className="toolbar-actions">
+            <div className="status-filter">
+              <SelectBox
+                aria-label="문의 답변 상태 분류"
+                value={selectedStatus}
+                onChange={(event) => setSelectedStatus(event.target.value)}
+              >
+                <option value="all">전체</option>
+                <option value="pending">답변 대기</option>
+                <option value="answered">답변 완료</option>
+              </SelectBox>
+            </div>
+            <Button variant="secondary" onClick={refreshManagerInquiries}>
+              새로고침
+            </Button>
           </div>
         </div>
         {isManagerInquiriesLoading ? (

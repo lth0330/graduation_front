@@ -145,9 +145,14 @@ export default function ResidentManagement() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <Link to="/apartment-manager/residents/new">
-            <Button>주민 등록</Button>
-          </Link>
+          <div className="toolbar-actions">
+            <Button variant="secondary" onClick={refreshResidents}>
+              새로고침
+            </Button>
+            <Link to="/apartment-manager/residents/new">
+              <Button>주민 등록</Button>
+            </Link>
+          </div>
         </div>
         {isResidentsLoading ? (
           <LoadingState message="주민 목록 불러오는 중" />

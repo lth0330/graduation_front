@@ -93,19 +93,23 @@ export default function ResidentRequestList() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <div className="status-filter">
-            <span className="filter-label">승인 상태</span>
-            <SelectBox
-              aria-label="주민 가입 신청 상태 분류"
-              value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
-            >
-              {residentRequestStatusOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </SelectBox>
+          <div className="toolbar-actions">
+            <div className="status-filter">
+              <SelectBox
+                aria-label="주민 가입 신청 상태 분류"
+                value={selectedStatus}
+                onChange={(event) => setSelectedStatus(event.target.value)}
+              >
+                {residentRequestStatusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </SelectBox>
+            </div>
+            <Button variant="secondary" onClick={refreshResidentSignupRequests}>
+              새로고침
+            </Button>
           </div>
         </div>
         {isResidentRequestsLoading ? (

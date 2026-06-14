@@ -241,16 +241,12 @@ export default function VehicleForm() {
 
       if (isEditMode) {
         await updateVehicle(vehicle.id, payload);
-        setVehicleDetail(await getVehicleDetail(vehicle.id));
-        setToastType('success');
-        setToastMessage('차량 정보가 저장되었습니다.');
+        navigate('/apartment-manager/vehicles');
         return;
       }
 
-      const createdVehicle = await createVehicle(payload);
-      setToastType('success');
-      setToastMessage('차량이 등록되었습니다.');
-      navigate(`/apartment-manager/vehicles/${createdVehicle.id}/edit`);
+      await createVehicle(payload);
+      navigate('/apartment-manager/vehicles');
     } catch (error) {
       setToastType('error');
       if (error.response?.status === 409) {

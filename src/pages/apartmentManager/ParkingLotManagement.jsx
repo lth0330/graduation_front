@@ -226,6 +226,12 @@ export default function ParkingLotManagement() {
       </SectionCard>
 
       <SectionCard title="주차장 목록" description="주차장 등록과 삭제를 처리합니다." className="parking-lot-list-card">
+        <div className="section-toolbar">
+          <span className="section-help">주차장 목록을 최신 데이터로 다시 불러옵니다.</span>
+          <Button variant="secondary" onClick={refreshParkingData}>
+            새로고침
+          </Button>
+        </div>
         <div className="inline-form-grid">
           <FormField label="주차장 이름">
             <TextInput value={form.name} onChange={(event) => handleChange('name', event.target.value)} />

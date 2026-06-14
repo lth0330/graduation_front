@@ -69,17 +69,22 @@ export default function SignupApprovalList() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <div className="status-filter">
-            <SelectBox
-              aria-label="가입 신청 상태 분류"
-              value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
-            >
-              <option value="all">전체</option>
-              <option value="pending">승인 대기</option>
-              <option value="approved">승인 완료</option>
-              <option value="rejected">거절</option>
-            </SelectBox>
+          <div className="toolbar-actions">
+            <div className="status-filter">
+              <SelectBox
+                aria-label="가입 신청 상태 분류"
+                value={selectedStatus}
+                onChange={(event) => setSelectedStatus(event.target.value)}
+              >
+                <option value="all">전체</option>
+                <option value="pending">승인 대기</option>
+                <option value="approved">승인 완료</option>
+                <option value="rejected">거절</option>
+              </SelectBox>
+            </div>
+            <Button variant="secondary" onClick={refreshSignupRequests}>
+              새로고침
+            </Button>
           </div>
         </div>
         {isSignupRequestsLoading ? (

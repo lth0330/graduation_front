@@ -354,6 +354,12 @@ export default function ParkingAreaManagement() {
       />
 
       <SectionCard title="주차장별 주차 구역 관리" description="주차 구역을 등록하고 상태, 배치, 삭제를 관리합니다.">
+        <div className="section-toolbar">
+          <span className="section-help">주차장과 주차 구역 정보를 최신 데이터로 다시 불러옵니다.</span>
+          <Button variant="secondary" onClick={refreshParkingData}>
+            새로고침
+          </Button>
+        </div>
         {isParkingLoading ? (
           <LoadingState message="주차 구역 목록 불러오는 중" />
         ) : parkingError ? (

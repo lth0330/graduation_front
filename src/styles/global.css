@@ -1105,16 +1105,28 @@ button,
   flex: 1;
 }
 
+.toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
 .section-help {
   color: var(--color-muted);
   font-weight: 700;
 }
 
 .status-filter {
-  display: grid;
+  display: flex;
+  align-items: center;
   width: 200px;
-  gap: 6px;
   flex-shrink: 0;
+}
+
+.status-filter .form-control {
+  width: 100%;
 }
 
 .filter-label {

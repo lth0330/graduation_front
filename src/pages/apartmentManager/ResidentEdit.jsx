@@ -226,9 +226,7 @@ export default function ResidentEdit() {
         residentCarLimit: parseLimitValue(form.residentCarLimit, 1),
         visitorCarLimit: parseLimitValue(form.visitorCarLimit, 2),
       });
-      setResidentDetail(await getResidentDetail(resident.id));
-      setToastType('success');
-      setToastMessage('주민 정보가 저장되었습니다.');
+      navigate('/apartment-manager/residents');
     } catch (error) {
       setToastType('error');
       if (error.response?.status === 409) {

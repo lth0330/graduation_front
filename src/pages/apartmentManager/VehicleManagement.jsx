@@ -72,9 +72,14 @@ export default function VehicleManagement() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <Link to="/apartment-manager/vehicles/new">
-            <Button>차량 등록</Button>
-          </Link>
+          <div className="toolbar-actions">
+            <Button variant="secondary" onClick={refreshVehicles}>
+              새로고침
+            </Button>
+            <Link to="/apartment-manager/vehicles/new">
+              <Button>차량 등록</Button>
+            </Link>
+          </div>
         </div>
         {isVehiclesLoading ? (
           <LoadingState message="차량 목록 불러오는 중" />
