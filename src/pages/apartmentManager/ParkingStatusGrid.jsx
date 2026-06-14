@@ -26,6 +26,7 @@ import {
   buildParkingOwnerNotificationForm,
   canNotifyParkingAreaOwner,
 } from '../../utils/parkingOwnerNotification.js';
+import { findVehicleOwnerFromLists } from '../../utils/vehicleOwnerLookup.js';
 
 const statusClassMap = {
   empty: 'empty',
@@ -46,6 +47,9 @@ export default function ParkingStatusGrid() {
     getManagerNotificationDetail,
     getVehicleOwnerByCarNumber,
     sendResidentNotification,
+    vehicles,
+    visitorCars,
+    residents,
   } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
   const [selectedErrorArea, setSelectedErrorArea] = useState(null);
@@ -170,14 +174,28 @@ export default function ParkingStatusGrid() {
   const openOwnerContactModal = async (area) => {
     try {
       setOwnerLookupAreaId(area.id);
-      const owner = await getVehicleOwnerByCarNumber(area.currentCarNumber);
+      let owner = null;
+      try {
+        owner = await getVehicleOwnerByCarNumber(area.currentCarNumber);
+      } catch (error) {
+        owner = findVehicleOwnerFromLists(area.currentCarNumber, {
+          vehicles,
+          visitorCars,
+          residents,
+        });
+      }
+
+      if (!owner?.residentNo) {
+        throw new Error('owner_not_found');
+      }
+
       setContactTargetArea(area);
       setContactOwner(owner);
       setContactForm(buildParkingOwnerNotificationForm(area, owner));
       setContactError('');
     } catch (error) {
       setToastType('error');
-      setToastMessage('차량번호와 연결된 주민을 찾지 못했습니다. 차량 등록 정보를 확인하세요.');
+      setToastMessage(`${area.currentCarNumber} 차량과 연결된 주민을 찾지 못했습니다. 차량 관리 또는 방문차량 목록을 확인하세요.`);
     } finally {
       setOwnerLookupAreaId('');
     }

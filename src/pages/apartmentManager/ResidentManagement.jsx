@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
 import EmptyState from '../../components/feedback/EmptyState.jsx';
 import LoadingState from '../../components/feedback/LoadingState.jsx';
@@ -9,7 +8,6 @@ import FormField from '../../components/forms/FormField.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
 import SectionCard from '../../components/common/SectionCard.jsx';
 import SearchBar from '../../components/forms/SearchBar.jsx';
-import SelectBox from '../../components/forms/SelectBox.jsx';
 import TextArea from '../../components/forms/TextArea.jsx';
 import TextInput from '../../components/forms/TextInput.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
@@ -38,7 +36,6 @@ export default function ResidentManagement() {
   } = useApartmentManager();
   const [searchInput, setSearchInput] = useState('');
   const [keyword, setKeyword] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [contactTarget, setContactTarget] = useState(null);
   const [contactForm, setContactForm] = useState({ title: '', message: '' });
   const [contactError, setContactError] = useState('');
@@ -49,10 +46,8 @@ export default function ResidentManagement() {
   useAutoRefresh(() => refreshResidents({ silent: true }), 15000);
 
   const searchedResidents = filterByKeyword(residents, keyword, ['id', 'name', 'loginId', 'email', 'building', 'unit']);
-  const filteredResidents = selectedStatus === 'all' || selectedStatus === 'approved' ? searchedResidents : [];
-  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredResidents, 5, [
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(searchedResidents, 5, [
     keyword,
-    selectedStatus,
   ]);
 
   const openContactModal = (resident) => {
@@ -113,10 +108,6 @@ export default function ResidentManagement() {
     { key: 'email', header: '이메일' },
     { key: 'phone', header: '연락처', render: (row) => row.phone || '-' },
     { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
-    { key: 'vehicleCount', header: '세대 차량 수', render: (row) => `${row.vehicleCount}대` },
-    { key: 'residentCarLimit', header: '세대 차량 제한', render: (row) => `${row.residentCarLimit}대` },
-    { key: 'visitorCarLimit', header: '방문차량 제한', render: (row) => `${row.visitorCarLimit}대` },
-    { key: 'status', header: '상태', render: () => <Badge status="approved">승인 완료</Badge> },
     {
       key: 'actions',
       header: '관리',
@@ -153,16 +144,6 @@ export default function ResidentManagement() {
             onChange={setSearchInput}
             onSearch={() => setKeyword(searchInput)}
           />
-          <div className="status-filter">
-            <SelectBox
-              aria-label="주민 상태 분류"
-              value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
-            >
-              <option value="all">전체</option>
-              <option value="approved">승인 완료</option>
-            </SelectBox>
-          </div>
           <Link to="/apartment-manager/residents/new">
             <Button>주민 등록</Button>
           </Link>
