@@ -11,6 +11,7 @@ import {
   getResidents,
   getResidentSignupRequests,
   getVehicle,
+  getVehicleOwnerByCarNumber as getVehicleOwnerByCarNumberApi,
   getVisitorCars,
   getVehicles,
   rejectResidentSignupRequest as rejectResidentSignupRequestApi,
@@ -594,6 +595,8 @@ export function ApartmentManagerProvider({ children }) {
 
   const getVehicleDetail = async (id) => mapVehicle(await getVehicle(id));
 
+  const getVehicleOwnerByCarNumber = async (carNumber) => getVehicleOwnerByCarNumberApi(carNumber);
+
   const updateVehicle = async (id, updatedFields) => {
     await updateVehicleApi(id, {
       carNumber: updatedFields.carNumber,
@@ -951,6 +954,7 @@ export function ApartmentManagerProvider({ children }) {
       deleteVisitorCar,
       findVehicleById: (id) => vehicles.find((vehicle) => vehicle.id === id),
       getVehicleDetail,
+      getVehicleOwnerByCarNumber,
       createVehicle,
       updateVehicle,
       deleteVehicle,

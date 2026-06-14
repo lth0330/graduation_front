@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 import Button from '../../components/common/Button.jsx';
+import Toast from '../../components/feedback/Toast.jsx';
+import FormField from '../../components/forms/FormField.jsx';
+import TextArea from '../../components/forms/TextArea.jsx';
+import TextInput from '../../components/forms/TextInput.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import MetricCard from '../../components/common/MetricCard.jsx';
 import PageTitle from '../../components/common/PageTitle.jsx';
@@ -18,6 +22,10 @@ import {
   findAreaIssueNotification,
   mergeAreaWithNotificationDetail,
 } from '../../utils/parkingIssueImage.js';
+import {
+  buildParkingOwnerNotificationForm,
+  canNotifyParkingAreaOwner,
+} from '../../utils/parkingOwnerNotification.js';
 
 const statusClassMap = {
   empty: 'empty',
@@ -36,11 +44,21 @@ export default function ParkingStatusGrid() {
     managerNotifications,
     refreshManagerNotifications,
     getManagerNotificationDetail,
+    getVehicleOwnerByCarNumber,
+    sendResidentNotification,
   } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
   const [selectedErrorArea, setSelectedErrorArea] = useState(null);
   const [isErrorImageLoading, setIsErrorImageLoading] = useState(false);
   const [errorImageError, setErrorImageError] = useState('');
+  const [ownerLookupAreaId, setOwnerLookupAreaId] = useState('');
+  const [contactTargetArea, setContactTargetArea] = useState(null);
+  const [contactOwner, setContactOwner] = useState(null);
+  const [contactForm, setContactForm] = useState({ title: '', message: '' });
+  const [contactError, setContactError] = useState('');
+  const [isContactSending, setIsContactSending] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success');
 
   useAutoRefresh(() => refreshParkingData({ silent: true }), 5000);
 
@@ -149,36 +167,110 @@ export default function ParkingStatusGrid() {
     }
   };
 
+  const openOwnerContactModal = async (area) => {
+    try {
+      setOwnerLookupAreaId(area.id);
+      const owner = await getVehicleOwnerByCarNumber(area.currentCarNumber);
+      setContactTargetArea(area);
+      setContactOwner(owner);
+      setContactForm(buildParkingOwnerNotificationForm(area, owner));
+      setContactError('');
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('차량번호와 연결된 주민을 찾지 못했습니다. 차량 등록 정보를 확인하세요.');
+    } finally {
+      setOwnerLookupAreaId('');
+    }
+  };
+
+  const closeOwnerContactModal = () => {
+    if (isContactSending) {
+      return;
+    }
+
+    setContactTargetArea(null);
+    setContactOwner(null);
+    setContactError('');
+  };
+
+  const handleContactFormChange = (field, value) => {
+    setContactForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+  };
+
+  const submitOwnerContactNotification = async (event) => {
+    event.preventDefault();
+
+    const title = contactForm.title.trim();
+    const message = contactForm.message.trim();
+    if (!title || !message) {
+      setContactError('제목과 내용을 모두 입력하세요.');
+      return;
+    }
+
+    try {
+      setIsContactSending(true);
+      setContactError('');
+      await sendResidentNotification(contactOwner.residentNo, {
+        title,
+        message,
+        type: 'manager_contact',
+      });
+      setToastType('success');
+      setToastMessage(`${contactOwner.name} 주민에게 차량 이동 알림을 보냈습니다.`);
+      setContactTargetArea(null);
+      setContactOwner(null);
+    } catch (error) {
+      setToastType('error');
+      setToastMessage('차주 알림 발송에 실패했습니다. 백엔드 서버 상태를 확인하세요.');
+    } finally {
+      setIsContactSending(false);
+    }
+  };
+
   const renderParkingSpot = (area) => {
     const isImageInspectable = isParkingImageInspectableArea(area);
+    const canNotifyOwner = canNotifyParkingAreaOwner(area);
     const statusClass = isImageInspectable ? 'error' : statusClassMap[area.status] || 'empty';
     const commonProps = {
-      className: `parking-spot ${statusClass} ${isImageInspectable ? 'is-clickable' : ''}`,
+      className: `parking-spot ${statusClass}`,
       style: {
         gridColumn: `${area.layoutColumn} / span ${area.layoutWidth}`,
         gridRow: `${area.layoutRow} / span ${area.layoutHeight}`,
       },
       title: `${area.areaNumber}: ${area.layoutRow}행 ${area.layoutColumn}열, ${area.layoutWidth}x${area.layoutHeight}${
         area.currentCarNumber ? `, ${area.currentCarNumber}` : ''
-      }${isImageInspectable ? ', 이미지 확인 가능' : ''}`,
+      }${isImageInspectable ? ', 이미지 확인 가능' : ''}${canNotifyOwner ? ', 차주 알림 가능' : ''}`,
     };
-
-    if (isImageInspectable) {
-      return (
-        <button
-          key={area.id}
-          type="button"
-          {...commonProps}
-          onClick={() => handleInspectArea(area)}
-        >
-          {getParkingSpotDisplayText(area)}
-        </button>
-      );
-    }
 
     return (
       <div key={area.id} {...commonProps}>
-        {getParkingSpotDisplayText(area)}
+        <span className="parking-spot-label">{getParkingSpotDisplayText(area)}</span>
+        {(isImageInspectable || canNotifyOwner) && (
+          <span className="parking-spot-actions">
+            {isImageInspectable && (
+              <button
+                className="parking-spot-action"
+                type="button"
+                onClick={() => handleInspectArea(area)}
+              >
+                이미지
+              </button>
+            )}
+            {canNotifyOwner && (
+              <button
+                className="parking-spot-action"
+                type="button"
+                disabled={ownerLookupAreaId === area.id}
+                onClick={() => openOwnerContactModal(area)}
+              >
+                {ownerLookupAreaId === area.id ? '조회' : '알림'}
+              </button>
+            )}
+          </span>
+        )}
       </div>
     );
   };
@@ -289,6 +381,53 @@ export default function ParkingStatusGrid() {
           </section>
         </div>
       )}
+
+      {contactTargetArea && contactOwner && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="parking-owner-contact-title">
+            <h2 id="parking-owner-contact-title">차주 알림 보내기</h2>
+            <p>
+              {contactTargetArea.areaNumber} 주차칸의 {contactOwner.carNumber} 차량 소유 주민에게 앱 알림을 보냅니다.
+            </p>
+
+            <form className="answer-form" onSubmit={submitOwnerContactNotification}>
+              <FormField label="차주 정보" helper="전화 연락이 필요하면 등록된 연락처를 사용하세요.">
+                <TextInput
+                  value={`${contactOwner.building || '-'}동 ${contactOwner.unit || '-'}호 ${contactOwner.name || '-'} / ${contactOwner.phone || '연락처 없음'}`}
+                  readOnly
+                />
+              </FormField>
+              <FormField label="제목">
+                <TextInput
+                  value={contactForm.title}
+                  maxLength={100}
+                  disabled={isContactSending}
+                  onChange={(event) => handleContactFormChange('title', event.target.value)}
+                />
+              </FormField>
+              <FormField label="내용" error={contactError}>
+                <TextArea
+                  rows={5}
+                  value={contactForm.message}
+                  maxLength={500}
+                  disabled={isContactSending}
+                  onChange={(event) => handleContactFormChange('message', event.target.value)}
+                />
+              </FormField>
+              <div className="modal-actions">
+                <Button variant="secondary" disabled={isContactSending} onClick={closeOwnerContactModal}>
+                  취소
+                </Button>
+                <Button type="submit" disabled={isContactSending}>
+                  {isContactSending ? '발송 중' : '알림 보내기'}
+                </Button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      <Toast message={toastMessage} type={toastType} onClose={() => setToastMessage('')} />
     </AdminLayout>
   );
 }

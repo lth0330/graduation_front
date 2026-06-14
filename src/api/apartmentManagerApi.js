@@ -114,6 +114,14 @@ export async function getVehicle(vehicleNo) {
   return response.data;
 }
 
+export async function getVehicleOwnerByCarNumber(carNumber) {
+  const response = await apiClient.get('/api/vehicles/owner', {
+    params: { carNumber },
+  });
+
+  return response.data;
+}
+
 export async function getVisitorCars(apartmentNo) {
   const response = await apiClient.get('/api/visitor-cars', {
     params: { apartmentNo },
