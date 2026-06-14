@@ -82,6 +82,27 @@ test('주차칸 화면 라벨은 마지막 하이픈 구간만 표시한다', ()
   assert.equal(getParkingSpotAreaLabel('A1'), 'A1');
 });
 
+test('통로 주차칸은 화면 라벨에 통로 문구를 함께 표시한다', () => {
+  assert.equal(
+    getParkingSpotDisplayText({
+      areaNumber: 'a-b1-009',
+      zoneType: 'double_lane',
+      status: 'empty',
+    }),
+    '통로 009',
+  );
+
+  assert.equal(
+    getParkingSpotDisplayText({
+      areaNumber: 'a-b1-009',
+      zoneType: 'double_lane',
+      status: 'occupied',
+      currentCarNumber: '12가3456',
+    }),
+    '통로 009\n12가3456',
+  );
+});
+
 test('오류와 unknown 상태는 이미지 확인 대상으로 본다', () => {
   assert.equal(isParkingImageInspectableStatus('error'), true);
   assert.equal(isParkingImageInspectableStatus('unknown'), true);

@@ -1481,6 +1481,12 @@ button,
   margin-top: 18px;
 }
 
+.table-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .answer-form {
   margin-top: 18px;
 }

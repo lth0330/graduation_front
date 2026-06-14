@@ -94,6 +94,12 @@ export async function deleteResident(residentNo) {
   await apiClient.delete(`/api/residents/${residentNo}`);
 }
 
+export async function sendResidentNotification(residentNo, notification) {
+  const response = await apiClient.post(`/api/residents/${residentNo}/notifications`, notification);
+
+  return response.data;
+}
+
 export async function getVehicles(apartmentNo) {
   const response = await apiClient.get('/api/vehicles', {
     params: { apartmentNo },

@@ -14,6 +14,7 @@ import {
   getVisitorCars,
   getVehicles,
   rejectResidentSignupRequest as rejectResidentSignupRequestApi,
+  sendResidentNotification as sendResidentNotificationApi,
   updateApartmentManagerProfile as updateApartmentManagerProfileApi,
   updateResident as updateResidentApi,
   updateVisitorCarExpiration as updateVisitorCarExpirationApi,
@@ -284,7 +285,7 @@ function mapManagerNotification(apiNotification) {
     referenceId: apiNotification.referenceId,
     parkingHistory: mapParkingHistory(apiNotification.parkingHistory),
     read: Boolean(apiNotification.read),
-    createdAt: formatDate(apiNotification.createdAt),
+    createdAt: formatDateTimeDisplay(apiNotification.createdAt),
   };
 }
 
@@ -544,6 +545,12 @@ export function ApartmentManagerProvider({ children }) {
     await deleteResidentApi(id);
     await refreshResidents();
   };
+
+  const sendResidentNotification = async (id, notification) => sendResidentNotificationApi(id, {
+    title: notification.title,
+    message: notification.message,
+    type: notification.type || 'manager_contact',
+  });
 
   const refreshVehicles = async ({ silent = false } = {}) => {
     try {
@@ -931,6 +938,7 @@ export function ApartmentManagerProvider({ children }) {
       createResident,
       updateResident,
       deleteResident,
+      sendResidentNotification,
       vehicles,
       isVehiclesLoading,
       vehiclesError,

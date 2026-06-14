@@ -14,6 +14,10 @@ import DataTable from '../../components/tables/DataTable.jsx';
 import Pagination from '../../components/tables/Pagination.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import {
+  formatManagerNotificationCreatedAt,
+  formatManagerNotificationMessage,
+} from '../../utils/managerNotificationDisplay.js';
 import { usePagination } from '../../utils/pagination.js';
 
 const notificationTypeLabel = {
@@ -114,7 +118,11 @@ export default function ManagerNotificationList() {
       render: (row) => notificationTypeLabel[row.notificationType] || row.notificationType,
     },
     { key: 'title', header: '제목' },
-    { key: 'message', header: '내용' },
+    {
+      key: 'message',
+      header: '내용',
+      render: (row) => formatManagerNotificationMessage(row.message),
+    },
     {
       key: 'read',
       header: '상태',
@@ -122,7 +130,11 @@ export default function ManagerNotificationList() {
         <Badge status={row.read ? 'inactive' : 'active'}>{row.read ? '읽음' : '안 읽음'}</Badge>
       ),
     },
-    { key: 'createdAt', header: '생성일' },
+    {
+      key: 'createdAt',
+      header: '생성일',
+      render: (row) => formatManagerNotificationCreatedAt(row.createdAt),
+    },
     {
       key: 'action',
       header: '처리',

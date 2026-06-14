@@ -71,9 +71,14 @@ export function getParkingSpotAreaLabel(areaNumber) {
   return areaParts.length > 1 ? areaParts[areaParts.length - 1] : normalizedAreaNumber;
 }
 
+function isDoubleLaneParkingArea(area) {
+  return ['double_lane', 'aisle'].includes(String(area?.zoneType || area?.type || '').toLowerCase());
+}
+
 export function getParkingSpotDisplayText(area) {
   const currentCarNumber = String(area.currentCarNumber || '').trim();
-  const areaLabel = getParkingSpotAreaLabel(area.areaNumber);
+  const baseAreaLabel = getParkingSpotAreaLabel(area.areaNumber);
+  const areaLabel = isDoubleLaneParkingArea(area) ? `통로 ${baseAreaLabel}` : baseAreaLabel;
 
   if (area.status === 'occupied' && currentCarNumber) {
     return `${areaLabel}\n${currentCarNumber}`;
