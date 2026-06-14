@@ -10,6 +10,7 @@ import SectionCard from '../../components/common/SectionCard.jsx';
 import AdminLayout from '../../components/layout/AdminLayout.jsx';
 import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx';
 import { apartmentManagerMenus } from '../../data/navigation.js';
+import { formatPhoneNumber } from '../../utils/phoneFormat.js';
 
 export default function MyPage() {
   const {
@@ -192,7 +193,7 @@ export default function MyPage() {
               </div>
               <div>
                 <dt>연락처</dt>
-                <dd>{apartmentManagerProfile.phone}</dd>
+                <dd>{formatPhoneNumber(apartmentManagerProfile.phone, '-')}</dd>
               </div>
               <div>
                 <dt>아파트 이름</dt>

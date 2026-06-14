@@ -46,7 +46,6 @@ const zoneTypeLabel = {
 const columns = [
   { key: 'id', header: '구역 ID' },
   { key: 'areaNumber', header: '구역 번호' },
-  { key: 'location', header: '위치' },
   { key: 'zoneType', header: '구역 종류', render: (row) => zoneTypeLabel[row.zoneType] || '일반 주차칸' },
   {
     key: 'status',
@@ -56,9 +55,10 @@ const columns = [
   {
     key: 'placement',
     header: '배치',
+    className: 'table-cell-center',
     render: (row) => formatParkingRange(row),
   },
-  { key: 'statusChangeReason', header: '변경 사유', render: (row) => row.statusChangeReason || '-' },
+  { key: 'statusChangeReason', header: '변경 사유', render: (row) => row.statusChangeReason ?? null },
 ];
 
 export default function ParkingAreaManagement() {
@@ -74,10 +74,8 @@ export default function ParkingAreaManagement() {
     deleteParkingArea,
   } = useApartmentManager();
   const [selectedParkingLotId, setSelectedParkingLotId] = useState(parkingLots[0]?.id || '');
-  const [selectedStatus, setSelectedStatus] = useState('all');
   const [form, setForm] = useState({
     areaNumber: '',
-    location: '',
     status: 'empty',
     zoneType: 'normal',
     rowStart: '1',
@@ -119,13 +117,8 @@ export default function ParkingAreaManagement() {
         ...placement,
       };
     });
-  const filteredAreas =
-    selectedStatus === 'all'
-      ? visibleAreas
-      : visibleAreas.filter((parkingArea) => parkingArea.status === selectedStatus);
-  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(filteredAreas, 5, [
+  const { currentPage, setCurrentPage, totalPages, pagedRows, startIndex } = usePagination(visibleAreas, 5, [
     selectedParkingLotId,
-    selectedStatus,
   ]);
   const tableColumns = [
     ...columns,
@@ -166,7 +159,7 @@ export default function ParkingAreaManagement() {
   };
 
   const handleCreate = async () => {
-    if (!selectedParkingLotId || !form.areaNumber.trim() || !form.location.trim()) {
+    if (!selectedParkingLotId || !form.areaNumber.trim()) {
       setToastMessage('주차 구역 정보를 모두 입력하세요.');
       return;
     }
@@ -188,13 +181,12 @@ export default function ParkingAreaManagement() {
         ...form,
         ...placement,
         areaNumber: form.areaNumber.trim(),
-        location: form.location.trim(),
+        location: form.areaNumber.trim(),
         parkingLotId: selectedParkingLotId,
-        statusChangeReason: '신규 등록',
+        statusChangeReason: null,
       });
       setForm({
         areaNumber: '',
-        location: '',
         status: 'empty',
         zoneType: 'normal',
         rowStart: '1',
@@ -377,7 +369,7 @@ export default function ParkingAreaManagement() {
           <EmptyState title="등록된 주차장이 없습니다." description="주차장 정보 관리에서 주차장을 먼저 등록하세요." />
         ) : (
           <>
-            <div className="filter-row">
+            <div className="filter-row parking-area-filter-row">
               <label>
                 주차장 선택
                 <SelectBox value={selectedParkingLotId} onChange={(event) => setSelectedParkingLotId(event.target.value)}>
@@ -388,23 +380,11 @@ export default function ParkingAreaManagement() {
                   ))}
                 </SelectBox>
               </label>
-              <label>
-                상태 분류
-                <SelectBox value={selectedStatus} onChange={(event) => setSelectedStatus(event.target.value)}>
-                  <option value="all">전체</option>
-                  <option value="empty">빈자리</option>
-                  <option value="occupied">주차됨</option>
-                  <option value="disabled">사용 불가</option>
-                </SelectBox>
-              </label>
             </div>
 
             <div className="inline-form-grid parking-area-form-grid">
               <FormField label="구역 번호">
                 <TextInput value={form.areaNumber} onChange={(event) => handleChange('areaNumber', event.target.value)} />
-              </FormField>
-              <FormField label="위치">
-                <TextInput value={form.location} onChange={(event) => handleChange('location', event.target.value)} />
               </FormField>
               <FormField label="상태">
                 <SelectBox value={form.status} onChange={(event) => handleChange('status', event.target.value)}>

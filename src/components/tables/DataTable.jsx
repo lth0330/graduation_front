@@ -9,6 +9,9 @@ export default function DataTable({
   loading = false,
   startIndex = 0,
 }) {
+  const getColumnClassName = (column) =>
+    [column.key === 'id' ? 'table-index-column' : '', column.className || ''].filter(Boolean).join(' ') || undefined;
+
   if (loading) {
     return <LoadingState />;
   }
@@ -23,7 +26,7 @@ export default function DataTable({
         <thead>
           <tr>
             {columns.map((column) => (
-              <th className={column.key === 'id' ? 'table-index-column' : undefined} key={column.key}>
+              <th className={getColumnClassName(column)} key={column.key}>
                 {column.header}
               </th>
             ))}
@@ -33,7 +36,7 @@ export default function DataTable({
           {rows.map((row, rowIndex) => (
             <tr key={row[rowKey] || rowIndex}>
               {columns.map((column) => (
-                <td className={column.key === 'id' ? 'table-index-column' : undefined} key={column.key}>
+                <td className={getColumnClassName(column)} key={column.key}>
                   {column.render ? column.render(row) : column.key === 'id' ? startIndex + rowIndex + 1 : row[column.key]}
                 </td>
               ))}

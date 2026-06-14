@@ -20,6 +20,7 @@ import {
 } from '../../api/webAdminApi.js';
 import { webAdminMenus } from '../../data/navigation.js';
 import { usePagination } from '../../utils/pagination.js';
+import { formatPhoneNumber } from '../../utils/phoneFormat.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const statusMap = {
@@ -368,7 +369,7 @@ export default function ApartmentManagerManagement() {
                 </div>
                 <div>
                   <dt>연락처</dt>
-                  <dd>{detailTarget.phone || '-'}</dd>
+                  <dd>{formatPhoneNumber(detailTarget.phone, '-')}</dd>
                 </div>
                 <div>
                   <dt>아파트 번호</dt>

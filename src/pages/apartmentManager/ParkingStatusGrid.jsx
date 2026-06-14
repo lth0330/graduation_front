@@ -26,6 +26,7 @@ import {
   buildParkingOwnerNotificationForm,
   canNotifyParkingAreaOwner,
 } from '../../utils/parkingOwnerNotification.js';
+import { formatPhoneNumber } from '../../utils/phoneFormat.js';
 import { findVehicleOwnerFromLists } from '../../utils/vehicleOwnerLookup.js';
 
 const statusClassMap = {
@@ -411,7 +412,7 @@ export default function ParkingStatusGrid() {
             <form className="answer-form" onSubmit={submitOwnerContactNotification}>
               <FormField label="차주 정보" helper="전화 연락이 필요하면 등록된 연락처를 사용하세요.">
                 <TextInput
-                  value={`${contactOwner.building || '-'}동 ${contactOwner.unit || '-'}호 ${contactOwner.name || '-'} / ${contactOwner.phone || '연락처 없음'}`}
+                  value={`${contactOwner.building || '-'}동 ${contactOwner.unit || '-'}호 ${contactOwner.name || '-'} / ${formatPhoneNumber(contactOwner.phone, '연락처 없음')}`}
                   readOnly
                 />
               </FormField>

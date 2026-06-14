@@ -22,8 +22,7 @@ export default function useAutoRefresh(callback, intervalMs, enabled = true) {
       try {
         isRunning = true;
         await callbackRef.current?.();
-      } catch (error) {
-        // 자동 갱신 실패는 기존 화면을 유지하고, 수동 새로고침에서 오류를 확인합니다.
+      } catch {
       } finally {
         isRunning = false;
       }

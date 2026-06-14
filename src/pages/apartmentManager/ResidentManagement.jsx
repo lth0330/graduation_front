@@ -17,6 +17,7 @@ import { useApartmentManager } from '../../contexts/ApartmentManagerContext.jsx'
 import { apartmentManagerMenus } from '../../data/navigation.js';
 import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 import { usePagination } from '../../utils/pagination.js';
+import { formatPhoneNumber } from '../../utils/phoneFormat.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 function buildDefaultContactForm(resident) {
@@ -106,7 +107,7 @@ export default function ResidentManagement() {
     { key: 'name', header: '이름' },
     { key: 'loginId', header: '아이디' },
     { key: 'email', header: '이메일' },
-    { key: 'phone', header: '연락처', render: (row) => row.phone || '-' },
+    { key: 'phone', header: '연락처', render: (row) => formatPhoneNumber(row.phone, '-') },
     { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
     {
       key: 'actions',
@@ -182,7 +183,7 @@ export default function ResidentManagement() {
 
             <form className="answer-form" onSubmit={submitContactNotification}>
               <FormField label="연락처" helper="전화 연락이 필요한 경우 이 번호를 사용하세요.">
-                <TextInput value={contactTarget.phone || '등록된 연락처 없음'} readOnly />
+                <TextInput value={formatPhoneNumber(contactTarget.phone, '등록된 연락처 없음')} readOnly />
               </FormField>
               <FormField label="제목">
                 <TextInput

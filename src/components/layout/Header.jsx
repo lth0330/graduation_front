@@ -6,8 +6,6 @@ export default function Header({ roleLabel, userName }) {
 
   const handleLogout = () => {
     clearAuthSessions();
-
-    // 로그아웃 후 메인 화면으로 이동합니다.
     navigate('/');
   };
 

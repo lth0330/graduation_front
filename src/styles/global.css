@@ -1346,7 +1346,35 @@ button,
 }
 
 .parking-area-form-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  grid-template-columns: 160px 150px 170px 120px 120px auto;
+  column-gap: 28px;
+  row-gap: 16px;
+  align-items: end;
+}
+
+.parking-area-filter-row {
+  grid-template-columns: 260px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.parking-area-filter-row label,
+.parking-area-form-grid .form-field > span {
+  text-align: center;
+}
+
+.parking-area-filter-row .form-control,
+.parking-area-form-grid .form-control {
+  min-height: 44px;
+}
+
+.parking-area-form-grid .range-input-group {
+  min-width: 0;
+}
+
+.parking-area-form-grid .button {
+  justify-self: end;
+  min-width: 150px;
 }
 
 .data-table-wrap {
@@ -1389,6 +1417,10 @@ button,
 
 .data-table td.table-index-column {
   font-weight: 800;
+}
+
+.data-table .table-cell-center {
+  text-align: center;
 }
 
 .data-table tbody tr:last-child td {

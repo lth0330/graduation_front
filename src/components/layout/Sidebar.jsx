@@ -4,8 +4,6 @@ import { NavLink, useLocation } from 'react-router-dom';
 export default function Sidebar({ roleLabel, consoleTitle, menus, menuBadges = {} }) {
   const location = useLocation();
 
-  // 대시보드는 정확히 해당 경로일 때만 활성화하고,
-  // 목록 메뉴는 상세 페이지에서도 활성화되도록 경로 앞부분을 비교합니다.
   const isSameMenuPath = (path) => {
     const dashboardPaths = ['/web-admin', '/apartment-admin'];
 

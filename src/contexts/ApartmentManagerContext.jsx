@@ -261,7 +261,7 @@ function mapParkingArea(apiParkingZone) {
     errorImage: errorImageBase64 ? `data:image/jpeg;base64,${errorImageBase64}` : errorImage,
     errorMessage: apiParkingZone.errorMessage || apiParkingZone.statusChangeReason || '',
     zoneType: apiParkingZone.zoneType || 'normal',
-    statusChangeReason: apiParkingZone.statusChangeReason || '',
+    statusChangeReason: apiParkingZone.statusChangeReason ?? null,
   };
 }
 
@@ -399,7 +399,6 @@ export function ApartmentManagerProvider({ children }) {
   const [managerNotificationsError, setManagerNotificationsError] = useState('');
   const [plateCorrectionReviews, setPlateCorrectionReviews] = useState([]);
   const [plateCorrectionReviewsError, setPlateCorrectionReviewsError] = useState('');
-  // 입주민 주차 문의 목록은 백엔드 API 응답을 기준으로 관리합니다.
   const [residentParkingInquiries, setResidentParkingInquiries] = useState([]);
   const [isResidentParkingInquiriesLoading, setIsResidentParkingInquiriesLoading] = useState(false);
   const [residentParkingInquiriesError, setResidentParkingInquiriesError] = useState('');
@@ -740,7 +739,7 @@ export function ApartmentManagerProvider({ children }) {
       layoutWidth: Number(parkingArea.layoutWidth || 2),
       layoutHeight: Number(parkingArea.layoutHeight || 1),
       zoneType: parkingArea.zoneType || 'normal',
-      statusChangeReason: parkingArea.statusChangeReason || '',
+      statusChangeReason: parkingArea.statusChangeReason ?? null,
     });
     await refreshParkingData();
   };
