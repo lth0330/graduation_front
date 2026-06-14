@@ -54,7 +54,7 @@ export default function ParkingLotManagement() {
   const gateModeLabel = gatePolicy.gateForceOpenEnabled ? '상시개방 모드' : '번호판 자동제어';
   const gateModeDescription = gatePolicy.gateForceOpenEnabled
     ? '번호판과 주차장 점유율 조건을 보지 않고 차단기를 열린 상태로 유지합니다.'
-    : 'Spring Boot의 번호판 확인 결과와 관리자 정책에 따라 차단기를 제어합니다.';
+    : '';
   const tableColumns = [
     ...columns,
     {
@@ -165,7 +165,7 @@ export default function ParkingLotManagement() {
               <div>
                 <span className="policy-eyebrow">현재 차단기 모드</span>
                 <strong>{gateModeLabel}</strong>
-                <p>{gateModeDescription}</p>
+                {gateModeDescription && <p>{gateModeDescription}</p>}
               </div>
               <div className="gate-policy-metrics" aria-label="현재 주차장 사용률">
                 <span>사용률 {occupancyRateLabel}</span>
@@ -180,11 +180,7 @@ export default function ParkingLotManagement() {
                     <span className="policy-dot" aria-hidden="true" />
                     <strong>방문차량 혼잡도 차단</strong>
                   </div>
-                  <p className="section-help">
-                    {gatePolicy.gateOccupancyBlockEnabled
-                      ? '주차장 80% 이상 또는 만차 시 방문차량을 차단합니다.'
-                      : '방문차량도 번호판 등록 여부만 확인합니다.'}
-                  </p>
+                  <p className="section-help">주차장 사용률 80% 이상일 때 방문차량을 차단합니다.</p>
                 </div>
                 <button
                   className={`policy-switch ${gatePolicy.gateOccupancyBlockEnabled ? 'is-on' : 'is-off'}`}
@@ -207,11 +203,9 @@ export default function ParkingLotManagement() {
                     <span className="policy-dot" aria-hidden="true" />
                     <strong>차단기 상시 개방</strong>
                   </div>
-                  <p className="section-help">
-                    {gatePolicy.gateForceOpenEnabled
-                      ? '장비가 상시개방 모드로 차단기를 열린 상태로 유지합니다.'
-                      : '번호판 확인 결과에 따라 차단기를 제어합니다.'}
-                  </p>
+                  {gatePolicy.gateForceOpenEnabled && (
+                    <p className="section-help">장비가 상시개방 모드로 차단기를 열린 상태로 유지합니다.</p>
+                  )}
                 </div>
                 <button
                   className={`policy-switch ${gatePolicy.gateForceOpenEnabled ? 'is-danger' : 'is-off'}`}
@@ -231,7 +225,7 @@ export default function ParkingLotManagement() {
         )}
       </SectionCard>
 
-      <SectionCard title="주차장 목록" description="주차장 등록과 삭제를 처리합니다.">
+      <SectionCard title="주차장 목록" description="주차장 등록과 삭제를 처리합니다." className="parking-lot-list-card">
         <div className="inline-form-grid">
           <FormField label="주차장 이름">
             <TextInput value={form.name} onChange={(event) => handleChange('name', event.target.value)} />
@@ -247,7 +241,6 @@ export default function ParkingLotManagement() {
           </FormField>
           <Button onClick={handleCreate}>주차장 등록</Button>
         </div>
-        <p className="section-help">주차장을 삭제하면 연결된 주차 구역도 함께 삭제됩니다.</p>
         {isParkingLoading ? (
           <LoadingState message="주차장 목록 불러오는 중" />
         ) : parkingError ? (

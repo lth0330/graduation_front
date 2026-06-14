@@ -403,16 +403,14 @@ export default function ParkingAreaManagement() {
                 <div className="range-input-group">
                   <TextInput
                     aria-label="차지할 시작 행"
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={form.rowStart}
                     onChange={(event) => handleChange('rowStart', event.target.value)}
                   />
                   <span>~</span>
                   <TextInput
                     aria-label="차지할 끝 행"
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={form.rowEnd}
                     onChange={(event) => handleChange('rowEnd', event.target.value)}
                   />
@@ -422,16 +420,14 @@ export default function ParkingAreaManagement() {
                 <div className="range-input-group">
                   <TextInput
                     aria-label="차지할 시작 열"
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={form.columnStart}
                     onChange={(event) => handleChange('columnStart', event.target.value)}
                   />
                   <span>~</span>
                   <TextInput
                     aria-label="차지할 끝 열"
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={form.columnEnd}
                     onChange={(event) => handleChange('columnEnd', event.target.value)}
                   />
@@ -472,8 +468,7 @@ export default function ParkingAreaManagement() {
                   <TextInput
                     aria-label="차지할 시작 행"
                     error={Boolean(layoutError)}
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={layoutForm.rowStart}
                     onChange={(event) => handleLayoutFormChange('rowStart', event.target.value)}
                   />
@@ -481,8 +476,7 @@ export default function ParkingAreaManagement() {
                   <TextInput
                     aria-label="차지할 끝 행"
                     error={Boolean(layoutError)}
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={layoutForm.rowEnd}
                     onChange={(event) => handleLayoutFormChange('rowEnd', event.target.value)}
                   />
@@ -493,8 +487,7 @@ export default function ParkingAreaManagement() {
                   <TextInput
                     aria-label="차지할 시작 열"
                     error={Boolean(layoutError)}
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={layoutForm.columnStart}
                     onChange={(event) => handleLayoutFormChange('columnStart', event.target.value)}
                   />
@@ -502,8 +495,7 @@ export default function ParkingAreaManagement() {
                   <TextInput
                     aria-label="차지할 끝 열"
                     error={Boolean(layoutError)}
-                    min="1"
-                    type="number"
+                    inputMode="numeric"
                     value={layoutForm.columnEnd}
                     onChange={(event) => handleLayoutFormChange('columnEnd', event.target.value)}
                   />

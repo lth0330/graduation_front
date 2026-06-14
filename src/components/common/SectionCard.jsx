@@ -1,6 +1,6 @@
-export default function SectionCard({ title, headerAction, children }) {
+export default function SectionCard({ title, headerAction, children, className = '' }) {
   return (
-    <section className="section-card">
+    <section className={`section-card ${className}`.trim()}>
       <div className="section-card-header">
         <div>
           <h2>{title}</h2>
