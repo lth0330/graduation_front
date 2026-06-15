@@ -115,6 +115,7 @@ function getStoredApartmentNo() {
   const storedManager = getValidAuthSession(authRoles.APARTMENT_MANAGER);
 
   if (!storedManager) {
+    // 개발용 기본값입니다. 실제 로그인 후에는 JWT 세션의 apartmentNo가 우선 사용됩니다.
     return 1;
   }
 
@@ -233,6 +234,8 @@ function mapParkingLot(apiParkingLot) {
 }
 
 function mapParkingArea(apiParkingZone) {
+  // 백엔드 응답 필드명이 상황별로 조금씩 다를 수 있어 이미지 경로 후보를 순서대로 확인합니다.
+  // Python OCR 실패 이미지나 업로드 이미지가 있으면 주차 상태 화면에서 확인 모달로 보여줍니다.
   const apiStatus = String(apiParkingZone.status || '');
   const errorImage =
     apiParkingZone.errorImageUrl ||
@@ -365,6 +368,8 @@ function mapResidentParkingInquiry(apiInquiry) {
 }
 
 export function ApartmentManagerProvider({ children }) {
+  // 이 Context는 아파트 관리자 화면에서 공통으로 쓰는 서버 데이터를 한곳에서 관리합니다.
+  // 각 페이지는 직접 Axios를 호출하지 않고 여기서 제공하는 refresh/create/update 함수를 사용합니다.
   const [managerProfile, setManagerProfile] = useState(emptyApartmentManagerProfile);
   const [isManagerProfileLoading, setIsManagerProfileLoading] = useState(false);
   const [managerProfileError, setManagerProfileError] = useState('');
@@ -437,6 +442,7 @@ export function ApartmentManagerProvider({ children }) {
   useEffect(() => {
     const handleAuthSessionChanged = (event) => {
       if (event.detail?.role === authRoles.APARTMENT_MANAGER) {
+        // 로그인 직후 빈 화면이 보이지 않도록 관리자에게 필요한 주요 데이터를 한 번에 다시 조회합니다.
         refreshManagerProfile();
         refreshResidentSignupRequests();
         refreshResidents();
@@ -661,6 +667,7 @@ export function ApartmentManagerProvider({ children }) {
       const apartmentNo = getStoredApartmentNo();
       const parkingLotList = await getParkingLots(apartmentNo);
       const mappedParkingLots = parkingLotList.map(mapParkingLot);
+      // 주차면은 주차장별 API로 조회되므로 Promise.all로 병렬 호출 후 하나의 배열로 합칩니다.
       const parkingZoneGroups = await Promise.all(
         mappedParkingLots.map((parkingLot) => getParkingZones(parkingLot.parkingLotNo)),
       );
@@ -822,6 +829,7 @@ export function ApartmentManagerProvider({ children }) {
         mapPlateCorrectionReview: mapPlateCorrectionReview,
       });
 
+      // 관리자 알림과 번호판 보정 대기 목록을 같은 알림 화면에서 함께 보여주기 위해 동시에 갱신합니다.
       setManagerNotifications(sortByNewest(result.managerNotifications));
       setPlateCorrectionReviews(sortByNewest(result.plateCorrectionReviews));
       setManagerNotificationsError(result.managerNotificationsError);
@@ -875,6 +883,7 @@ export function ApartmentManagerProvider({ children }) {
 
   const confirmPlateCorrectionReview = async (reviewId, plate) => {
     const result = await confirmPlateCorrectionReviewApi(reviewId, plate);
+    // 번호판 확정 후에는 알림 목록과 주차면의 차량번호가 함께 바뀌므로 두 데이터를 같이 새로고침합니다.
     await Promise.all([
       refreshManagerNotifications({ silent: true }),
       refreshParkingData({ silent: true }),
@@ -918,6 +927,8 @@ export function ApartmentManagerProvider({ children }) {
 
   const value = useMemo(
     () => ({
+      // Provider 밖의 페이지들이 사용할 상태와 함수 목록입니다.
+      // 새 기능을 추가할 때 화면에서 필요한 값은 이 객체에 포함되어야 합니다.
       residentSignupRequests,
       isResidentRequestsLoading,
       residentRequestsError,

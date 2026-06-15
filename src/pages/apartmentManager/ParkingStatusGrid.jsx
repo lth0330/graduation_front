@@ -65,6 +65,7 @@ export default function ParkingStatusGrid() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success');
 
+  // Python/Spring Boot에서 주차 상태가 바뀌어도 화면을 새로고침하지 않도록 5초마다 조용히 갱신합니다.
   useAutoRefresh(() => refreshParkingData({ silent: true }), 5000);
 
   useEffect(() => {
@@ -74,6 +75,8 @@ export default function ParkingStatusGrid() {
   }, [parkingLots, selectedParkingLotId]);
 
   const selectedParkingLot = parkingLots.find((parkingLot) => parkingLot.id === selectedParkingLotId);
+  // 백엔드의 layoutRow/layoutColumn/layoutWidth/layoutHeight 값을 CSS Grid 위치로 변환합니다.
+  // 이 값이 있어야 세로형/가로형 주차면과 통로 주차면을 실제 배치처럼 보여줄 수 있습니다.
   const visibleAreas = parkingAreas
     .filter((parkingArea) => parkingArea.parkingLotId === selectedParkingLotId)
     .map((parkingArea, index) => ({
@@ -135,6 +138,7 @@ export default function ParkingStatusGrid() {
   }, [parkingAreas, selectedErrorArea?.id, selectedErrorArea?.errorImage]);
 
   const handleManualRefresh = async () => {
+    // 수동 새로고침은 주차면뿐 아니라 OCR 실패/이상 주차 알림도 함께 다시 조회합니다.
     await Promise.all([
       refreshParkingData(),
       refreshManagerNotifications({ silent: true }),
@@ -142,6 +146,7 @@ export default function ParkingStatusGrid() {
   };
 
   const handleInspectArea = async (area) => {
+    // UNKNOWN, error 상태의 주차면은 관련 관리자 알림을 찾아 이미지와 이력 정보를 보강합니다.
     const matchedNotification = findAreaIssueNotification(area, managerNotifications);
 
     setSelectedErrorArea({
@@ -177,8 +182,10 @@ export default function ParkingStatusGrid() {
       setOwnerLookupAreaId(area.id);
       let owner = null;
       try {
+        // 우선 백엔드에 차량번호로 소유자를 조회합니다.
         owner = await getVehicleOwnerByCarNumber(area.currentCarNumber);
       } catch (error) {
+        // 네트워크 오류나 응답 누락 시 이미 불러온 차량/방문차/입주민 목록에서 한 번 더 찾습니다.
         owner = findVehicleOwnerFromLists(area.currentCarNumber, {
           vehicles,
           visitorCars,
@@ -252,6 +259,7 @@ export default function ParkingStatusGrid() {
   const renderParkingSpot = (area) => {
     const isImageInspectable = isParkingImageInspectableArea(area);
     const canNotifyOwner = canNotifyParkingAreaOwner(area);
+    // 이미지 확인 대상이면 실제 status와 관계없이 error 스타일을 적용해 관리자가 바로 찾을 수 있게 합니다.
     const statusClass = isImageInspectable ? 'error' : statusClassMap[area.status] || 'empty';
     const commonProps = {
       className: `parking-spot ${statusClass}`,

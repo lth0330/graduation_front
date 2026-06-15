@@ -12,6 +12,8 @@ const roleStorageKeyMap = {
   [authRoles.APARTMENT_MANAGER]: APARTMENT_MANAGER_KEY,
 };
 
+// 웹 관리자와 아파트 관리자는 동시에 로그인 상태를 유지하지 않습니다.
+// 새 로그인을 저장하기 전에 기존 세션을 지워 권한이 섞이는 문제를 방지합니다.
 export function clearAuthSessions() {
   sessionStorage.removeItem(WEB_ADMIN_KEY);
   sessionStorage.removeItem(APARTMENT_MANAGER_KEY);
@@ -30,6 +32,7 @@ export function consumeAuthMessage() {
 export function saveAuthSession(role, user) {
   clearAuthSessions();
   sessionStorage.setItem(roleStorageKeyMap[role], JSON.stringify(user));
+  // Context가 로그인 직후 필요한 목록을 다시 불러올 수 있도록 브라우저 이벤트를 발생시킵니다.
   window.dispatchEvent(new CustomEvent('auth-session-changed', { detail: { role } }));
 }
 
@@ -60,6 +63,8 @@ export function decodeJwtPayload(token) {
   }
 
   try {
+    // JWT는 header.payload.signature 구조입니다.
+    // 여기서는 payload만 읽어 만료 시간(exp)과 권한(role)을 프론트에서 빠르게 확인합니다.
     const payload = token.split('.')[1];
     const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
     const decodedPayload = decodeURIComponent(
@@ -108,6 +113,8 @@ export function getValidAuthSession(role) {
 
   const payload = decodeJwtPayload(user.accessToken);
 
+  // 저장된 세션의 role과 토큰 내부 role이 다르면 잘못 저장된 세션이므로 제거합니다.
+  // 예: 웹 관리자 토큰으로 아파트 관리자 화면에 접근하는 상황을 막습니다.
   if (payload?.role !== role) {
     sessionStorage.removeItem(roleStorageKeyMap[role]);
     return null;
@@ -139,6 +146,7 @@ export function getCurrentAuthRole() {
 export function getAccessTokenForRequest(requestUrl = '') {
   const url = String(requestUrl);
 
+  // 로그인, 회원가입 요청은 아직 토큰이 없으므로 Authorization 헤더를 붙이지 않습니다.
   if (
     (url === '/api/apartment-managers' || url === '/api/apartment-managers/') ||
     url === '/api/apartment-managers/login' ||
@@ -151,6 +159,8 @@ export function getAccessTokenForRequest(requestUrl = '') {
     return getValidAuthSession(authRoles.WEB_ADMIN)?.accessToken || '';
   }
 
+  // 아파트 관리자 기능 API는 APARTMENT_MANAGER 토큰만 사용합니다.
+  // 백엔드 SecurityConfig의 권한 규칙과 맞춰야 401/403 오류를 줄일 수 있습니다.
   if (
     url.startsWith('/api/resident') ||
     url.startsWith('/api/vehicles') ||

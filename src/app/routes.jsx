@@ -33,6 +33,7 @@ import {
 } from '../pages/webAdmin/index.js';
 import { authRoles } from '../utils/auth.js';
 
+// 권한이 필요한 라우트는 ProtectedRoute로 감싸서 로그인 여부와 role을 먼저 검사합니다.
 const webAdminRoute = (element) => (
   <ProtectedRoute role={authRoles.WEB_ADMIN}>{element}</ProtectedRoute>
 );
@@ -41,6 +42,8 @@ const apartmentManagerRoute = (element) => (
   <ProtectedRoute role={authRoles.APARTMENT_MANAGER}>{element}</ProtectedRoute>
 );
 
+// 프론트 화면 URL과 실제 React 페이지 컴포넌트를 연결하는 중앙 라우팅 설정입니다.
+// 메뉴를 추가할 때는 보통 이 파일과 src/data/navigation.js를 함께 확인합니다.
 export const router = createBrowserRouter([
   { path: '/', element: <MainPage /> },
 
@@ -50,6 +53,7 @@ export const router = createBrowserRouter([
   { path: '/auth/login', element: <Navigate to="/login" replace /> },
   { path: '/auth/apartment-signup', element: <Navigate to="/signup-request" replace /> },
 
+  // 웹 관리자 영역: 가입 승인, 관리자 목록, 관리자 문의를 처리합니다.
   { path: '/web-admin', element: webAdminRoute(<WebAdminDashboard />) },
   { path: '/web-admin/dashboard', element: <Navigate to="/web-admin" replace /> },
   { path: '/web-admin/signup-approvals', element: webAdminRoute(<SignupApprovalList />) },
@@ -58,6 +62,7 @@ export const router = createBrowserRouter([
   { path: '/web-admin/inquiries', element: webAdminRoute(<WebAdminInquiryList />) },
   { path: '/web-admin/inquiries/:id', element: webAdminRoute(<WebAdminInquiryDetail />) },
 
+  // 아파트 관리자 영역: 입주민, 차량, 주차장, 알림, 문의 화면을 처리합니다.
   { path: '/apartment-admin', element: apartmentManagerRoute(<ApartmentDashboard />) },
   { path: '/apartment-manager/dashboard', element: <Navigate to="/apartment-admin" replace /> },
   { path: '/apartment-manager/my-page', element: apartmentManagerRoute(<MyPage />) },
