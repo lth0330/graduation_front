@@ -20,3 +20,6 @@ pnpm-debug.log*
 .vscode/
 .idea/
 .DS_Store
+
+# Playwright CLI logs
+.playwright-cli/
