@@ -97,6 +97,13 @@ export default function PlateCorrectionReviewPage() {
       setReviewImageError('');
       setToastMessage(`${confirmedPlate} 번호판으로 확정했습니다.`);
     } catch (error) {
+      if (error.response?.status === 409) {
+        // 출차·차단기 역추적으로 이미 처리된 항목이면 목록을 다시 불러와 내린다.
+        setSelectedReviewId('');
+        setToastMessage('이미 처리된 항목입니다. 목록을 새로고침했습니다.');
+        refreshManagerNotifications({ silent: true });
+        return;
+      }
       setToastMessage('번호판 확정에 실패했습니다. 백엔드 서버 상태를 확인하세요.');
     } finally {
       setIsConfirmingReview(false);
