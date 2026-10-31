@@ -38,6 +38,15 @@ const statusClassMap = {
   unknown: 'error',
 };
 
+// 주차면 색이 무엇을 뜻하는지 그리드 위에 보여 준다 (statusClassMap·.parking-spot 색과 같게)
+const parkingLegendItems = [
+  { className: 'empty', label: '빈자리' },
+  { className: 'used', label: '사용 중' },
+  { className: 'reserved', label: '예약(대기자)' },
+  { className: 'disabled', label: '사용 불가' },
+  { className: 'error', label: '확인 필요(번호 미확인)' },
+];
+
 export default function ParkingStatusGrid() {
   const {
     parkingLots,
@@ -351,6 +360,14 @@ export default function ParkingStatusGrid() {
             </Button>
           </div>
         </div>
+        <ul className="parking-legend" aria-label="주차면 색 설명">
+          {parkingLegendItems.map((item) => (
+            <li key={item.className}>
+              <span className={`parking-legend-swatch ${item.className}`} aria-hidden="true" />
+              {item.label}
+            </li>
+          ))}
+        </ul>
         <div className="parking-grid">
           {visibleAreas.map(renderParkingSpot)}
         </div>

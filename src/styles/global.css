@@ -334,7 +334,8 @@ button,
 
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* 카드 수(3·4개)에 맞춰 한 줄에 채운다. 3열 고정이면 4번째 카드만 아래 줄에 혼자 남았음 */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -516,12 +517,64 @@ button,
 
 .parking-spot.disabled {
   background: #fef2f2;
+  /* 사용 중(같은 빨간 계열)과 구분되게 빗금 */
+  background-image: repeating-linear-gradient(45deg, transparent 0 8px, rgba(254, 202, 202, 0.7) 8px 12px);
   color: var(--color-red);
 }
 
 .parking-spot.reserved {
   background: #eff6ff;
   color: #1d4ed8;
+}
+
+.parking-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.parking-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.parking-legend-swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.parking-legend-swatch.empty {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.parking-legend-swatch.used,
+.parking-legend-swatch.disabled {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.parking-legend-swatch.disabled {
+  background-image: repeating-linear-gradient(45deg, transparent 0 3px, #fecaca 3px 5px);
+}
+
+.parking-legend-swatch.reserved {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.parking-legend-swatch.error {
+  background: #fff7ed;
+  border-color: #f59e0b;
 }
 
 .parking-spot.error {
@@ -1040,6 +1093,10 @@ button,
   color: var(--color-red);
 }
 
+.badge-muted {
+  color: var(--color-muted);
+}
+
 .form-field {
   display: grid;
   gap: 8px;
@@ -1368,8 +1425,11 @@ button,
 }
 
 .parking-area-form-grid {
-  grid-template-columns: 160px 150px 170px 120px 120px auto;
-  column-gap: 28px;
+  /* 고정 폭 합(약 1010px)이 1280px 화면의 본문(876px)보다 커서 '구역 등록' 버튼이 잘렸음 → 늘었다 줄었다 하게 */
+  grid-template-columns:
+    minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(130px, 1.2fr) minmax(100px, 1fr) minmax(100px, 1fr)
+    auto;
+  column-gap: 18px;
   row-gap: 16px;
   align-items: end;
 }
@@ -1447,6 +1507,15 @@ button,
 
 .data-table .table-cell-center {
   text-align: center;
+}
+
+/* 알림 내용·문의 제목처럼 긴 글은 줄바꿈해서 오른쪽 처리 버튼 열이 화면 밖으로 밀리지 않게 한다 */
+.data-table .table-cell-wrap {
+  min-width: 220px;
+  max-width: 420px;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 .data-table tbody tr:last-child td {
@@ -2290,6 +2359,26 @@ button,
 
 .support-link + .support-link {
   margin-top: 10px;
+}
+
+/* 노트북 화면(1280~1440px)에서 열이 많은 표(알림·주차 구역·방문 차량)가 가로 스크롤 없이 들어가게 */
+@media (max-width: 1440px) {
+  .data-table th,
+  .data-table td {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .data-table .table-index-column {
+    width: 64px;
+    min-width: 64px;
+    max-width: 64px;
+  }
+
+  .data-table .table-cell-wrap {
+    min-width: 150px;
+    max-width: 260px;
+  }
 }
 
 @media (max-width: 900px) {

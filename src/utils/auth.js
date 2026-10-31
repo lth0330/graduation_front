@@ -143,12 +143,16 @@ export function getCurrentAuthRole() {
   return '';
 }
 
-export function getAccessTokenForRequest(requestUrl = '') {
+export function getAccessTokenForRequest(requestUrl = '', requestMethod = 'get') {
   const url = String(requestUrl);
+  const method = String(requestMethod || 'get').toLowerCase();
+  const isApartmentManagerCollection = url === '/api/apartment-managers' || url === '/api/apartment-managers/';
 
   // 로그인, 회원가입 요청은 아직 토큰이 없으므로 Authorization 헤더를 붙이지 않습니다.
+  // 회원가입(POST)과 웹 관리자의 관리자 목록 조회(GET)가 같은 주소라 요청 방식으로 구분합니다.
+  // (예전에는 주소만 보고 GET 목록 조회에도 토큰을 빼서 "관리자 정보 관리" 화면이 항상 실패했음)
   if (
-    (url === '/api/apartment-managers' || url === '/api/apartment-managers/') ||
+    (isApartmentManagerCollection && method === 'post') ||
     url === '/api/apartment-managers/login' ||
     url === '/api/web-admin/login'
   ) {

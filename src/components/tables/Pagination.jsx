@@ -1,6 +1,11 @@
 import Button from '../common/Button.jsx';
 
 export default function Pagination({ currentPage = 1, totalPages = 1, onPageChange }) {
+  // 한 페이지 이하이면 "이전 1 다음"만 보여 주는 것이라 숨긴다
+  if (totalPages <= 1) {
+    return null;
+  }
+
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
   const movePage = (page) => {
     if (!onPageChange || page < 1 || page > totalPages || page === currentPage) {
