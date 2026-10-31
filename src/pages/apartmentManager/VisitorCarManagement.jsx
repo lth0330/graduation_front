@@ -32,7 +32,7 @@ const visitorCarStatusBadge = {
 };
 
 const columns = [
-  { key: 'id', header: '방문 차량 ID' },
+  { key: 'id', header: '번호' },
   { key: 'carNumber', header: '차량번호' },
   { key: 'ownerName', header: '신청 입주민' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building || '-'}동 ${row.unit || '-'}호` },

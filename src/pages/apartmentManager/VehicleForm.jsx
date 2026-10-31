@@ -36,15 +36,16 @@ export default function VehicleForm() {
   const [isVehicleDetailLoading, setIsVehicleDetailLoading] = useState(false);
   const [vehicleDetailError, setVehicleDetailError] = useState('');
   const vehicle = vehicleDetail || listVehicle;
-  const firstResident = residents[0];
+  // 새 차량은 소유자를 직접 고르게 한다. 예전엔 첫 번째 입주민이 미리 선택돼 있어서
+  // 확인 없이 저장하면 엉뚱한 세대의 차로 등록될 수 있었음
   const initialForm = useMemo(
     () => ({
       carNumber: vehicle?.carNumber || '',
       carType: vehicle?.carType || '',
-      ownerId: vehicle?.ownerId || firstResident?.id || '',
+      ownerId: vehicle?.ownerId || '',
       note: vehicle?.note || '',
     }),
-    [vehicle, firstResident],
+    [vehicle],
   );
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
@@ -152,15 +153,15 @@ export default function VehicleForm() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="차량 등록" description="차량을 등록하려면 먼저 승인된 주민이 필요합니다." />
-        <SectionCard title="등록 가능한 주민 없음">
+        <PageTitle title="차량 등록" description="차량을 등록하려면 먼저 승인된 입주민이 필요합니다." />
+        <SectionCard title="등록 가능한 입주민 없음">
           <EmptyState
             title="차량 소유자를 선택할 수 없습니다."
-            description="주민 등록 또는 주민 가입 승인을 먼저 진행한 뒤 차량을 등록하세요."
+            description="입주민 등록 또는 입주민 가입 승인을 먼저 진행한 뒤 차량을 등록하세요."
           />
           <div className="detail-actions">
             <Link to="/apartment-manager/residents">
-              <Button variant="secondary">주민 관리로 이동</Button>
+              <Button variant="secondary">입주민 관리로 이동</Button>
             </Link>
             <Link to="/apartment-manager/vehicles">
               <Button>차량 목록으로</Button>
@@ -318,6 +319,9 @@ export default function VehicleForm() {
                 value={form.ownerId}
                 onChange={(event) => handleChange('ownerId', event.target.value)}
               >
+                <option value="" disabled>
+                  소유자를 선택하세요
+                </option>
                 {residents.map((resident) => (
                   <option value={resident.id} key={resident.id}>
                     {resident.name} · {resident.building}동 {resident.unit}호

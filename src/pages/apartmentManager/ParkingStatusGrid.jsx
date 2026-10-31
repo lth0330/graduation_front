@@ -214,7 +214,7 @@ export default function ParkingStatusGrid() {
       setContactError('');
     } catch (error) {
       setToastType('error');
-      setToastMessage(`${area.currentCarNumber} 차량과 연결된 주민을 찾지 못했습니다. 차량 관리 또는 방문차량 목록을 확인하세요.`);
+      setToastMessage(`${area.currentCarNumber} 차량과 연결된 입주민을 찾지 못했습니다. 차량 관리 또는 방문차량 목록을 확인하세요.`);
     } finally {
       setOwnerLookupAreaId('');
     }
@@ -256,7 +256,7 @@ export default function ParkingStatusGrid() {
         type: 'manager_contact',
       });
       setToastType('success');
-      setToastMessage(`${contactOwner.name} 주민에게 차량 이동 알림을 보냈습니다.`);
+      setToastMessage(`${contactOwner.name} 입주민에게 차량 이동 알림을 보냈습니다.`);
       setContactTargetArea(null);
       setContactOwner(null);
     } catch (error) {
@@ -397,7 +397,7 @@ export default function ParkingStatusGrid() {
             ) : (
               <div className="parking-error-empty">
                 {errorImageError ||
-                  '저장된 이미지 경로가 없습니다. Python이 image_base64를 보내고 Spring Boot가 image_path를 저장해야 표시됩니다.'}
+                  '이 주차칸에 저장된 카메라 사진이 없습니다. 현장에서 차량 번호를 확인한 뒤 번호판 보정 화면에서 확정하세요.'}
               </div>
             )}
 
@@ -433,7 +433,7 @@ export default function ParkingStatusGrid() {
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="parking-owner-contact-title">
             <h2 id="parking-owner-contact-title">차주 알림 보내기</h2>
             <p>
-              {contactTargetArea.areaNumber} 주차칸의 {contactOwner.carNumber} 차량 소유 주민에게 앱 알림을 보냅니다.
+              {contactTargetArea.areaNumber} 주차칸의 {contactOwner.carNumber} 차량 소유 입주민에게 앱 알림을 보냅니다.
             </p>
 
             <form className="answer-form" onSubmit={submitOwnerContactNotification}>

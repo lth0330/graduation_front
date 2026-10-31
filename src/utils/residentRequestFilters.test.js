@@ -12,7 +12,7 @@ const requests = [
   { id: '3', status: 'rejected' },
 ];
 
-test('전체 상태를 선택하면 모든 주민 가입 요청을 유지한다', () => {
+test('전체 상태를 선택하면 모든 입주민 가입 요청을 유지한다', () => {
   assert.deepEqual(filterResidentRequestsByStatus(requests, 'all'), requests);
 });
 

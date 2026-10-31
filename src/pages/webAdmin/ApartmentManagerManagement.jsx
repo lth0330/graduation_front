@@ -107,7 +107,7 @@ export default function ApartmentManagerManagement() {
     selectedStatus,
   ]);
   const columns = [
-    { key: 'id', header: '관리자 ID' },
+    { key: 'id', header: '번호' },
     { key: 'loginId', header: '아이디' },
     { key: 'email', header: '이메일' },
     { key: 'apartmentName', header: '아파트 이름' },

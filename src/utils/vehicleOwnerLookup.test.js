@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { findVehicleOwnerFromLists } from './vehicleOwnerLookup.js';
 
-test('입주민 차량 목록과 주민 목록으로 차주 정보를 찾는다', () => {
+test('입주민 차량 목록과 입주민 목록으로 차주 정보를 찾는다', () => {
   const owner = findVehicleOwnerFromLists('12가 3456', {
     vehicles: [{ carNumber: '12가3456', ownerId: '7', ownerName: '홍길동', building: '101', unit: '1001' }],
     visitorCars: [],

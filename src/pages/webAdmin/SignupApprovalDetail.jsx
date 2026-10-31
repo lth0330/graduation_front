@@ -164,12 +164,17 @@ export default function SignupApprovalDetail() {
           <Link to="/web-admin/signup-approvals">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button variant="danger" disabled={isSubmitting} onClick={() => setIsRejectModalOpen(true)}>
-            거절
-          </Button>
-          <Button disabled={isSubmitting} onClick={handleApprove}>
-            {isSubmitting ? '처리 중...' : '승인'}
-          </Button>
+          {/* 이미 승인·거절된 신청은 다시 처리할 수 없으므로 버튼을 숨긴다 */}
+          {request.status === 'pending' && (
+            <>
+              <Button variant="danger" disabled={isSubmitting} onClick={() => setIsRejectModalOpen(true)}>
+                거절
+              </Button>
+              <Button disabled={isSubmitting} onClick={handleApprove}>
+                {isSubmitting ? '처리 중...' : '승인'}
+              </Button>
+            </>
+          )}
         </div>
       </SectionCard>
 

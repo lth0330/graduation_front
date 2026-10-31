@@ -13,7 +13,7 @@ import { useWebAdmin } from '../../contexts/WebAdminContext.jsx';
 import { webAdminMenus } from '../../data/navigation.js';
 
 const recentSignupColumns = [
-  { key: 'id', header: '신청 ID' },
+  { key: 'id', header: '번호' },
   { key: 'apartmentName', header: '아파트명' },
   { key: 'applicantName', header: '신청자' },
   { key: 'status', header: '상태', render: (row) => <Badge status={row.status} /> },

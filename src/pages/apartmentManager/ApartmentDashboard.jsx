@@ -14,7 +14,7 @@ import { apartmentManagerMenus } from '../../data/navigation.js';
 import useAutoRefresh from '../../hooks/useAutoRefresh.js';
 
 const recentResidentRequestColumns = [
-  { key: 'id', header: '신청 ID' },
+  { key: 'id', header: '번호' },
   { key: 'name', header: '이름' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
   { key: 'carNumber', header: '차량번호' },

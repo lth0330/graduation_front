@@ -92,18 +92,18 @@ export default function ResidentManagement() {
         type: 'manager_contact',
       });
       setToastType('success');
-      setToastMessage(`${contactTarget.name} 주민에게 알림을 보냈습니다.`);
+      setToastMessage(`${contactTarget.name} 입주민에게 알림을 보냈습니다.`);
       setContactTarget(null);
     } catch (error) {
       setToastType('error');
-      setToastMessage('주민 알림 발송에 실패했습니다. 백엔드 서버 상태를 확인하세요.');
+      setToastMessage('입주민 알림 발송에 실패했습니다. 백엔드 서버 상태를 확인하세요.');
     } finally {
       setIsContactSending(false);
     }
   };
 
   const columns = [
-    { key: 'id', header: '주민 ID' },
+    { key: 'id', header: '번호' },
     { key: 'name', header: '이름' },
     { key: 'loginId', header: '아이디' },
     { key: 'email', header: '이메일' },
@@ -133,11 +133,11 @@ export default function ResidentManagement() {
       menus={apartmentManagerMenus}
     >
       <PageTitle
-        title="승인 주민 정보 관리"
-        description="승인된 주민 정보를 조회, 수정, 삭제합니다."
+        title="승인 입주민 정보 관리"
+        description="승인된 입주민 정보를 조회, 수정, 삭제합니다."
       />
 
-      <SectionCard title="승인된 주민 목록" description="수정 화면에서 주민 정보를 변경하거나 삭제할 수 있습니다.">
+      <SectionCard title="승인된 입주민 목록" description="수정 화면에서 입주민 정보를 변경하거나 삭제할 수 있습니다.">
         <div className="section-toolbar">
           <SearchBar
             placeholder="이름, 아이디, 이메일, 동/호수 검색"
@@ -150,15 +150,15 @@ export default function ResidentManagement() {
               새로고침
             </Button>
             <Link to="/apartment-manager/residents/new">
-              <Button>주민 등록</Button>
+              <Button>입주민 등록</Button>
             </Link>
           </div>
         </div>
         {isResidentsLoading ? (
-          <LoadingState message="주민 목록 불러오는 중" />
+          <LoadingState message="입주민 목록 불러오는 중" />
         ) : residentsError ? (
           <>
-            <EmptyState title="주민 목록 조회 실패" description={residentsError} />
+            <EmptyState title="입주민 목록 조회 실패" description={residentsError} />
             <div className="detail-actions">
               <Button variant="secondary" onClick={refreshResidents}>
                 다시 불러오기
@@ -171,7 +171,7 @@ export default function ResidentManagement() {
               columns={columns}
               rows={pagedRows}
               startIndex={startIndex}
-              emptyMessage="조건에 맞는 주민이 없습니다."
+              emptyMessage="조건에 맞는 입주민이 없습니다."
             />
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
@@ -181,9 +181,9 @@ export default function ResidentManagement() {
       {contactTarget && (
         <div className="modal-backdrop" role="presentation">
           <section className="modal-panel" role="dialog" aria-modal="true" aria-labelledby="resident-contact-title">
-            <h2 id="resident-contact-title">주민 알림 보내기</h2>
+            <h2 id="resident-contact-title">입주민 알림 보내기</h2>
             <p>
-              {contactTarget.building}동 {contactTarget.unit}호 {contactTarget.name} 주민에게 앱 알림을 보냅니다.
+              {contactTarget.building}동 {contactTarget.unit}호 {contactTarget.name} 입주민에게 앱 알림을 보냅니다.
             </p>
 
             <form className="answer-form" onSubmit={submitContactNotification}>
