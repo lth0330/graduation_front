@@ -29,12 +29,14 @@ import { usePagination } from '../../utils/pagination.js';
 const areaStatusLabel = {
   empty: '빈자리',
   occupied: '주차됨',
+  reserved: '예약(대기자)',
   disabled: '사용 불가',
 };
 
 const areaStatusBadge = {
   empty: 'active',
   occupied: 'rejected',
+  reserved: 'pending',
   disabled: 'rejected',
 };
 

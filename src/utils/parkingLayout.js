@@ -88,6 +88,10 @@ export function getParkingSpotDisplayText(area) {
     return `${areaLabel}\n${currentCarNumber}`;
   }
 
+  if (area.status === 'reserved') {
+    return `${areaLabel}\n예약`;
+  }
+
   return areaLabel;
 }
 
@@ -100,7 +104,8 @@ function isUnknownCarNumber(currentCarNumber) {
 }
 
 export function isParkingImageInspectableArea(area) {
-  if (String(area?.status || '').toLowerCase() === 'empty') {
+  // 빈 칸과 예약 칸(차가 나간 뒤 앱 대기자에게 잡아 둔 칸)에는 확인할 차가 없다
+  if (['empty', 'reserved'].includes(String(area?.status || '').toLowerCase())) {
     return false;
   }
 

@@ -519,6 +519,11 @@ button,
   color: var(--color-red);
 }
 
+.parking-spot.reserved {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
 .parking-spot.error {
   border-color: #f59e0b;
   background: #fff7ed;

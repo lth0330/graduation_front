@@ -32,6 +32,7 @@ import { findVehicleOwnerFromLists } from '../../utils/vehicleOwnerLookup.js';
 const statusClassMap = {
   empty: 'empty',
   occupied: 'used',
+  reserved: 'reserved',
   disabled: 'disabled',
   error: 'error',
   unknown: 'error',
@@ -86,6 +87,7 @@ export default function ParkingStatusGrid() {
   const occupiedCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'occupied').length;
   const emptyCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'empty').length;
   const disabledCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'disabled').length;
+  const reservedCount = visibleAreas.filter((parkingArea) => parkingArea.status === 'reserved').length;
   const inspectableCount = visibleAreas.filter((parkingArea) =>
     isParkingImageInspectableArea(parkingArea),
   ).length;
@@ -317,7 +319,7 @@ export default function ParkingStatusGrid() {
       <div className="metric-grid">
         <MetricCard label="전체 주차면" value={`${visibleAreas.length}면`} helper={`${selectedParkingLot?.name || ''} ${selectedParkingLot?.floor || ''}`} />
         <MetricCard label="사용 중" value={`${occupiedCount}면`} helper="실시간 입차 기준" />
-        <MetricCard label="빈자리" value={`${emptyCount}면`} helper={`사용 불가 ${disabledCount}면 / 확인 필요 ${inspectableCount}면`} />
+        <MetricCard label="빈자리" value={`${emptyCount}면`} helper={`예약 ${reservedCount}면 / 사용 불가 ${disabledCount}면 / 확인 필요 ${inspectableCount}면`} />
       </div>
 
       <SectionCard title={`${selectedParkingLot?.name || '주차장'} ${selectedParkingLot?.floor || ''} 주차면`}>

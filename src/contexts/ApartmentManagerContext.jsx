@@ -69,6 +69,8 @@ const statusMap = {
 const parkingZoneStatusMap = {
   EMPTY: 'empty',
   OCCUPIED: 'occupied',
+  // 앱 빈자리 대기 기능: 출차한 칸을 1순위 대기자에게 3분 동안 예약해 둔 상태
+  RESERVED: 'reserved',
   DISABLED: 'disabled',
   ERROR: 'error',
   UNKNOWN: 'unknown',
