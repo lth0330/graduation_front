@@ -223,16 +223,16 @@ export default function MyPage() {
         )}
 
         <div className="info-box">
-          <strong>주민에게 이 비밀번호를 전달하세요.</strong>
+          <strong>입주민에게 이 비밀번호를 전달하세요.</strong>
           <p>
-            주민은 회원가입 또는 아파트 인증 과정에서 이 6자리 아파트 비밀번호를 입력해야 합니다.
+            입주민은 회원가입 또는 아파트 인증 과정에서 이 6자리 아파트 비밀번호를 입력해야 합니다.
             외부인에게 노출되지 않도록 관리하세요.
           </p>
         </div>
 
         <div className="info-box muted">
           <strong>사용 위치</strong>
-          <p>주민 회원가입 화면 → 아파트 인증 단계 → 아파트 비밀번호 입력</p>
+          <p>입주민 회원가입 화면 → 아파트 인증 단계 → 아파트 비밀번호 입력</p>
         </div>
       </SectionCard>
 

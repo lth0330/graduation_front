@@ -16,7 +16,7 @@ import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
-  { key: 'id', header: '차량 ID' },
+  { key: 'id', header: '번호' },
   { key: 'carNumber', header: '차량번호' },
   { key: 'carType', header: '차종' },
   { key: 'ownerName', header: '소유자' },

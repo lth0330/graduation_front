@@ -43,7 +43,7 @@ export default function ResidentRequestDetail() {
       navigate('/apartment-manager/resident-requests');
     } catch (error) {
       setToastType('error');
-      setToastMessage('주민 가입 신청 승인에 실패했습니다.');
+      setToastMessage('입주민 가입 신청 승인에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -57,7 +57,7 @@ export default function ResidentRequestDetail() {
       navigate('/apartment-manager/resident-requests');
     } catch (error) {
       setToastType('error');
-      setToastMessage('주민 가입 신청 반려에 실패했습니다.');
+      setToastMessage('입주민 가입 신청 반려에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,9 +71,9 @@ export default function ResidentRequestDetail() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 신청 상세" description="주민 신청 정보를 불러오고 있습니다." />
+        <PageTitle title="입주민 신청 상세" description="입주민 신청 정보를 불러오고 있습니다." />
         <SectionCard title="신청 정보">
-          <LoadingState message="주민 신청 상세 불러오는 중" />
+          <LoadingState message="입주민 신청 상세 불러오는 중" />
         </SectionCard>
       </AdminLayout>
     );
@@ -87,7 +87,7 @@ export default function ResidentRequestDetail() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 신청 상세" description="주민 신청 정보를 불러오지 못했습니다." />
+        <PageTitle title="입주민 신청 상세" description="입주민 신청 정보를 불러오지 못했습니다." />
         <SectionCard title="조회 실패">
           <EmptyState title="상세 조회 실패" description={residentRequestsError} />
           <div className="detail-actions">
@@ -108,7 +108,7 @@ export default function ResidentRequestDetail() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 신청 상세" description="요청한 주민 신청 정보를 찾을 수 없습니다." />
+        <PageTitle title="입주민 신청 상세" description="요청한 입주민 신청 정보를 찾을 수 없습니다." />
         <SectionCard title="데이터 없음">
           <Link className="text-link" to="/apartment-manager/resident-requests">
             목록으로 돌아가기
@@ -126,11 +126,11 @@ export default function ResidentRequestDetail() {
       menus={apartmentManagerMenus}
     >
       <PageTitle
-        title="주민 회원가입 신청 상세"
-        description="주민 정보와 차량 정보를 확인한 뒤 승인 또는 거절을 처리합니다."
+        title="입주민 회원가입 신청 상세"
+        description="입주민 정보와 차량 정보를 확인한 뒤 승인 또는 거절을 처리합니다."
       />
 
-      <SectionCard title="신청 정보" description="승인하면 주민 계정이 활성화됩니다.">
+      <SectionCard title="신청 정보" description="승인하면 입주민 계정이 활성화됩니다.">
         <dl className="detail-list">
           <div>
             <dt>신청 ID</dt>
@@ -184,12 +184,17 @@ export default function ResidentRequestDetail() {
           <Link to="/apartment-manager/resident-requests">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button variant="danger" disabled={isSubmitting} onClick={() => setIsRejectModalOpen(true)}>
-            거절
-          </Button>
-          <Button disabled={isSubmitting} onClick={handleApprove}>
-            {isSubmitting ? '처리 중...' : '승인'}
-          </Button>
+          {/* 이미 승인·거절된 신청은 다시 처리할 수 없으므로 버튼을 숨긴다 */}
+          {request.status === 'pending' && (
+            <>
+              <Button variant="danger" disabled={isSubmitting} onClick={() => setIsRejectModalOpen(true)}>
+                거절
+              </Button>
+              <Button disabled={isSubmitting} onClick={handleApprove}>
+                {isSubmitting ? '처리 중...' : '승인'}
+              </Button>
+            </>
+          )}
         </div>
       </SectionCard>
 

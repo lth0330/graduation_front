@@ -74,7 +74,7 @@ export default function ResidentEdit() {
         }
       } catch (error) {
         if (!ignore) {
-          setResidentDetailError('주민 상세 정보를 불러오지 못했습니다.');
+          setResidentDetailError('입주민 상세 정보를 불러오지 못했습니다.');
         }
       } finally {
         if (!ignore) {
@@ -98,9 +98,9 @@ export default function ResidentEdit() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 정보 수정" description="주민 정보를 불러오고 있습니다." />
-        <SectionCard title="주민 정보">
-          <LoadingState message="주민 정보 불러오는 중" />
+        <PageTitle title="입주민 정보 수정" description="입주민 정보를 불러오고 있습니다." />
+        <SectionCard title="입주민 정보">
+          <LoadingState message="입주민 정보 불러오는 중" />
         </SectionCard>
       </AdminLayout>
     );
@@ -114,9 +114,9 @@ export default function ResidentEdit() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 정보 수정" description="주민 정보를 불러오지 못했습니다." />
+        <PageTitle title="입주민 정보 수정" description="입주민 정보를 불러오지 못했습니다." />
         <SectionCard title="조회 실패">
-          <EmptyState title="주민 정보 조회 실패" description={residentDetailError || residentsError} />
+          <EmptyState title="입주민 정보 조회 실패" description={residentDetailError || residentsError} />
           <div className="detail-actions">
             <Link to="/apartment-manager/residents">
               <Button variant="secondary">목록으로</Button>
@@ -135,7 +135,7 @@ export default function ResidentEdit() {
         userName="아파트 관리자"
         menus={apartmentManagerMenus}
       >
-        <PageTitle title="주민 정보 수정" description="요청한 주민 정보를 찾을 수 없습니다." />
+        <PageTitle title="입주민 정보 수정" description="요청한 입주민 정보를 찾을 수 없습니다." />
         <SectionCard title="데이터 없음">
           <Link className="text-link" to="/apartment-manager/residents">
             목록으로 돌아가기
@@ -230,11 +230,11 @@ export default function ResidentEdit() {
     } catch (error) {
       setToastType('error');
       if (error.response?.status === 409) {
-        setToastMessage('이미 사용 중인 주민 아이디입니다.');
+        setToastMessage('이미 사용 중인 입주민 아이디입니다.');
       } else if (error.response?.status === 400) {
         setToastMessage('필수 입력값을 다시 확인하세요.');
       } else {
-        setToastMessage(isCreateMode ? '주민 등록에 실패했습니다.' : '주민 정보 저장에 실패했습니다.');
+        setToastMessage(isCreateMode ? '입주민 등록에 실패했습니다.' : '입주민 정보 저장에 실패했습니다.');
       }
     } finally {
       setIsSubmitting(false);
@@ -249,7 +249,7 @@ export default function ResidentEdit() {
       navigate('/apartment-manager/residents');
     } catch (error) {
       setToastType('error');
-      setToastMessage('주민 정보 삭제에 실패했습니다.');
+      setToastMessage('입주민 정보 삭제에 실패했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -263,18 +263,18 @@ export default function ResidentEdit() {
       menus={apartmentManagerMenus}
     >
       <PageTitle
-        title={isCreateMode ? '주민 직접 등록' : '주민 정보 상세 및 수정'}
-        description={isCreateMode ? '아파트 관리자가 주민 계정을 직접 등록합니다.' : '승인된 주민 정보를 확인하고 필요한 항목을 수정합니다.'}
+        title={isCreateMode ? '입주민 직접 등록' : '입주민 정보 상세 및 수정'}
+        description={isCreateMode ? '아파트 관리자가 입주민 계정을 직접 등록합니다.' : '승인된 입주민 정보를 확인하고 필요한 항목을 수정합니다.'}
       />
 
       <SectionCard
-        title={isCreateMode ? '주민 등록 정보' : '주민 정보 수정'}
-        description={isCreateMode ? '등록한 주민은 승인 완료 상태로 바로 주민 목록에 표시됩니다.' : '아이디와 가입일은 표시용이며, 나머지 정보는 수정 가능합니다.'}
+        title={isCreateMode ? '입주민 등록 정보' : '입주민 정보 수정'}
+        description={isCreateMode ? '등록한 입주민은 승인 완료 상태로 바로 입주민 목록에 표시됩니다.' : '아이디와 가입일은 표시용이며, 나머지 정보는 수정 가능합니다.'}
       >
         {!isCreateMode && (
           <dl className="detail-list">
             <div>
-              <dt>주민 ID</dt>
+              <dt>입주민 ID</dt>
               <dd>{resident.id}</dd>
             </div>
             <div>
@@ -389,7 +389,7 @@ export default function ResidentEdit() {
       <ConfirmModal
         open={isDeleteModalOpen}
         title="정말 삭제하시겠습니까?"
-        description="삭제된 주민 정보는 복구할 수 없습니다."
+        description="삭제된 입주민 정보는 복구할 수 없습니다."
         confirmLabel="삭제"
         danger
         onClose={() => setIsDeleteModalOpen(false)}

@@ -704,6 +704,11 @@ button,
   content: "";
 }
 
+/* 회원가입 화면에는 아래 띠 위에 올릴 안내 카드가 없어서 띠가 경계선처럼만 보였음 */
+.auth-info-plain::after {
+  display: none;
+}
+
 .auth-brand {
   z-index: 1;
   margin-bottom: 80px;
@@ -1652,6 +1657,12 @@ button,
 
 .answer-form {
   margin-top: 18px;
+}
+
+/* 팝업 안의 입력 칸끼리 간격 (안내 문구가 다음 칸 이름에 붙어 보였음) */
+.modal-panel .answer-form {
+  display: grid;
+  gap: 14px;
 }
 
 .form-grid {

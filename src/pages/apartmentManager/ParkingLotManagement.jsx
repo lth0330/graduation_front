@@ -18,7 +18,7 @@ import { calculateGateOccupancy } from '../../utils/gateOccupancy.js';
 import { usePagination } from '../../utils/pagination.js';
 
 const columns = [
-  { key: 'id', header: '주차장 ID' },
+  { key: 'id', header: '번호' },
   { key: 'name', header: '주차장 이름' },
   { key: 'floor', header: '층' },
   { key: 'totalSpaces', header: '총 주차면 수', render: (row) => `${row.totalSpaces}면` },

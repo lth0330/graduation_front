@@ -23,7 +23,7 @@ import {
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
-  { key: 'id', header: '신청 ID' },
+  { key: 'id', header: '번호' },
   { key: 'name', header: '이름' },
   { key: 'loginId', header: '아이디' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
@@ -81,11 +81,11 @@ export default function ResidentRequestList() {
       menus={apartmentManagerMenus}
     >
       <PageTitle
-        title="주민 회원가입 신청 관리"
+        title="입주민 회원가입 신청 관리"
         description="이름, 아이디, 동/호수, 차량번호로 신청 내역을 확인합니다."
       />
 
-      <SectionCard title="주민 가입 신청 목록" description="신청 상세 정보를 확인하고 주민 가입 승인 또는 거절을 처리합니다.">
+      <SectionCard title="입주민 가입 신청 목록" description="신청 상세 정보를 확인하고 입주민 가입 승인 또는 거절을 처리합니다.">
         <div className="section-toolbar">
           <SearchBar
             placeholder="이름, 아이디, 동/호수, 차량번호 검색"
@@ -96,7 +96,7 @@ export default function ResidentRequestList() {
           <div className="toolbar-actions">
             <div className="status-filter">
               <SelectBox
-                aria-label="주민 가입 신청 상태 분류"
+                aria-label="입주민 가입 신청 상태 분류"
                 value={selectedStatus}
                 onChange={(event) => setSelectedStatus(event.target.value)}
               >
@@ -113,10 +113,10 @@ export default function ResidentRequestList() {
           </div>
         </div>
         {isResidentRequestsLoading ? (
-          <LoadingState message="주민 가입 신청 목록 불러오는 중" />
+          <LoadingState message="입주민 가입 신청 목록 불러오는 중" />
         ) : residentRequestsError ? (
           <>
-            <EmptyState title="주민 신청 조회 실패" description={residentRequestsError} />
+            <EmptyState title="입주민 신청 조회 실패" description={residentRequestsError} />
             <div className="detail-actions">
               <Button variant="secondary" onClick={refreshResidentSignupRequests}>
                 다시 불러오기
@@ -129,7 +129,7 @@ export default function ResidentRequestList() {
               columns={columns}
               rows={pagedRows}
               startIndex={startIndex}
-              emptyMessage={`${selectedStatusLabel} 조건에 맞는 주민 신청이 없습니다.`}
+              emptyMessage={`${selectedStatusLabel} 조건에 맞는 입주민 신청이 없습니다.`}
             />
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>

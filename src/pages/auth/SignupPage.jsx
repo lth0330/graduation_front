@@ -161,7 +161,7 @@ export default function SignupPage() {
 
   return (
     <main className="auth-page">
-      <section className="auth-info">
+      <section className="auth-info auth-info-plain">
         <div className="brand auth-brand">
           <div className="brand-mark">P</div>
           <div>
@@ -180,7 +180,7 @@ export default function SignupPage() {
           <FormField label="아이디" error={errors.loginId}>
             <TextInput
               error={Boolean(errors.loginId)}
-              placeholder="사용할 아이디를 입력하세요."
+              placeholder="사용할 아이디"
               value={form.loginId}
               onChange={(event) => handleChange('loginId', event.target.value)}
             />
@@ -204,7 +204,7 @@ export default function SignupPage() {
           <FormField label="관리자 이름" error={errors.name}>
             <TextInput
               error={Boolean(errors.name)}
-              placeholder="이름을 입력하세요."
+              placeholder="이름"
               value={form.name}
               onChange={(event) => handleChange('name', event.target.value)}
             />
@@ -213,7 +213,7 @@ export default function SignupPage() {
             <TextInput
               error={Boolean(errors.password)}
               type="password"
-              placeholder="비밀번호를 입력하세요."
+              placeholder="비밀번호"
               value={form.password}
               onChange={(event) => handleChange('password', event.target.value)}
             />
@@ -222,7 +222,7 @@ export default function SignupPage() {
             <TextInput
               error={Boolean(errors.passwordConfirm)}
               type="password"
-              placeholder="비밀번호를 다시 입력하세요."
+              placeholder="비밀번호 다시 입력"
               value={form.passwordConfirm}
               onChange={(event) => handleChange('passwordConfirm', event.target.value)}
             />
@@ -241,7 +241,7 @@ export default function SignupPage() {
           <FormField label="아파트 주소" error={errors.address}>
             <TextInput
               error={Boolean(errors.address)}
-              placeholder="주소 검색 버튼으로 선택하세요."
+              placeholder="주소 검색으로 선택"
               value={form.address}
               readOnly
             />

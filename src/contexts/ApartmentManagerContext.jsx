@@ -474,7 +474,7 @@ export function ApartmentManagerProvider({ children }) {
       setResidentSignupRequests(sortByNewest(requests.map(mapResidentSignupRequest)));
     } catch (error) {
       if (!silent) {
-        setResidentRequestsError('주민 가입 신청 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+        setResidentRequestsError('입주민 가입 신청 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
       }
     } finally {
       if (!silent) {
@@ -515,7 +515,7 @@ export function ApartmentManagerProvider({ children }) {
       setResidents(sortByNewest(residentList.map(mapResident)));
     } catch (error) {
       if (!silent) {
-        setResidentsError('주민 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
+        setResidentsError('입주민 목록을 불러오지 못했습니다. 백엔드 서버 상태를 확인하세요.');
       }
     } finally {
       if (!silent) {

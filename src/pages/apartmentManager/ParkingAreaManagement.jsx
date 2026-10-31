@@ -46,7 +46,7 @@ const zoneTypeLabel = {
 };
 
 const columns = [
-  { key: 'id', header: '구역 ID' },
+  { key: 'id', header: '번호' },
   { key: 'areaNumber', header: '구역 번호' },
   { key: 'zoneType', header: '구역 종류', render: (row) => zoneTypeLabel[row.zoneType] || '일반 주차칸' },
   {

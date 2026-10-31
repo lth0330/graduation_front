@@ -16,7 +16,7 @@ export function canNotifyParkingAreaOwner(area) {
 export function buildParkingOwnerNotificationForm(area, owner) {
   const carNumber = normalizeText(owner?.carNumber) || normalizeText(area?.currentCarNumber);
   const areaNumber = normalizeText(area?.areaNumber) || '해당 주차칸';
-  const residentName = normalizeText(owner?.name) || '주민';
+  const residentName = normalizeText(owner?.name) || '입주민';
   const unitInfo = owner?.building && owner?.unit ? `${owner.building}동 ${owner.unit}호 ` : '';
 
   return {

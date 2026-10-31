@@ -18,7 +18,7 @@ import { usePagination } from '../../utils/pagination.js';
 import { filterByKeyword } from '../../utils/search.js';
 
 const columns = [
-  { key: 'id', header: '문의 ID' },
+  { key: 'id', header: '번호' },
   { key: 'title', header: '제목', className: 'table-cell-wrap' },
   { key: 'writer', header: '작성자' },
   { key: 'unitInfo', header: '동/호수', render: (row) => `${row.building}동 ${row.unit}호` },
