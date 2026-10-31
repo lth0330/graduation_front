@@ -137,3 +137,25 @@ test('빈 주차칸은 이전 UNKNOWN 번호판이나 이미지가 남아도 이
     false,
   );
 });
+
+test('예약(대기자) 칸은 구역 번호와 예약 문구를 표시한다', () => {
+  assert.equal(
+    getParkingSpotDisplayText({
+      areaNumber: 'a-b1-001',
+      status: 'reserved',
+      currentCarNumber: null,
+    }),
+    '001\n예약',
+  );
+});
+
+test('예약 칸은 이전 오류 이미지가 남아 있어도 이미지 확인 대상이 아니다', () => {
+  assert.equal(
+    isParkingImageInspectableArea({
+      status: 'reserved',
+      currentCarNumber: 'UNKNOWN',
+      errorImage: '/uploads/old.jpg',
+    }),
+    false,
+  );
+});
