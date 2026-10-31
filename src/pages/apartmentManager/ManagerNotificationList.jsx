@@ -117,17 +117,19 @@ export default function ManagerNotificationList() {
       header: '구분',
       render: (row) => notificationTypeLabel[row.notificationType] || row.notificationType,
     },
-    { key: 'title', header: '제목' },
+    { key: 'title', header: '제목', className: 'table-cell-wrap' },
     {
       key: 'message',
       header: '내용',
+      className: 'table-cell-wrap',
       render: (row) => formatManagerNotificationMessage(row.message),
     },
     {
       key: 'read',
       header: '상태',
       render: (row) => (
-        <Badge status={row.read ? 'inactive' : 'active'}>{row.read ? '읽음' : '안 읽음'}</Badge>
+        // 안 읽은 알림을 강조하고, 읽은 알림은 회색으로 (예전엔 '읽음'이 빨간색이라 오류처럼 보였음)
+        <Badge status={row.read ? 'muted' : 'pending'}>{row.read ? '읽음' : '안 읽음'}</Badge>
       ),
     },
     {

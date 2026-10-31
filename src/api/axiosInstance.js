@@ -14,7 +14,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   // 요청 URL을 기준으로 웹 관리자 토큰과 아파트 관리자 토큰 중 필요한 토큰을 자동 선택합니다.
   // 화면 코드에서 매번 Authorization 헤더를 직접 붙이지 않게 하기 위한 공통 처리입니다.
-  const accessToken = getAccessTokenForRequest(config.url);
+  const accessToken = getAccessTokenForRequest(config.url, config.method);
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;

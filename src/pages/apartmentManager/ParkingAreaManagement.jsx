@@ -60,7 +60,7 @@ const columns = [
     className: 'table-cell-center',
     render: (row) => formatParkingRange(row),
   },
-  { key: 'statusChangeReason', header: '변경 사유', render: (row) => row.statusChangeReason ?? null },
+  { key: 'statusChangeReason', header: '변경 사유', className: 'table-cell-wrap', render: (row) => row.statusChangeReason ?? null },
 ];
 
 export default function ParkingAreaManagement() {

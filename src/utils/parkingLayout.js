@@ -84,6 +84,11 @@ export function getParkingSpotDisplayText(area) {
   const baseAreaLabel = getParkingSpotAreaLabel(area.areaNumber);
   const areaLabel = isDoubleLaneParkingArea(area) ? `통로 ${baseAreaLabel}` : baseAreaLabel;
 
+  if (area.status === 'occupied' && isUnknownCarNumber(currentCarNumber)) {
+    // 좁은 칸에서 'UNKNOWN'이 'UNKNOW / N'으로 끊겨 보여서 한글로 표시
+    return `${areaLabel}\n번호 미확인`;
+  }
+
   if (area.status === 'occupied' && currentCarNumber) {
     return `${areaLabel}\n${currentCarNumber}`;
   }

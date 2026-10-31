@@ -60,7 +60,7 @@ export default function VehicleManagement() {
       menus={apartmentManagerMenus}
     >
       <PageTitle
-        title="주민 차량 정보 관리"
+        title="입주민 차량 정보 관리"
         description="차량번호, 차종, 소유자, 동/호수 기준으로 차량 정보를 관리합니다."
       />
 

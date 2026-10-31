@@ -159,3 +159,14 @@ test('예약 칸은 이전 오류 이미지가 남아 있어도 이미지 확인
     false,
   );
 });
+
+test('번호판이 UNKNOWN인 주차 중 칸은 번호 미확인으로 표시한다', () => {
+  assert.equal(
+    getParkingSpotDisplayText({
+      areaNumber: 'a-b1-005',
+      status: 'occupied',
+      currentCarNumber: 'UNKNOWN',
+    }),
+    '005\n번호 미확인',
+  );
+});
