@@ -10,8 +10,13 @@ export default function AdminLayout({
   menus,
   children,
 }) {
-  const { managerNotifications, refreshManagerNotifications } = useApartmentManager();
+  const { managerNotifications, refreshManagerNotifications, apartmentManagerProfile } = useApartmentManager();
   const shouldRefreshNotifications = roleLabel === '아파트 관리자';
+  // 아파트 관리자는 로그인한 관리자 이름·아파트를 보여 준다 (불러오기 전에는 페이지가 넘긴 이름)
+  const managerName = apartmentManagerProfile?.name;
+  const displayUserName = shouldRefreshNotifications && managerName
+    ? [managerName, apartmentManagerProfile.apartmentName].filter(Boolean).join(' · ')
+    : userName;
 
   useAutoRefresh(
     () => refreshManagerNotifications({ silent: true }),
@@ -28,7 +33,7 @@ export default function AdminLayout({
     <div className="admin-layout">
       <Sidebar roleLabel={roleLabel} consoleTitle={consoleTitle} menus={menus} menuBadges={menuBadges} />
       <div className="admin-main">
-        <Header roleLabel={roleLabel} userName={userName} />
+        <Header roleLabel={roleLabel} userName={displayUserName} />
         <main className="admin-content">{children}</main>
       </div>
     </div>
