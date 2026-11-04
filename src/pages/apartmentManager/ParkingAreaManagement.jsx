@@ -227,7 +227,8 @@ export default function ParkingAreaManagement() {
     setStatusForm({
       status: parkingArea.status,
       zoneType: parkingArea.zoneType || 'normal',
-      reason: parkingArea.statusChangeReason || '',
+      // 예전 사유를 미리 채우면 사유를 안 적어도 저장돼서, 상태를 바꿀 때마다 새로 적게 비워 둔다.
+      reason: '',
     });
     setStatusError('');
   };
@@ -529,6 +530,9 @@ export default function ParkingAreaManagement() {
             <p>
               {statusTarget.areaNumber} 구역의 상태를 변경하고 사유를 저장합니다.
             </p>
+            {statusTarget.statusChangeReason && (
+              <p className="parking-error-meta">이전 사유: {statusTarget.statusChangeReason}</p>
+            )}
 
             <div className="form-grid">
               <FormField label="변경 상태">
