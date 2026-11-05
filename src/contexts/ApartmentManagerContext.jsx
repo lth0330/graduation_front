@@ -51,6 +51,7 @@ import {
 } from '../api/plateCorrectionReviewApi.js';
 import {
   answerResidentInquiry as answerResidentInquiryApi,
+  deleteResidentInquiry as deleteResidentInquiryApi,
   getResidentInquiries,
 } from '../api/residentInquiryApi.js';
 import { authRoles, getValidAuthSession } from '../utils/auth.js';
@@ -927,6 +928,12 @@ export function ApartmentManagerProvider({ children }) {
     return mapResidentParkingInquiry(answeredInquiry);
   };
 
+  const deleteResidentParkingInquiry = async (id) => {
+    await deleteResidentInquiryApi(id);
+    await refreshResidentParkingInquiries();
+    await refreshManagerNotifications({ silent: true });
+  };
+
   const value = useMemo(
     () => ({
       // Provider 밖의 페이지들이 사용할 상태와 함수 목록입니다.
@@ -1011,6 +1018,7 @@ export function ApartmentManagerProvider({ children }) {
       findResidentParkingInquiryById: (id) =>
         residentParkingInquiries.find((inquiry) => inquiry.id === id),
       answerResidentParkingInquiry,
+      deleteResidentParkingInquiry,
     }),
     [
       residentSignupRequests,

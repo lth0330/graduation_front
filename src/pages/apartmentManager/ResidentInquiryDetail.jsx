@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Badge from '../../components/common/Badge.jsx';
 import Button from '../../components/common/Button.jsx';
+import ConfirmModal from '../../components/feedback/ConfirmModal.jsx';
 import EmptyState from '../../components/feedback/EmptyState.jsx';
 import Toast from '../../components/feedback/Toast.jsx';
 import FormField from '../../components/forms/FormField.jsx';
@@ -19,6 +20,7 @@ export default function ResidentInquiryDetail() {
   const {
     findResidentParkingInquiryById,
     answerResidentParkingInquiry,
+    deleteResidentParkingInquiry,
     residentParkingInquiriesError,
     refreshResidentParkingInquiries,
   } = useApartmentManager();
@@ -27,8 +29,14 @@ export default function ResidentInquiryDetail() {
   const [error, setError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  useAutoRefresh(() => refreshResidentParkingInquiries({ silent: true }), 10000, !isSubmitting);
+  useAutoRefresh(
+    () => refreshResidentParkingInquiries({ silent: true }),
+    10000,
+    !isSubmitting && !isDeleting && !isDeleteOpen,
+  );
 
   useEffect(() => {
     refreshResidentParkingInquiries();
@@ -38,7 +46,8 @@ export default function ResidentInquiryDetail() {
     setAnswer(inquiry?.answer || '');
   }, [inquiry?.answer]);
 
-  if (!inquiry) {
+  // 삭제 중에는 목록이 먼저 갱신돼 "데이터 없음" 화면이 잠깐 뜨지 않도록 그대로 둔다.
+  if (!inquiry && !isDeleting) {
     return (
       <AdminLayout
         roleLabel="아파트 관리자"
@@ -79,6 +88,22 @@ export default function ResidentInquiryDetail() {
       setIsSubmitting(false);
     }
   };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      setIsDeleteOpen(false);
+      await deleteResidentParkingInquiry(inquiry.id);
+      navigate('/apartment-manager/resident-inquiries');
+    } catch (deleteError) {
+      setIsDeleting(false);
+      setError('문의 삭제에 실패했습니다. 백엔드 서버 상태를 확인하세요.');
+    }
+  };
+
+  if (!inquiry) {
+    return null;
+  }
 
   return (
     <AdminLayout
@@ -149,11 +174,24 @@ export default function ResidentInquiryDetail() {
           <Link to="/apartment-manager/resident-inquiries">
             <Button variant="secondary">목록으로</Button>
           </Link>
-          <Button disabled={isSubmitting} onClick={handleSubmit}>
+          <Button variant="danger" disabled={isSubmitting || isDeleting} onClick={() => setIsDeleteOpen(true)}>
+            {isDeleting ? '삭제 중...' : '삭제'}
+          </Button>
+          <Button disabled={isSubmitting || isDeleting} onClick={handleSubmit}>
             {isSubmitting ? '등록 중...' : '답변 등록'}
           </Button>
         </div>
       </SectionCard>
+
+      <ConfirmModal
+        open={isDeleteOpen}
+        title="이 문의를 삭제할까요?"
+        description="삭제한 문의와 답변은 되돌릴 수 없고, 입주민 앱 문의 내역에서도 사라집니다."
+        confirmLabel="삭제"
+        danger
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleDelete}
+      />
 
       <Toast message={toastMessage} onClose={() => setToastMessage('')} />
     </AdminLayout>
