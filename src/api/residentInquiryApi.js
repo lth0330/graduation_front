@@ -21,3 +21,7 @@ export async function answerResidentInquiry(inquiryNo, answer) {
 
   return response.data;
 }
+
+export async function deleteResidentInquiry(inquiryNo) {
+  await apiClient.delete(`/api/resident-inquiries/${inquiryNo}`);
+}
